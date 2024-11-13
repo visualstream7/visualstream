@@ -1,6 +1,6 @@
-import PrintfulClient from "@/printful-sdk/src/printfulClient";
+import PrintfulClient from "@/libs/printful-sdk/src/printfulClient";
 
-let printfulClient = new PrintfulClient(
+const printfulClient = new PrintfulClient(
   process.env.NEXT_PUBLIC_PRINTFUL_TOKEN as string,
 );
 
