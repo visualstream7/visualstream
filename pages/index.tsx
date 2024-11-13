@@ -3,11 +3,6 @@ import { useEffect } from "react";
 
 export default function Home() {
   const { user } = useUser();
-  useEffect(() => {
-    if (user) {
-      console.log("User: ", user);
-    }
-  }, [user]);
 
   return (
     <div className="flex flex-col items-center text-2xl ">
