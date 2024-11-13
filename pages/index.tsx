@@ -1,17 +1,24 @@
-import printfulClient from "@/utils/printfulClient";
+import { SignOutButton, useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 export default function Home() {
+  const { user } = useUser();
+  useEffect(() => {
+    if (user) {
+      console.log("User: ", user);
+    }
+  }, [user]);
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={async () => {
-          const products = await printfulClient.getProductsFromIds([71]);
-          console.log(products);
-        }}
-      >
-        Get Products
-      </button>
+    <div className="flex flex-col items-center text-2xl ">
+      <h1>Home page</h1>
+      <div>
+        <SignOutButton>
+          <button className="flex bg-red-500 text-white p-2 ">
+            <p>Sign Out</p>
+          </button>
+        </SignOutButton>
+      </div>
     </div>
   );
 }
