@@ -20,7 +20,7 @@ export default async function handler(
 
   let database = new SupabaseWrapper("SERVER", req, res);
   let { result: addToBucketResult, error: addToBucketError } =
-    await database.addImageToBucket(image_url);
+    await database.addImageFromUrlToAssets(image_url);
 
   if (addToBucketError || !addToBucketResult) {
     return res.status(500).json({ result: null, error: addToBucketError });

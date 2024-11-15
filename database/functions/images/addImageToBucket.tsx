@@ -2,7 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
-async function addImageToBucket(
+async function addImageToBucketFromUrl(
   imageUrl: string,
   bucketName: string,
   supabase: SupabaseClient,
@@ -40,4 +40,4 @@ async function addImageToBucket(
   return storageUrl.data.publicUrl;
 }
 
-export { addImageToBucket };
+export { addImageToBucketFromUrl };
