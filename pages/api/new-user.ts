@@ -1,3 +1,4 @@
+import { SupabaseWrapper } from "@/database/wrapper";
 import { clerkClient, currentUser, getAuth } from "@clerk/nextjs/server";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
@@ -18,6 +19,10 @@ export default async function handler(
   }
 
   console.log(user);
+
+  let database = new SupabaseWrapper("SERVER", req, res);
+
+  database.addUser();
 
   let redirectTo = "/";
   res.redirect(redirectTo);
