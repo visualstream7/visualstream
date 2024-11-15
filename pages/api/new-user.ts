@@ -8,17 +8,15 @@ export default async function handler(
 ) {
   const { userId } = getAuth(req);
   if (!userId) {
-    return new NextResponse("Unauthorized", { status: 401 });
+    return res.status(401).json({ result: null, error: "Unauthorized" });
   }
 
   // Add logic that retrieves the data for the API route
   const user = await (await clerkClient()).users.getUser(userId);
 
   if (!user) {
-    return new NextResponse("User does not exist", { status: 404 });
+    return res.status(404).json({ result: null, error: "User not found" });
   }
-
-  console.log(user);
 
   let database = new SupabaseWrapper("SERVER", req, res);
 
