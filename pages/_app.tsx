@@ -13,7 +13,9 @@ export default function App({ Component, pageProps }: AppProps) {
             backgroundColor: "rgba(0, 0, 0, 0.8)",
           },
           cardBox: {
-            width: "100vw",
+            width: "400px",
+            minWidth: "00px",
+            maxWidth: "90vw",
             height: "70vh",
             minHeight: "max-content",
             boxShadow: "none",
@@ -24,8 +26,6 @@ export default function App({ Component, pageProps }: AppProps) {
           card: {
             backgroundColor: "#1b1b1b",
             width: "100%",
-            minWidth: "300px",
-            maxWidth: "500px",
             margin: "0 auto",
             border: "0.1px solid #b2ebf520",
           },
@@ -41,12 +41,19 @@ export default function App({ Component, pageProps }: AppProps) {
           footer: {
             display: "none",
           },
-          socialButtonsBlockButton: {
-            backgroundColor: "#b2ebf5",
-            color: "#1b1b1b",
+          modalCloseButton: {
             "&:hover": {
-              backgroundColor: "#384572",
-              color: "white",
+              backgroundColor: "#2b2b2b",
+            },
+            "&:focus": {
+              border: "1px solid #dbdbdb50",
+              boxShadow: "none",
+            },
+          },
+          socialButtonsBlockButton: {
+            backgroundColor: "#2b2b2b80",
+            "&:hover": {
+              backgroundColor: "#2b2b2b",
             },
             padding: "12px",
           },
