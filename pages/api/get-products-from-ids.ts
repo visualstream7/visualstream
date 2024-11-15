@@ -6,7 +6,7 @@ export default async function handler(
   res: NextApiResponse<any>,
 ) {
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    return res.status(405).json({ result: null, error: "Method not allowed" });
   }
 
   const token = req?.body?.token as string | undefined;
@@ -18,11 +18,6 @@ export default async function handler(
       error: "Missing token : string or product_ids : number[]",
     });
   }
-
-  // const product_ids: number[] = [71, 380, 57];
-
-  // get all the products at once in a promise.all for product_ids
-  //
 
   let queries = product_ids.map((product_id) => {
     return fetch(`https://api.printful.com/products/${product_id}`, {
@@ -44,7 +39,6 @@ export default async function handler(
     });
   }
 
-  //
   let filteredData: {
     id: number;
     type: string;
