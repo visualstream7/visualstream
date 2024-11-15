@@ -2,5 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+:root {
+  --color-primary: #fbf5f3;
+  --color-secondary: #cccccc;
+  --color-accent: #7692ff;
+  --color-danger: #ff5858;
+
+  --text-dark: #3d3d3d;
+  --text-mid: #5c5c5c;
+  --text-light: #fbf5f3;
+
+  --font-primary: "Roboto", sans-serif;
+  --font-secondary: "Montserrat", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }

@@ -1,43 +1,11 @@
-import { printfulClient } from "@/libs/printful-client";
-import {
-  SignInButton,
-  SignOutButton,
-  SignUpButton,
-  useUser,
-} from "@clerk/nextjs";
-import { useEffect } from "react";
+import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
+import SearchPage from "@/features/search/searchPage";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
 
-  return (
-    <div className="flex flex-col items-center text-2xl gap-8">
-      <h1>Home page</h1>
+  if (!isLoaded) return <FullPageSpinner />;
 
-      <button
-        onClick={async () => {
-          printfulClient.getProductsFromIds([71, 380]).then((res) => {
-            console.log(res);
-          });
-        }}
-        className="flex bg-blue-500 text-white p-2 "
-      >
-        <p>Get Products 71 and 380 </p>
-      </button>
-
-      {user ? (
-        <SignOutButton>
-          <button className="flex bg-red-500 text-white p-2 ">
-            <p>Sign Out</p>
-          </button>
-        </SignOutButton>
-      ) : (
-        <SignInButton mode="modal">
-          <button className="flex bg-blue-500 text-white p-2 ">
-            <p>Sign In</p>
-          </button>
-        </SignInButton>
-      )}
-    </div>
-  );
+  return <SearchPage user={user} />;
 }
