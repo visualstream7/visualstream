@@ -10,13 +10,28 @@ export default async function handler(
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
   }
 
-  const { image_url } = req.body;
+  const { image_url, caption, description } = req.body;
+
 
   if (!image_url) {
     return res
       .status(200)
       .json({ result: null, error: "Image URL is required" });
   }
+
+  if (!caption) {
+    return res
+      .status(200)
+      .json({ result: null, error: "Caption URL is required" });
+  }
+
+  if (!description) {
+    return res
+      .status(200)
+      .json({ result: null, error: "Description URL is required" });
+  }
+
+
 
   let database = new SupabaseWrapper("SERVER", req, res);
   let { result: addToBucketResult, error: addToBucketError } =
@@ -33,12 +48,20 @@ export default async function handler(
   if (colorCompositionError || !colorComposition) {
     return res.status(500).json({ result: null, error: colorCompositionError });
   }
+  
+  let { result: imageDataSaveResult, error: imageDataSaveError } = await database.addImageData(addToBucketResult.image_url, caption, description, colorComposition);
+  
+  if (imageDataSaveError) {
+    return res.status(500).json({ result: null, error: imageDataSaveError });
+  }
+
 
   return res.status(200).json({
     result: {
       image_url: image_url,
       stored_image_url: addToBucketResult.image_url,
       color_composition: colorComposition,
+      image_data: imageDataSaveResult,
     },
     error: null,
   });
