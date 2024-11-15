@@ -12,7 +12,6 @@ export default async function handler(
 
   const { image_url, caption, description } = req.body;
 
-
   if (!image_url) {
     return res
       .status(200)
@@ -20,18 +19,14 @@ export default async function handler(
   }
 
   if (!caption) {
-    return res
-      .status(200)
-      .json({ result: null, error: "Caption URL is required" });
+    return res.status(200).json({ result: null, error: "Caption is required" });
   }
 
   if (!description) {
     return res
       .status(200)
-      .json({ result: null, error: "Description URL is required" });
+      .json({ result: null, error: "Description is required" });
   }
-
-
 
   let database = new SupabaseWrapper("SERVER", req, res);
   let { result: addToBucketResult, error: addToBucketError } =
@@ -48,13 +43,18 @@ export default async function handler(
   if (colorCompositionError || !colorComposition) {
     return res.status(500).json({ result: null, error: colorCompositionError });
   }
-  
-  let { result: imageDataSaveResult, error: imageDataSaveError } = await database.addImageData(addToBucketResult.image_url, caption, description, colorComposition);
-  
+
+  let { result: imageDataSaveResult, error: imageDataSaveError } =
+    await database.addImageData(
+      addToBucketResult.image_url,
+      caption,
+      description,
+      colorComposition,
+    );
+
   if (imageDataSaveError) {
     return res.status(500).json({ result: null, error: imageDataSaveError });
   }
-
 
   return res.status(200).json({
     result: {
