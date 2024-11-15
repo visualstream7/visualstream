@@ -10,7 +10,7 @@ export default function App({ Component, pageProps }: AppProps) {
         elements: {
           modalBackdrop: {
             position: "fixed",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
           },
           cardBox: {
             width: "100vw",
@@ -27,6 +27,7 @@ export default function App({ Component, pageProps }: AppProps) {
             minWidth: "300px",
             maxWidth: "500px",
             margin: "0 auto",
+            border: "0.1px solid #b2ebf520",
           },
           headerSubtitle: {
             display: "none",
