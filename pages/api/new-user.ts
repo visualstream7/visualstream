@@ -22,8 +22,6 @@ export default async function handler(
 
   let database = new SupabaseWrapper("SERVER", req, res);
 
-  database.addUser();
-
   let redirectTo = "/";
   res.redirect(redirectTo);
 }
