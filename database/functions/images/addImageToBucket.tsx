@@ -10,7 +10,9 @@ async function addImageToBucket(
   // Step 1: Fetch the image from the URL
   const response = await fetch(imageUrl);
   if (!response.ok) {
-    throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch image from URL: ${imageUrl} with status: ${response.status}`,
+    );
   }
 
   // Step 2: Convert the image to base64
@@ -20,7 +22,8 @@ async function addImageToBucket(
   // Step 3: Decode the base64 string to ArrayBuffer
   const decodedData = decode(base64FileData);
 
-  const fileName = Math.random().toString(36).substring(7) + ".png";
+  // random file name of size 16
+  let fileName = Math.random().toString(36).substring(2, 18) + ".png";
   const { error } = await supabase.storage
     .from(bucketName)
     .upload(fileName, decodedData, {
@@ -28,7 +31,7 @@ async function addImageToBucket(
     });
 
   if (error) {
-    throw error;
+    throw new Error(`Failed to upload image to bucket: ${error.message}`);
   }
 
   // Step 5: Get the public URL of the uploaded file

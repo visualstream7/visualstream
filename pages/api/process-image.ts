@@ -19,19 +19,25 @@ export default async function handler(
   }
 
   let database = new SupabaseWrapper("SERVER", req, res);
-  let { result, error } = await database.addImageToBucket(image_url);
+  let { result: addToBucketResult, error: addToBucketError } =
+    await database.addImageToBucket(image_url);
 
-  if (error || !result) {
-    return res.status(500).json({ result: null, error: error });
+  if (addToBucketError || !addToBucketResult) {
+    return res.status(500).json({ result: null, error: addToBucketError });
   }
 
-  let analyzer = new ColorAnalyzer(result.image_url);
-  let colorComposition = await analyzer.getColorComposition();
+  let analyzer = new ColorAnalyzer(addToBucketResult.image_url);
+  let { result: colorComposition, error: colorCompositionError } =
+    await analyzer.getColorComposition();
+
+  if (colorCompositionError || !colorComposition) {
+    return res.status(500).json({ result: null, error: colorCompositionError });
+  }
 
   return res.status(200).json({
     result: {
       image_url: image_url,
-      stored_image_url: result.image_url,
+      stored_image_url: addToBucketResult.image_url,
       color_composition: colorComposition,
     },
     error: null,

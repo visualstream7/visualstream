@@ -59,7 +59,10 @@ class ColorAnalyzer {
     return data;
   }
 
-  public async getColorComposition(): Promise<QuantizedColor[]> {
+  public async getColorComposition(): Promise<{
+    result: QuantizedColor[] | null;
+    error: string | null;
+  }> {
     try {
       const imageData = await this.getImageData();
       if (!imageData) {
@@ -105,9 +108,20 @@ class ColorAnalyzer {
         }),
       ) as QuantizedColor[];
 
-      return arrayOfColorCount;
+      return {
+        result: arrayOfColorCount,
+        error: null,
+      };
     } catch (error) {
-      throw new Error(`Failed to process image`);
+      let message = "failed to process image colors";
+      if (error instanceof Error) {
+        message = error.message;
+      }
+
+      return {
+        result: null,
+        error: message,
+      };
     }
   }
 }

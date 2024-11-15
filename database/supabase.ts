@@ -44,9 +44,11 @@ class SupabaseWrapper {
         error: null,
       };
     } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
       return {
         result: null,
-        error: "Failed to add image to bucket",
+        error: message,
       };
     }
   };
