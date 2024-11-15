@@ -3,6 +3,7 @@ import { createClient as serverClient } from "./apiClient";
 import { createClient as uiClient } from "./uiClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { addUser } from "./functions/users/addUser";
+import { addImageToBucket as addImageToBucketInternal } from "./functions/images/addImageToBucket";
 
 // Define overload signatures for the constructor
 class SupabaseWrapper {
@@ -30,8 +31,25 @@ class SupabaseWrapper {
     }
   }
 
-  // add all the methods I'd need!
-  addUser = addUser;
+  addImageToBucket = async (
+    imageUrl: string,
+  ): Promise<{
+    result: { image_url: string } | null;
+    error: string | null;
+  }> => {
+    try {
+      let url = await addImageToBucketInternal(imageUrl, "assets", this.client);
+      return {
+        result: { image_url: url },
+        error: null,
+      };
+    } catch (error) {
+      return {
+        result: null,
+        error: "Failed to add image to bucket",
+      };
+    }
+  };
 }
 
 export { SupabaseWrapper };

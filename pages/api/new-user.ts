@@ -1,4 +1,4 @@
-import { SupabaseWrapper } from "@/database/wrapper";
+import { SupabaseWrapper } from "@/database/supabase";
 import { clerkClient, currentUser, getAuth } from "@clerk/nextjs/server";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
