@@ -1,5 +1,10 @@
 import { printfulClient } from "@/libs/printful-client";
-import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import {
+  SignInButton,
+  SignOutButton,
+  SignUpButton,
+  useUser,
+} from "@clerk/nextjs";
 import { useEffect } from "react";
 
 export default function Home() {
@@ -27,7 +32,7 @@ export default function Home() {
           </button>
         </SignOutButton>
       ) : (
-        <SignInButton>
+        <SignInButton mode="modal">
           <button className="flex bg-blue-500 text-white p-2 ">
             <p>Sign In</p>
           </button>
