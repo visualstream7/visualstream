@@ -58,9 +58,7 @@ export default async function handler(
 
   return res.status(200).json({
     result: {
-      image_url: image_url,
-      stored_image_url: addToBucketResult.image_url,
-      color_composition: colorComposition,
+      source_image_url: image_url,
       image_data: imageDataSaveResult,
     },
     error: null,
