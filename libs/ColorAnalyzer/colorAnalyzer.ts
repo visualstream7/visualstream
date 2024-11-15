@@ -49,22 +49,14 @@ class ColorAnalyzer {
   }
 
   private async getImageData(): Promise<Uint8ClampedArray | null> {
-    try {
-      const response = await fetch(this.imageUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image, status: ${response.status}`);
-      }
-
-      const imageBuffer = await response.arrayBuffer();
-      const image = await loadImage(Buffer.from(imageBuffer));
-      const canvas = createCanvas(image.width, image.height);
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(image, 0, 0);
-      const { data } = ctx.getImageData(0, 0, image.width, image.height);
-      return data;
-    } catch (error) {
-      throw new Error(`Failed to get image data: ${error.message}`);
-    }
+    const response = await fetch(this.imageUrl);
+    const imageBuffer = await response.arrayBuffer();
+    const image = await loadImage(Buffer.from(imageBuffer));
+    const canvas = createCanvas(image.width, image.height);
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(image, 0, 0);
+    const { data } = ctx.getImageData(0, 0, image.width, image.height);
+    return data;
   }
 
   public async getColorComposition(): Promise<QuantizedColor[]> {
@@ -81,6 +73,10 @@ class ColorAnalyzer {
       ]) as [number, number, number][];
 
       const colorMap = quantize(rgbArrayOfPixels, this.maxColors);
+
+      if (!colorMap) {
+        throw new Error("Failed to quantize colors");
+      }
 
       const colorCountMap = new Map<string, number>();
       const totalPixels = rgbArrayOfPixels.length;
@@ -111,7 +107,7 @@ class ColorAnalyzer {
 
       return arrayOfColorCount;
     } catch (error) {
-      throw new Error(`Failed to process image: ${error.message}`);
+      throw new Error(`Failed to process image`);
     }
   }
 }
