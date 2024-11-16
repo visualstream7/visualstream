@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,8 +14,7 @@
   --text-mid: #5c5c5c;
   --text-light: #fbf5f3;
 
-  --font-primary: "Roboto", sans-serif;
-  --font-secondary: "Montserrat", sans-serif;
+  --font-primary: "Poppins", sans-serif;
 }
 
 * {

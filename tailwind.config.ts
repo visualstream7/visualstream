@@ -19,8 +19,7 @@ export default {
         light: "var(--text-light)",
       },
       fontFamily: {
-        primary: ["Roboto", "sans-serif"],
-        secondary: ["Montserrat", "sans-serif"],
+        primary: "var(--font-primary)",
       },
     },
   },
