@@ -22,7 +22,12 @@ export default async function handler(
     return res.status(200).json({ result: null, error: "ID is required" });
   }
 
-  let idInt = parseInt(id);
+  let idInt;
+  try {
+    idInt = parseInt(id);
+  } catch (e) {
+    return res.status(200).json({ result: null, error: "Invalid ID" });
+  }
 
   let database = new SupabaseWrapper("SERVER", req, res);
   let { result: addToBucketResult, error: addToBucketError } =
