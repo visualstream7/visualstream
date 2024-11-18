@@ -90,6 +90,7 @@ export type Database = {
       }
       Images: {
         Row: {
+          article_link: string | null
           caption: string | null
           color_composition: Json | null
           created_at: string
@@ -97,8 +98,10 @@ export type Database = {
           id: number
           image_url: string | null
           is_mock_generated: boolean | null
+          summary: string | null
         }
         Insert: {
+          article_link?: string | null
           caption?: string | null
           color_composition?: Json | null
           created_at?: string
@@ -106,8 +109,10 @@ export type Database = {
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
+          summary?: string | null
         }
         Update: {
+          article_link?: string | null
           caption?: string | null
           color_composition?: Json | null
           created_at?: string
@@ -115,6 +120,7 @@ export type Database = {
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
+          summary?: string | null
         }
         Relationships: []
       }

@@ -8,22 +8,20 @@ interface QuantizedColor {
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addImageToDatabase(
-  imageUrl: string,
   caption: string,
   description: string,
-  colorPercentage: QuantizedColor[],
+  summary: string,
+  articleUrl: string,
   supabase: SupabaseClient<Database>,
 ) {
   const { data, error } = await supabase
     .from("Images")
     .insert([
       {
-        image_url: imageUrl,
         caption: caption,
         description: description,
-        color_composition: {
-          composition: colorPercentage,
-        } as any,
+        summary: summary,
+        article_link: articleUrl,
       },
     ])
     .select("*");
@@ -35,4 +33,26 @@ async function addImageToDatabase(
   return data ? data[0] : null;
 }
 
-export { addImageToDatabase };
+async function updateImageInDatabase(
+  id: number,
+  imageUrl: string,
+  colorPercentages: QuantizedColor[],
+  supabase: SupabaseClient<Database>,
+) {
+  const { data, error } = await supabase
+    .from("Images")
+    .update({
+      image_url: imageUrl,
+      color_composition: colorPercentages as any,
+    })
+    .eq("id", id)
+    .select("*");
+
+  if (error) {
+    throw new Error(`Failed to insert image data: ${error.message}`);
+  }
+
+  return data ? data[0] : null;
+}
+
+export { addImageToDatabase, updateImageInDatabase };
