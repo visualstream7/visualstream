@@ -2,6 +2,11 @@ import { SupabaseWrapper } from "@/database/supabase";
 import ColorAnalyzer from "@/libs/ColorAnalyzer/colorAnalyzer";
 import { NextApiRequest, NextApiResponse } from "next";
 
+// This function can run for a maximum of 5 seconds
+export const config = {
+  maxDuration: 40,
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
