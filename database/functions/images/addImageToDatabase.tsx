@@ -1,6 +1,5 @@
 import { Database } from "@/database/types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { decode } from "base64-arraybuffer";
 
 interface QuantizedColor {
   color: string;
