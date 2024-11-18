@@ -1,11 +1,12 @@
+import { Database } from "@/database/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addImageToBucketFromUrl(
   imageUrl: string,
-  bucketName: string,
-  supabase: SupabaseClient,
+  bucketName: "assets",
+  supabase: SupabaseClient<Database>,
 ) {
   // Step 1: Fetch the image from the URL
   const response = await fetch(imageUrl);

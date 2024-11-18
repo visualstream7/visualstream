@@ -1,3 +1,4 @@
+import { Database } from "@/database/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 
@@ -12,29 +13,27 @@ async function addImageToDatabase(
   caption: string,
   description: string,
   colorPercentage: QuantizedColor[],
-  supabase: SupabaseClient,
+  supabase: SupabaseClient<Database>,
 ) {
-
-  const { data, error } = await supabase.from("Images").insert([
-    {
-      image_url: imageUrl,
-      caption: caption,
-      description: description,
-      color_composition: {
-        composition: colorPercentage,
-      }
-    }
-  ])
+  const { data, error } = await supabase
+    .from("Images")
+    .insert([
+      {
+        image_url: imageUrl,
+        caption: caption,
+        description: description,
+        color_composition: {
+          composition: colorPercentage,
+        } as any,
+      },
+    ])
     .select("*");
 
   if (error) {
     throw new Error(`Failed to insert image data: ${error.message}`);
   }
-  
+
   return data ? data[0] : null;
-
-
-
 }
 
 export { addImageToDatabase };

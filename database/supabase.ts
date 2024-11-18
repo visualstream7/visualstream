@@ -5,6 +5,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { addUser } from "./functions/users/addUser";
 import { addImageToBucketFromUrl as addImageToBucketFromUrl } from "./functions/images/addImageToBucket";
 import { addImageToDatabase } from "./functions/images/addImageToDatabase";
+import { Database } from "./types";
 
 interface QuantizedColor {
   color: string;
@@ -13,7 +14,7 @@ interface QuantizedColor {
 
 // Define overload signatures for the constructor
 class SupabaseWrapper {
-  client: SupabaseClient;
+  client: SupabaseClient<Database>;
 
   // Constructor signature for "SERVER" type, requiring req and res
   constructor(wrapperType: "SERVER", req: NextApiRequest, res: NextApiResponse);
@@ -59,17 +60,23 @@ class SupabaseWrapper {
     }
   };
 
-  addImageData = async(
+  addImageData = async (
     imageUrl: string,
     caption: string,
     description: string,
     colorPercentage: QuantizedColor[],
   ): Promise<{
-    result: any,
-    error: string | null,
+    result: any;
+    error: string | null;
   }> => {
     try {
-      let data = await addImageToDatabase(imageUrl, caption, description, colorPercentage, this.client);
+      let data = await addImageToDatabase(
+        imageUrl,
+        caption,
+        description,
+        colorPercentage,
+        this.client,
+      );
       return {
         result: data,
         error: null,
@@ -82,7 +89,7 @@ class SupabaseWrapper {
         error: message,
       };
     }
-  }
+  };
 }
 
 export { SupabaseWrapper };
