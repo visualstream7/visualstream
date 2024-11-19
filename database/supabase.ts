@@ -97,6 +97,7 @@ class SupabaseWrapper {
     description: string,
     summary: string,
     article_link: string,
+    category: string,
   ): Promise<{
     result: any;
     error: string | null;
@@ -107,6 +108,7 @@ class SupabaseWrapper {
         description,
         summary,
         article_link,
+        category,
         this.client,
       );
       return {
@@ -123,7 +125,7 @@ class SupabaseWrapper {
     }
   };
 
-  addUser = async(
+  addUser = async (
     id: string,
     email: string,
   ): Promise<{
@@ -144,7 +146,7 @@ class SupabaseWrapper {
         error: message,
       };
     }
-  }
+  };
 }
 
 export { SupabaseWrapper };

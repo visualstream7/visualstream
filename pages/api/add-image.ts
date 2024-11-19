@@ -10,9 +10,15 @@ export default async function handler(
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
   }
 
-  const { caption, description, summary, article_link } = req.body;
+  const { caption, description, summary, article_link, category } = req.body;
   if (!caption) {
     return res.status(200).json({ result: null, error: "Caption is required" });
+  }
+
+  if (!category) {
+    return res
+      .status(200)
+      .json({ result: null, error: "Category is required" });
   }
 
   if (!description) {
@@ -34,7 +40,13 @@ export default async function handler(
   let database = new SupabaseWrapper("SERVER", req, res);
 
   let { result: imageDataSaveResult, error: imageDataSaveError } =
-    await database.addImageData(caption, description, summary, article_link);
+    await database.addImageData(
+      caption,
+      description,
+      summary,
+      article_link,
+      category,
+    );
 
   if (imageDataSaveError) {
     return res.status(500).json({ result: null, error: imageDataSaveError });

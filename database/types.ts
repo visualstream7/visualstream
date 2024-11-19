@@ -92,6 +92,7 @@ export type Database = {
         Row: {
           article_link: string | null
           caption: string | null
+          category: string | null
           color_composition: Json | null
           created_at: string
           description: string | null
@@ -103,6 +104,7 @@ export type Database = {
         Insert: {
           article_link?: string | null
           caption?: string | null
+          category?: string | null
           color_composition?: Json | null
           created_at?: string
           description?: string | null
@@ -114,6 +116,7 @@ export type Database = {
         Update: {
           article_link?: string | null
           caption?: string | null
+          category?: string | null
           color_composition?: Json | null
           created_at?: string
           description?: string | null
