@@ -1,4 +1,8 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import {
+  ProductResponseType,
+  ProductType,
+  VariantType,
+} from "@/libs/printful-client/types";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -39,38 +43,11 @@ export default async function handler(
     });
   }
 
-  let filteredData: {
-    id: number;
-    type: string;
-    description: string;
-    type_name: string;
-    title: string;
-    varaints: {
-      id: number;
-      price: string;
-      product_id: number;
-      size: string;
-      color_code: string;
-      availability_status: { region: string; status: string }[];
-    }[];
-  }[] = data.map(
+  let filteredData: ProductResponseType[] = data.map(
     (apiResponse: {
       result: {
-        product: {
-          id: number;
-          type: string;
-          description: string;
-          type_name: string;
-          title: string;
-        };
-        variants: {
-          id: number;
-          price: string;
-          product_id: number;
-          size: string;
-          color_code: string;
-          availability_status: { region: string; status: string }[];
-        }[];
+        product: ProductType;
+        variants: VariantType[];
       };
     }) => ({
       id: apiResponse.result.product.id,
@@ -78,7 +55,7 @@ export default async function handler(
       description: apiResponse.result.product.description,
       type_name: apiResponse.result.product.type_name,
       title: apiResponse.result.product.title,
-      varaints: apiResponse.result.variants?.map((variant) => ({
+      variants: apiResponse.result.variants?.map((variant) => ({
         id: variant.id,
         price: variant.price,
         product_id: variant.product_id,

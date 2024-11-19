@@ -1,5 +1,11 @@
+import { ProductResponseType } from "./types";
+
 class Printful {
-  apiKey: string;
+  private apiKey: string;
+  private baseUrl =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://visualstream.vercel.app/";
 
   constructor(apiKey: string) {
     if (!apiKey) {
@@ -10,7 +16,7 @@ class Printful {
 
   getProductsFromIds = async (product_ids: number[]) => {
     console.log("product_ids", product_ids);
-    const query = fetch("/api/get-products-from-ids", {
+    const query = fetch(`${this.baseUrl}/api/get-products-from-ids`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +29,7 @@ class Printful {
 
     const response = await query;
     const data = (await response.json()) as {
-      result: any[] | null;
+      result: ProductResponseType[] | null;
       error: string | null;
     };
 
