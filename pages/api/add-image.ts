@@ -1,12 +1,19 @@
 import { SupabaseWrapper } from "@/database/supabase";
-import ColorAnalyzer from "@/libs/ColorAnalyzer/colorAnalyzer";
 import { Printful } from "@/libs/printful-client/printful-sdk";
 import { NextApiRequest, NextApiResponse } from "next";
+export type TaskType = {
+  image_id: number;
+  product_id: number;
+  variant_ids: number[];
+};
 
-async function getProductsWithDistinctColorGroups(
+async function getMockGenerationTasks(
   productIds: number[],
   image_id: number,
-) {
+): Promise<{
+  result: TaskType[] | null;
+  error: string | null;
+}> {
   let client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN as string);
   let { result: productsWithVariants, error } =
     await client.getProductsFromIds(productIds);
@@ -89,20 +96,19 @@ async function getProductsWithDistinctColorGroups(
     });
   }
 
-  let result: string[] = [];
+  let tasks: TaskType[] = [];
 
-  for (let product of productsWithDistinctColorGroups) {
-    for (let group of product.distinctVariants) {
-      result.push(
-        `Generate Mock For Product ID : ${product.product.id} with the Image ID: ${group.image_id} -> for the Variants: ${group.variant_ids.join(
-          ", ",
-        )}`,
-      );
-    }
+  // Iterate over distinct color groups
+  for (let group of distinctColorGroups) {
+    tasks.push({
+      image_id: group.image_id,
+      product_id: group.variants[0].product_id,
+      variant_ids: group.variant_ids,
+    });
   }
 
   return {
-    result: result,
+    result: tasks,
     error: null,
   };
 }
@@ -157,26 +163,28 @@ export default async function handler(
     return res.status(500).json({ result: null, error: imageDataSaveError });
   }
 
-  let productIds = [71, 380];
+  let productIds = [380];
 
-  let { result: mockGenerationTasks, error: mockGenerationTasksError } =
-    await getProductsWithDistinctColorGroups(
-      productIds,
-      imageDataSaveResult.id,
-    );
+  let { result: tasks, error: tasksError } = await getMockGenerationTasks(
+    productIds,
+    imageDataSaveResult.id,
+  );
 
-  if (mockGenerationTasksError || !mockGenerationTasks) {
-    return res
-      .status(500)
-      .json({ result: null, error: mockGenerationTasksError });
+  if (tasksError || !tasks) {
+    return res.status(500).json({ result: null, error: tasksError });
+  }
+
+  let { result: addTasksResult, error: addTasksError } =
+    await database.addTasks(tasks);
+
+  if (addTasksError) {
+    return res.status(500).json({ result: null, error: addTasksError });
   }
 
   return res.status(200).json({
     result: {
       image_data: imageDataSaveResult,
-      mock_generation_tasks: mockGenerationTasks,
-      number_of_tasks: mockGenerationTasks.length,
-      estimated_time: `approx. ${(mockGenerationTasks.length * 30) / (60 * 5)} minutes`,
+      mock_generation_tasks: tasks,
     },
     error: null,
   });

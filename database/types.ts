@@ -172,7 +172,7 @@ export type Database = {
           reason: string | null
           retry_left: number | null
           status: string | null
-          variant_ids: string[] | null
+          variant_ids: number[] | null
         }
         Insert: {
           created_at?: string | null
@@ -182,7 +182,7 @@ export type Database = {
           reason?: string | null
           retry_left?: number | null
           status?: string | null
-          variant_ids?: string[] | null
+          variant_ids?: number[] | null
         }
         Update: {
           created_at?: string | null
@@ -192,7 +192,7 @@ export type Database = {
           reason?: string | null
           retry_left?: number | null
           status?: string | null
-          variant_ids?: string[] | null
+          variant_ids?: number[] | null
         }
         Relationships: [
           {
