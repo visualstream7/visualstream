@@ -19,6 +19,7 @@ export default async function handler(
   }
 
   let database = new SupabaseWrapper("SERVER", req, res);
+  let { result, error } = await database.addUser(user.id, user.emailAddresses[0].emailAddress);
 
   let redirectTo = "/";
   res.redirect(redirectTo);
