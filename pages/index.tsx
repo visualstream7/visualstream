@@ -1,5 +1,5 @@
 import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
-import SearchPage from "@/features/search/searchPage";
+import SearchPage from "@/components/search/searchPage";
 import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
