@@ -78,6 +78,7 @@ export const UserButton = ({ user }: UserPropType) => {
 // NavBar Component
 export default function Nav({ user }: UserPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
+  const [returnOrders, setReturnOrders] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
 
   const toggleCountryDropdown = () => {
@@ -97,23 +98,30 @@ export default function Nav({ user }: UserPropType) {
         <div className="text-xl font-bold">VisualStream</div>
 
         {/* SearchBar Section */}
-        <div className="flex items-center bg-white text-black rounded-md w-1/2">
-          <select className="bg-gray-200 text-black px-2 py-1 rounded-l-md">
-            <option>All</option>
-          </select>
+        <div className="flex items-center bg-white text-black rounded-sm w-1/2">
+          <div className="relative">
+            <select className="bg-gray-200 text-black px-2 py-1 rounded-l-md appearance-none pr-8">
+              <option>All</option>
+            </select>
+            <MdArrowDropDown
+              size={20}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
+            />
+          </div>
           <input
             type="text"
             placeholder="Search VisualStream.ai"
-            className="flex-grow px-2 py-1 outline-none"
+            className="flex-grow px-2 py-2 outline-none"
           />
           <button className="px-3 text-gray-500">
             <FiSearch size={20} />
           </button>
         </div>
 
+
         {/* Country Dropdown, Profile Icon, Orders, and Cart */}
         <div className="flex items-center gap-6 relative">
-          {/* Country Dropdown */}
+          
           <div className="relative">
             <div
               className="cursor-pointer flex items-center gap-2"
@@ -143,7 +151,12 @@ export default function Nav({ user }: UserPropType) {
           <UserButton user={user} />
 
           {/* Orders and Cart */}
-          <div className="cursor-pointer">Returns & Orders</div>
+          <div className="cursor-pointer flex items-center gap-1">
+            <span className=" text-[#535f6c]">Returns <br />& Orders</span>
+            {returnOrders}
+            <MdArrowDropDown size={20} />
+          </div>
+
           <div className="cursor-pointer flex items-center">
             <HiOutlineShoppingCart size={24} />
           </div>
@@ -156,7 +169,7 @@ export default function Nav({ user }: UserPropType) {
           <FiMenu size={20} />
           <span>All</span>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-8">
           <div className="cursor-pointer">LifeStyle & Gifts</div>
           <div className="cursor-pointer">Wall Decor</div>
           <div className="cursor-pointer">Tech Accessories</div>
