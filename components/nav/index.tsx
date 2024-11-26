@@ -75,8 +75,22 @@ export const UserButton = ({ user }: UserPropType) => {
   );
 };
 
-// NavBar Component
-export default function Nav({ user }: UserPropType) {
+// MobileNavBar Component
+function MobileNav({ user }: UserPropType) {
+  return (
+    <div className="w-full block lg:hidden">
+      <div className="bg-[#25384c] text-white py-2 px-4 flex items-center justify-between w-full">
+        <div className="text-xl font-bold">VisualStream</div>
+        <div className="flex items-center gap-4">
+          <FiSearch size={24} />
+          <FiMenu size={24} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LargeScreenNav({ user }: UserPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
   const [returnOrders, setReturnOrders] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
@@ -91,7 +105,7 @@ export default function Nav({ user }: UserPropType) {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full hidden lg:block">
       {/* UpperNavbar */}
       <div className="bg-[#25384c] text-white py-2 px-4 flex items-center justify-between w-full">
         {/* Logo Section */}
@@ -118,10 +132,8 @@ export default function Nav({ user }: UserPropType) {
           </button>
         </div>
 
-
         {/* Country Dropdown, Profile Icon, Orders, and Cart */}
         <div className="flex items-center gap-6 relative">
-          
           <div className="relative">
             <div
               className="cursor-pointer flex items-center gap-2"
@@ -152,7 +164,9 @@ export default function Nav({ user }: UserPropType) {
 
           {/* Orders and Cart */}
           <div className="cursor-pointer flex items-center gap-1">
-            <span className=" text-[#535f6c]">Returns <br />& Orders</span>
+            <span className=" text-[#535f6c]">
+              Returns <br />& Orders
+            </span>
             {returnOrders}
             <MdArrowDropDown size={20} />
           </div>
@@ -181,5 +195,15 @@ export default function Nav({ user }: UserPropType) {
         </div>
       </div>
     </div>
+  );
+}
+
+// NavBar Component
+export default function Nav({ user }: UserPropType) {
+  return (
+    <>
+      <LargeScreenNav user={user} />
+      <MobileNav user={user} />
+    </>
   );
 }

@@ -12,6 +12,8 @@ import {
 
 import { Database } from "./types";
 import { TaskType } from "@/pages/api/add-image";
+import { Cat } from "lucide-react";
+import { getImagesFromDatabase } from "./functions/images/getImagesFromDatabase";
 
 interface QuantizedColor {
   color: string;
@@ -81,6 +83,26 @@ class SupabaseWrapper {
         colorPercentage,
         this.client,
       );
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getImages = async (): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let data = await getImagesFromDatabase(this.client);
       return {
         result: data,
         error: null,

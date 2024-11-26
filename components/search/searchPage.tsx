@@ -2,17 +2,23 @@ import { SignInButton, SignOutButton } from "@clerk/nextjs";
 import { UserResource } from "@clerk/types";
 
 import Nav from "@/components/nav";
+import Grid from "./grid";
+import PickerContainer from "./pickerContainer";
+import useImageSearch from "@/hooks/useImageSearch";
 
 type UserPropType = {
   user: UserResource | null | undefined;
 };
 
 export default function SearchPage({ user }: UserPropType) {
+  const { images, isImagesLoading } = useImageSearch();
+
   return (
-    <div className="flex flex-col h-dvh gap-4 font-primary">
+    <div className="flex flex-col h-dvh font-primary">
       <Nav user={user} />
-      <div className="flex justify-end text-dark gap-4">
-        {/* Use the UserButton component here */}
+      <div className="flex-1 flex flex-col lg:flex-row max-h-dvh overflow-hidden">
+        <Grid images={images} isImagesLoading={isImagesLoading} />
+        <PickerContainer />
       </div>
     </div>
   );
