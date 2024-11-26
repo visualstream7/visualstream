@@ -164,7 +164,7 @@ function LargeScreenNav({ user }: UserPropType) {
 
           {/* Orders and Cart */}
           <div className="cursor-pointer flex items-center gap-1">
-            <span className=" text-light opacity-[0.5]">
+            <span className=" text-light opacity-[0.5g]">
               Returns <br />& Orders
             </span>
             {returnOrders}
