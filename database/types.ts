@@ -99,6 +99,7 @@ export type Database = {
           id: number
           image_url: string | null
           is_mock_generated: boolean | null
+          low_resolution_image_url: string | null
           summary: string | null
         }
         Insert: {
@@ -111,6 +112,7 @@ export type Database = {
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
+          low_resolution_image_url?: string | null
           summary?: string | null
         }
         Update: {
@@ -123,6 +125,7 @@ export type Database = {
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
+          low_resolution_image_url?: string | null
           summary?: string | null
         }
         Relationships: []
