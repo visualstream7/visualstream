@@ -10,8 +10,6 @@ async function addLowResImage(
   id: number,
   imageUrl: string,
   bucketName: "assets",
-  req: NextApiRequest,
-  res: NextApiResponse,
   supabase: SupabaseClient<Database>,
 ) {
   // Step 1: Fetch the image from the URL

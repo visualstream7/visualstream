@@ -1,5 +1,6 @@
 import { Database } from "@/database/types";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { addLowResImage } from "./addLowResImageToDatabase";
 
 interface QuantizedColor {
   color: string;
@@ -54,7 +55,18 @@ async function updateImageInDatabase(
     throw new Error(`Failed to insert image data: ${error.message}`);
   }
 
-  return data ? data[0] : null;
+  const { data: lowResData, error: lowResError } = await addLowResImage(
+    id,
+    imageUrl,
+    "assets",
+    supabase,
+  );
+
+  if (lowResError) {
+    throw new Error(`Failed to insert image data: ${lowResError}`);
+  }
+
+  return lowResData ? lowResData[0] : null;
 }
 
 export { addImageToDatabase, updateImageInDatabase };
