@@ -3,7 +3,10 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
+import Jimp from "jimp";
+
+const path = "@img/sharp-darwin-arm64/sharp.node";
+const sharp = require(path);
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addLowResImage(
@@ -20,10 +23,14 @@ async function addLowResImage(
     );
   }
 
-  // Step 2: Convert the image low res using sharp
-  const buffer = await sharp(await response.arrayBuffer())
-    .resize(100, 100)
-    .toBuffer();
+  // Fetch the image from the provided URL
+  const image = await Jimp.read(imageUrl);
+
+  // Resize the image to a low-res version (100x100 in this example)
+  image.resize(100, 100);
+
+  // Get the image buffer in JPEG format
+  const buffer = await image.getBufferAsync(Jimp.MIME_JPEG);
 
   const base64FileData = Buffer.from(buffer).toString("base64");
 
