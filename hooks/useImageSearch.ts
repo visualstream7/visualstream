@@ -1,14 +1,6 @@
+import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { SupabaseWrapper } from "@/database/supabase";
 import { useEffect, useState } from "react";
-
-interface Image {
-  caption: string;
-  description: string;
-  summary: string;
-  articleUrl: string;
-  category: string;
-  image_url: string;
-}
 
 export default function useImageSearch() {
   const [loading, setLoading] = useState<boolean>(false);

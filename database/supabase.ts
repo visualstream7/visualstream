@@ -13,7 +13,10 @@ import {
 import { Database } from "./types";
 import { TaskType } from "@/pages/api/add-image";
 import { Cat } from "lucide-react";
-import { getImagesFromDatabase } from "./functions/images/getImagesFromDatabase";
+import {
+  getImagesFromDatabase,
+  Image,
+} from "./functions/images/getImagesFromDatabase";
 
 interface QuantizedColor {
   color: string;
@@ -98,7 +101,7 @@ class SupabaseWrapper {
   };
 
   getImages = async (): Promise<{
-    result: any;
+    result: Image[] | null;
     error: string | null;
   }> => {
     try {

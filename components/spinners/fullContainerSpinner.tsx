@@ -1,8 +1,8 @@
 import { CircleDashed } from "lucide-react";
 
-function FullPageSpinner() {
+function FullContainerSpinner() {
   return (
-    <div className="h-dvh w-full relative flex items-center justify-center">
+    <div className="h-[100%] w-full relative flex items-center justify-center">
       <CircleDashed
         className="text-accent animate-spin"
         strokeWidth={1}
@@ -12,4 +12,4 @@ function FullPageSpinner() {
   );
 }
 
-export { FullPageSpinner };
+export { FullContainerSpinner };

@@ -1,13 +1,6 @@
+import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
-
-interface Image {
-  caption: string;
-  description: string;
-  summary: string;
-  articleUrl: string;
-  category: string;
-  image_url: string;
-}
+import { FullContainerSpinner } from "../spinners/fullContainerSpinner";
 
 export default function Grid({
   images,
@@ -17,19 +10,19 @@ export default function Grid({
   isImagesLoading: boolean;
 }) {
   return (
-    <div className="lg:flex-[0.8] max-h-[100%] overflow-y-scroll">
-      {isImagesLoading ? <FullPageSpinner /> : null}
+    <div className="lg:flex-[0.8] max-h-[100%] overflow-y-auto bg-light custom-scrollbar">
+      {isImagesLoading ? <FullContainerSpinner /> : null}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6">
         {!isImagesLoading &&
           images?.map((image) => (
             <div
-              key={image.articleUrl}
-              className="bg-red-500 h-[200px] overflow-clip"
+              key={image.id}
+              className="h-[200px] overflow-clip cursor-pointer"
             >
               <img
-                src={image.image_url}
-                alt={image.caption}
-                className="min-h-[100%]"
+                src={image.image_url || ""}
+                alt={image.caption || ""}
+                className="min-h-[100%] hover:scale-[1.1] transition-transform duration-500 ease-in-out"
               ></img>
             </div>
           ))}
