@@ -16,7 +16,7 @@ export default function SearchPage({ user }: UserPropType) {
   return (
     <div className="flex flex-col h-dvh font-primary">
       <Nav user={user} />
-      <div className="flex-1 flex flex-col lg:flex-row max-h-dvh overflow-hidden">
+      <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
         <Grid images={images} isImagesLoading={isImagesLoading} />
         <PickerContainer />
       </div>
