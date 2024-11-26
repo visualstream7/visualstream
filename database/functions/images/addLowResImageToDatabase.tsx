@@ -3,10 +3,31 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
-import Jimp from "jimp";
 
-const path = "@img/sharp-darwin-arm64/sharp.node";
-const sharp = require(path);
+import { createCanvas, loadImage } from "canvas";
+
+export async function scaleImageToBase64(arrayBuffer: ArrayBuffer) {
+  try {
+    // Convert ArrayBuffer to a Buffer
+    const buffer = Buffer.from(arrayBuffer);
+
+    // Load the image from the buffer
+    const img = await loadImage(buffer);
+
+    // Create a canvas with the target size
+    const canvas = createCanvas(100, 100);
+    const context = canvas.getContext("2d");
+
+    // Draw the image on the canvas, scaled to 100x100
+    context.drawImage(img, 0, 0, 100, 100);
+
+    // Convert the canvas content to a Base64 string
+    return canvas.toDataURL("image/png");
+  } catch (error) {
+    console.error("Error scaling image:", error);
+    return null;
+  }
+}
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addLowResImage(
@@ -23,16 +44,15 @@ async function addLowResImage(
     );
   }
 
-  // Fetch the image from the provided URL
-  const image = await Jimp.read(imageUrl);
-
-  // Resize the image to a low-res version (100x100 in this example)
-  image.resize(100, 100);
-
   // Get the image buffer in JPEG format
-  const buffer = await image.getBufferAsync(Jimp.MIME_JPEG);
+  let buffer = await response.arrayBuffer();
+  const base64FileData = await scaleImageToBase64(buffer);
 
-  const base64FileData = Buffer.from(buffer).toString("base64");
+  if (!base64FileData)
+    return {
+      data: null,
+      error: " Failed to convert image to base64",
+    };
 
   // Step 3: Decode the base64 string to ArrayBuffer
   const decodedData = decode(base64FileData);
