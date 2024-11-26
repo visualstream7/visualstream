@@ -3,30 +3,30 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { decode } from "base64-arraybuffer";
 import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
-import sharp from "sharp";
+
+import { createCanvas, loadImage } from "canvas";
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addLowResImage(
   id: number,
   imageUrl: string,
   bucketName: "assets",
-  req: NextApiRequest,
-  res: NextApiResponse,
   supabase: SupabaseClient<Database>,
 ) {
   // Step 1: Fetch the image from the URL
-  const response = await fetch(imageUrl);
+
+  // Get the image buffer in JPEG format
+  let response = await fetch(
+    `https://resize.sardo.work/?imageUrl=${imageUrl}&width=${100}&height=${100}&quality=${50}`,
+  );
+
   if (!response.ok) {
     throw new Error(
       `Failed to fetch image from URL: ${imageUrl} with status: ${response.status}`,
     );
   }
-
-  // Step 2: Convert the image low res using sharp
-  const buffer = await sharp(await response.arrayBuffer())
-    .resize(100, 100)
-    .toBuffer();
-
+  // Step 2: Convert the image to base64
+  const buffer = await response.arrayBuffer();
   const base64FileData = Buffer.from(buffer).toString("base64");
 
   // Step 3: Decode the base64 string to ArrayBuffer
