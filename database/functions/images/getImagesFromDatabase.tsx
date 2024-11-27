@@ -32,4 +32,22 @@ async function getImagesFromDatabase(supabase: SupabaseClient<Database>) {
   return images;
 }
 
-export { getImagesFromDatabase };
+async function getImageFromDatabase(
+  id: number,
+  supabase: SupabaseClient<Database>,
+) {
+  const { data, error } = await supabase
+    .from("Images")
+    .select("*")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to get images: ${error.message}`);
+  }
+
+  let image: Image = data;
+  return image;
+}
+
+export { getImagesFromDatabase, getImageFromDatabase };

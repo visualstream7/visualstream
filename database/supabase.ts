@@ -14,6 +14,7 @@ import { Database } from "./types";
 import { TaskType } from "@/pages/api/add-image";
 import { Cat } from "lucide-react";
 import {
+  getImageFromDatabase,
   getImagesFromDatabase,
   Image,
 } from "./functions/images/getImagesFromDatabase";
@@ -106,6 +107,28 @@ class SupabaseWrapper {
   }> => {
     try {
       let data = await getImagesFromDatabase(this.client);
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getImage = async (
+    id: number,
+  ): Promise<{
+    result: Image | null;
+    error: string | null;
+  }> => {
+    try {
+      let data = await getImageFromDatabase(id, this.client);
       return {
         result: data,
         error: null,
