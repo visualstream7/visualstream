@@ -61,54 +61,6 @@ export default function PickerContainer() {
     }
   };
 
-  const handleTouchStart = (e: TouchEvent, index: number) => {
-    setIsResizing(index);
-  };
-
-  const handleTouchEnd = () => {
-    setIsResizing(null);
-  };
-
-  const handleTouchMove = (e: TouchEvent) => {
-    if (isResizing === null) return;
-
-    const container = document.getElementById("swatch-container");
-    if (!container) return;
-
-    const containerWidth = container.offsetWidth;
-    const touchX = e.touches[0].clientX;
-
-    const deltaX = touchX - container.getBoundingClientRect().left;
-
-    const updatedColors = [...selectedColors];
-    const currentColor = updatedColors[isResizing];
-    const nextColor = updatedColors[isResizing + 1];
-
-    if (!currentColor || !nextColor) return;
-
-    const deltaPercentage = (deltaX / containerWidth) * 100;
-
-    // Adjust the percentages based on movement
-    const newCurrentPercentage = Math.max(
-      currentColor.percentage + deltaPercentage,
-      5,
-    );
-    const newNextPercentage = Math.max(
-      nextColor.percentage - deltaPercentage,
-      5,
-    );
-
-    // Ensure total percentages remain at 100%
-    if (
-      newCurrentPercentage + newNextPercentage <=
-      currentColor.percentage + nextColor.percentage
-    ) {
-      currentColor.percentage = newCurrentPercentage;
-      nextColor.percentage = newNextPercentage;
-      setSelectedColors(updatedColors);
-    }
-  };
-
   const addColor = (color: string) => {
     if (selectedColors.some((c) => c.hex === color)) {
       console.log("Color already selected.");
@@ -152,7 +104,7 @@ export default function PickerContainer() {
   };
 
   return (
-    <div className="lg:flex-[0.15] mx-auto">
+    <div className="lg:flex-[0.2] mx-auto py-[20px]">
       <div className="w-[90%] aspect-square m-auto relative grid grid-cols-16">
         <img
           src="/palette.png"
@@ -181,9 +133,6 @@ export default function PickerContainer() {
           className="mt-4 flex w-[90%] m-auto h-[100px] relative overflow-hidden rounded bg-slate-200 p-2 border border-slate-300"
           onMouseUp={handleMouseUp}
           onMouseMove={(e) => handleMouseMove(e.nativeEvent)}
-          onTouchStart={(e) => handleTouchStart(e, 0)} // Handle touch for resizing
-          onTouchMove={(e) => handleTouchMove(e)} // Handle touch move for resizing
-          onTouchEnd={handleTouchEnd}
         >
           {selectedColors.map((color, index) => (
             <div
@@ -231,7 +180,6 @@ export default function PickerContainer() {
           ))}
         </div>
       )}
-      <p className="w-[50%] break-all">{JSON.stringify(selectedColors)}</p>
     </div>
   );
 }

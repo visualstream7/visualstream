@@ -45,7 +45,7 @@ export default function Grid({
   isImagesLoading: boolean;
 }) {
   return (
-    <div className="lg:flex-[0.5] m-auto max-h-[100%] overflow-y-auto bg-light custom-scrollbar">
+    <div className="lg:flex-[0.7] m-auto max-h-[100%] overflow-y-auto bg-light custom-scrollbar">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 flex-1">
         {images?.map((image) => (
           <ImageComponent key={image.id} image={image} />
