@@ -113,8 +113,12 @@ export default function PickerContainer({
   };
 
   return (
-    <div className="lg:flex-[0.2] mx-auto py-[20px] w-full">
-      <div className="w-[90%] aspect-square m-auto relative grid grid-cols-16">
+    <div className="lg:flex-[0.2] mx-auto p-[20px] w-full">
+      <div className="my-4">
+        <h1 className="font-bold text-2xl">Step 1</h1>
+        <p>Select up to 5 colors</p>
+      </div>
+      <div className="w-[100%] aspect-square m-auto relative grid grid-cols-16 border border-gray-300">
         <img
           src="/palette.png"
           alt="palette"
@@ -136,10 +140,15 @@ export default function PickerContainer({
         ))}
       </div>
 
+      <div className="my-4">
+        <h1 className="font-bold text-2xl">Step 2</h1>
+        <p>Slide dividers to adjust color composition</p>
+      </div>
+
       {selectedColors.length > 0 && (
         <div
           id="swatch-container"
-          className="mt-4 flex w-[90%] m-auto h-[100px] relative overflow-hidden rounded bg-slate-200 p-2 border border-slate-300"
+          className="mt-4 flex w-[100%] m-auto h-[100px] relative overflow-hidden rounded bg-slate-200 p-2 border border-slate-300"
           onMouseUp={handleMouseUp}
           onMouseMove={(e) => handleMouseMove(e.nativeEvent)}
         >

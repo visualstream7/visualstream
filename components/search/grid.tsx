@@ -18,7 +18,7 @@ const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
       key={image.id}
       className="h-[200px] w-full relative overflow-hidden cursor-pointer"
     >
-      <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">{`similarity - ${image.similarity}`}</p>
+      {/* <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">{`similarity - ${image.similarity}`}</p> */}
       {/* Low-resolution image */}
       <img
         src={image.low_resolution_image_url || ""}
