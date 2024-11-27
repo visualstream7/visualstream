@@ -3,6 +3,7 @@ import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import { FullContainerSpinner } from "../spinners/fullContainerSpinner";
 import { useState } from "react";
 import { CircleDashed } from "lucide-react";
+import Link from "next/link";
 
 const ImageComponent = ({ image }: { image: Image }) => {
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,9 @@ export default function Grid({
     <div className="lg:flex-[0.7] m-auto max-h-[100%] overflow-y-auto bg-light custom-scrollbar">
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 flex-1">
         {images?.map((image) => (
-          <ImageComponent key={image.id} image={image} />
+          <Link key={image.id} href={`/image/${image.id}`}>
+            <ImageComponent key={image.id} image={image} />
+          </Link>
         ))}
       </div>
     </div>
