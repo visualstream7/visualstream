@@ -113,7 +113,7 @@ export default function PickerContainer({
   };
 
   return (
-    <div className="lg:flex-[0.2] mx-auto py-[20px]">
+    <div className="lg:flex-[0.2] mx-auto py-[20px] w-full">
       <div className="w-[90%] aspect-square m-auto relative grid grid-cols-16">
         <img
           src="/palette.png"
