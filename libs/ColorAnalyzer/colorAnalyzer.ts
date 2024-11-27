@@ -55,6 +55,44 @@ class ColorAnalyzer {
     return `#${componentToHex(pixel.r)}${componentToHex(pixel.g)}${componentToHex(pixel.b)}`.toUpperCase();
   }
 
+  private rgbToLab([r, g, b]: number[]): number[] {
+    // return [r, g, b];
+    // Convert RGB to a scale of 0 to 1
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    // Convert RGB to linear space
+    r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+    g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+    b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+
+    // Convert to XYZ color space (reference: D65 illuminant)
+    let x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375;
+    let y = r * 0.2126729 + g * 0.7151522 + b * 0.072175;
+    let z = r * 0.0193339 + g * 0.119192 + b * 0.9503041;
+
+    // Normalize for D65 white point
+    x /= 0.95047;
+    y /= 1.0;
+    z /= 1.08883;
+
+    // Convert to Lab space
+    const epsilon = 0.008856; // threshold for linear RGB
+    const kappa = 903.3; // used in conversion formula
+
+    x = x > epsilon ? Math.cbrt(x) : (kappa * x + 16) / 116;
+    y = y > epsilon ? Math.cbrt(y) : (kappa * y + 16) / 116;
+    z = z > epsilon ? Math.cbrt(z) : (kappa * z + 16) / 116;
+
+    // Calculate Lab values
+    const lab_l = 116 * y - 16;
+    const lab_a = 500 * (x - y);
+    const lab_b = 200 * (y - z);
+
+    return [lab_l, lab_a, lab_b];
+  }
+
   private async getImageData(): Promise<Uint8ClampedArray | null> {
     const response = await fetch(this.imageUrl);
     const imageBuffer = await response.arrayBuffer();
@@ -66,11 +104,72 @@ class ColorAnalyzer {
     return data;
   }
 
+  private hexToLab(hex: string): number[] {
+    return this.rgbToLab(Object.values(this.hexToRgb(hex)));
+  }
+
+  private ciede2000(lab1: number[], lab2: number[]): number {
+    return Math.sqrt(
+      (lab1[0] - lab2[0]) ** 2 +
+        (lab1[1] - lab2[1]) ** 2 +
+        (lab1[2] - lab2[2]) ** 2,
+    );
+  }
   private calculateSimilarityScore(
     colorPercentage: QuantizedColor[],
     userColors: { hex: string; percentage: number }[],
   ): number {
-    return Math.random();
+    let score = 0;
+    const maxPossibleDistance = 100; // Maximum possible CIEDE2000 distance (range: 0-100)
+    const maxColorDifferenceWeight = 0.7; // Adjust weights if needed
+    const maxPercentageDifferenceWeight = 0.3;
+    const missingColorPenaltyWeight = 0.02; // Penalty weight for missing colors
+
+    // For each user-selected color
+    userColors.forEach((userColor) => {
+      const userLab = this.hexToLab(userColor.hex);
+      let bestMatchDistance = Infinity;
+      let bestMatchPercentageDiff = 100;
+
+      // Find the best match from the image colors
+      colorPercentage.forEach((imageColor) => {
+        const imageLab = this.hexToLab(imageColor.color);
+        const distance = this.ciede2000(userLab, imageLab);
+        if (distance < bestMatchDistance) {
+          bestMatchDistance = distance;
+          bestMatchPercentageDiff = Math.abs(
+            userColor.percentage - imageColor.percentage,
+          );
+        }
+      });
+
+      const colorSimilarity = 1 - bestMatchDistance / maxPossibleDistance;
+      const percentageSimilarity = 1 - bestMatchPercentageDiff / 100;
+
+      score +=
+        colorSimilarity * maxColorDifferenceWeight +
+        percentageSimilarity * maxPercentageDifferenceWeight;
+    });
+
+    // Handle missing colors from the user's input
+    const unmatchedImageColors = colorPercentage.filter(
+      (imageColor) =>
+        !userColors.some((userColor) => {
+          const distance = this.ciede2000(
+            this.hexToLab(userColor.hex),
+            this.hexToLab(imageColor.color),
+          );
+          return distance < maxPossibleDistance * 0.1; // Threshold for a "match"
+        }),
+    );
+
+    // Apply a penalty for each unmatched image color
+    score -= unmatchedImageColors.length * missingColorPenaltyWeight;
+
+    // Normalize score to ensure it stays within 0-1 range
+    score = Math.max(score / userColors.length, 0);
+
+    return score;
   }
 
   public getImagesWithSimilarity(
