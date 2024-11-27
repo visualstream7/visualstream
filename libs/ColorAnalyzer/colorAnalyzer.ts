@@ -1,5 +1,7 @@
+import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { createCanvas, loadImage } from "canvas";
 import quantize from "quantize";
+export type ImageWithSimilarity = Image & { similarity: number };
 
 interface RGB {
   r: number;
@@ -16,9 +18,14 @@ class ColorAnalyzer {
   private imageUrl: string;
   private maxColors: number;
 
-  constructor(imageUrl: string, maxColors: number = 5) {
-    this.imageUrl = imageUrl;
-    this.maxColors = maxColors;
+  constructor(imageUrl?: string, maxColors?: number) {
+    if (!imageUrl || !maxColors) {
+      this.imageUrl = imageUrl ? imageUrl : "";
+      this.maxColors = 5;
+    } else {
+      this.imageUrl = imageUrl;
+      this.maxColors = maxColors;
+    }
   }
 
   private hexToRgb(hex: string): RGB {
@@ -57,6 +64,34 @@ class ColorAnalyzer {
     ctx.drawImage(image, 0, 0);
     const { data } = ctx.getImageData(0, 0, image.width, image.height);
     return data;
+  }
+
+  private calculateSimilarityScore(
+    colorPercentage: QuantizedColor[],
+    userColors: { hex: string; percentage: number }[],
+  ): number {
+    return Math.random();
+  }
+
+  public getImagesWithSimilarity(
+    images: Image[],
+    userColors: { hex: string; percentage: number }[],
+  ): ImageWithSimilarity[] {
+    let imagesWithSimilarity = images.map((image) => {
+      let similarity = this.calculateSimilarityScore(
+        // @ts-ignore
+        image.color_composition as QuantizedColor[],
+        userColors,
+      );
+      return { ...image, similarity };
+    });
+
+    // sort by similarity (high to low)
+
+    let sortedImages = imagesWithSimilarity.sort(
+      (a, b) => b.similarity - a.similarity,
+    );
+    return sortedImages;
   }
 
   public async getColorComposition(): Promise<{

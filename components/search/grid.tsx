@@ -4,8 +4,9 @@ import { FullContainerSpinner } from "../spinners/fullContainerSpinner";
 import { useState } from "react";
 import { CircleDashed } from "lucide-react";
 import Link from "next/link";
+import { ImageWithSimilarity } from "@/libs/ColorAnalyzer/colorAnalyzer";
 
-const ImageComponent = ({ image }: { image: Image }) => {
+const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
   const [loading, setLoading] = useState(true);
 
   const handleImageLoad = () => {
@@ -17,6 +18,7 @@ const ImageComponent = ({ image }: { image: Image }) => {
       key={image.id}
       className="h-[200px] w-full relative overflow-hidden cursor-pointer"
     >
+      <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">{`similarity - ${image.similarity}`}</p>
       {/* Low-resolution image */}
       <img
         src={image.low_resolution_image_url || ""}
@@ -42,7 +44,7 @@ export default function Grid({
   images,
   isImagesLoading,
 }: {
-  images: Image[];
+  images: ImageWithSimilarity[];
   isImagesLoading: boolean;
 }) {
   return (

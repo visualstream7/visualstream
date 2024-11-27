@@ -2,15 +2,24 @@ import { colors } from "@/data/colors";
 import { useState } from "react";
 import { TbDots, TbPaint } from "react-icons/tb";
 
-interface Color {
+export interface Color {
   hex: string;
   percentage: number;
 }
 
-export default function PickerContainer() {
-  const [selectedColors, setSelectedColors] = useState<Color[]>([]);
-  const [isResizing, setIsResizing] = useState<number | null>(null);
+interface PickerContainerProps {
+  selectedColors: Color[];
+  setSelectedColors: (colors: Color[]) => void;
+  isResizing: number | null;
+  setIsResizing: (index: number | null) => void;
+}
 
+export default function PickerContainer({
+  selectedColors,
+  setSelectedColors,
+  isResizing,
+  setIsResizing,
+}: PickerContainerProps) {
   const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(
     null,
   );
