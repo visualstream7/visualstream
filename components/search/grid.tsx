@@ -29,7 +29,7 @@ const ImageComponent = ({ image }: { image: Image }) => {
       <img
         src={image.image_url || ""}
         alt={image.caption || ""}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
+        className={`absolute inset-0 w-full h-full object-cover duration-500 transition-all hover:scale-[1.1] ${
           loading ? "opacity-0" : "opacity-100"
         }`}
         onLoad={handleImageLoad}
