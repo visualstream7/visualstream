@@ -10,6 +10,7 @@ export type ProductResponseType = {
     product_id: number;
     size: string;
     color_code: string;
+    image: string;
     availability_status: { region: string; status: string }[];
   }[];
 };

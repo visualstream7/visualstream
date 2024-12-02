@@ -62,6 +62,7 @@ export default async function handler(
         size: variant.size,
         color_code: variant.color_code,
         availability_status: variant.availability_status,
+        image: variant.image,
       })),
     }),
   );
