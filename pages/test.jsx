@@ -5,7 +5,12 @@ export default function Home() {
   const [overlayImageUrl, setOverlayImageUrl] = useState("");
   const [x, setX] = useState(0);
   const [y, setY] = useState(0);
-  const [scale, setScale] = useState(1);
+  const [w, setW] = useState(100);
+  const [h, setH] = useState(100);
+  const [boxX, setBoxX] = useState(0);
+  const [boxY, setBoxY] = useState(0);
+  const [boxW, setBoxW] = useState(50);
+  const [boxH, setBoxH] = useState(50);
   const [resultImage, setResultImage] = useState(null);
 
   const handleSubmit = async (e) => {
@@ -19,7 +24,12 @@ export default function Home() {
         image_url: overlayImageUrl,
         x,
         y,
-        scale,
+        w,
+        h,
+        box_x: boxX,
+        box_y: boxY,
+        box_w: boxW,
+        box_h: boxH,
       }),
     });
 
@@ -33,7 +43,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      <h1>Image Overlay Tool</h1>
+      <h1>Image Overlay Tool with Transparent Box</h1>
       <form onSubmit={handleSubmit} style={{ marginBottom: "20px" }}>
         <div>
           <label>Product Image URL:</label>
@@ -76,13 +86,62 @@ export default function Home() {
           />
         </div>
         <div>
-          <label>Scale:</label>
+          <label>Overlay Width (w):</label>
           <input
             type="number"
-            step="0.1"
-            value={scale}
-            onChange={(e) => setScale(Number(e.target.value))}
-            placeholder="Scale (e.g., 0.5)"
+            value={w}
+            onChange={(e) => setW(Number(e.target.value))}
+            placeholder="Width (e.g., 100)"
+            required
+          />
+        </div>
+        <div>
+          <label>Overlay Height (h):</label>
+          <input
+            type="number"
+            value={h}
+            onChange={(e) => setH(Number(e.target.value))}
+            placeholder="Height (e.g., 100)"
+            required
+          />
+        </div>
+        <div>
+          <label>Transparent Box X:</label>
+          <input
+            type="number"
+            value={boxX}
+            onChange={(e) => setBoxX(Number(e.target.value))}
+            placeholder="Box X"
+            required
+          />
+        </div>
+        <div>
+          <label>Transparent Box Y:</label>
+          <input
+            type="number"
+            value={boxY}
+            onChange={(e) => setBoxY(Number(e.target.value))}
+            placeholder="Box Y"
+            required
+          />
+        </div>
+        <div>
+          <label>Transparent Box Width (box_w):</label>
+          <input
+            type="number"
+            value={boxW}
+            onChange={(e) => setBoxW(Number(e.target.value))}
+            placeholder="Box Width"
+            required
+          />
+        </div>
+        <div>
+          <label>Transparent Box Height (box_h):</label>
+          <input
+            type="number"
+            value={boxH}
+            onChange={(e) => setBoxH(Number(e.target.value))}
+            placeholder="Box Height"
             required
           />
         </div>
