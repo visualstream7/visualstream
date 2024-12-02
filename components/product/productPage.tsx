@@ -15,21 +15,20 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
   const [selectedColor, setSelectedColor] = useState<string>('Black');
   return (
-    <div>
+    <div className='flex h-dvh flex-col '>
       <Nav user={user} />
-      <div className="flex flex-col md:flex-row gap-6 p-6">
-
-        {/* Left Section: Big Image */}
-        <div className="flex-1 flex justify-center items-center">
+      <div className='flex-1 flex lg:flex-row justify-center items-start mt-10 overflow-auto gap-6 p-6'>
+        
+        <div className="bg-red-800 flex rounded-md">
           <img
             src="/productImages/bigImage.jpg"
-            alt="Product"
-            className="max-w-[70vw] max-h-[70vh] object-contain"
+            alt="Product" 
+            className=" rounded-md border border-gray-300" 
           />
         </div>
 
         {/* Middle Section: Product Details */}
-        <div className="flex-2 mt-10">
+        <div className="flex flex-col  p-3 bg-green-700 ">
           <h3 className='text-[#6ba5b1] text-sm'>Brand WDIRARA</h3>
           <h2 className="text-2xl font-medium text-[#575859]">Amazon Essentials Men's Lightweight French Terry Full-Zip Hoodie</h2>
           <div className="flex items-center gap-4 mt-2">
@@ -72,7 +71,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
             <p className="text-sm font-medium text-gray-500">
               Color: <span className="text-gray-700">{selectedColor}</span>
             </p>
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-2 flex-wrap">
               {[
                 { id: 1, src: '/productImages/1.jpg', alt: 'Black' },
                 { id: 2, src: '/productImages/2.jpg', alt: 'Blue' },
@@ -80,13 +79,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 { id: 4, src: '/productImages/4.jpg', alt: 'Dark Navy' },
                 { id: 5, src: '/productImages/5.jpg', alt: 'French Blue' },
                 { id: 6, src: '/productImages/6.jpg', alt: 'Indigo' },
-                {id: 7, src: '/productImages/7.jpg', alt: 'Light Grey Heather' },
+                { id: 7, src: '/productImages/7.jpg', alt: 'Light Grey Heather' },
                 { id: 8, src: '/productImages/8.jpg', alt: 'Mint Green' },
                 { id: 9, src: '/productImages/9.jpg', alt: 'Oatmeal Heather' },
                 { id: 10, src: '/productImages/10.jpg', alt: 'Pink' },
                 { id: 11, src: '/productImages/11.jpg', alt: 'Tan' },
                 { id: 12, src: '/productImages/12.jpg', alt: 'Teal Blue' },
-                
+
               ].map((color) => (
                 <img
                   key={color.id}
@@ -151,23 +150,29 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
         </div>
 
-        {/* Right Section: Purchase Options */}
-        <div className="flex-1 border-2 rounded-md p-4">
-          <p className="text-2xl font-bold">$24.70</p>
-          <p className="text-sm mt-1">SAR96 delivery 6-9 October</p>
-          <button className="text-blue-500 underline mt-1">Details</button>
-          <p className="mt-2">
-            Deliver to Bangladesh <button className="text-blue-500 underline">Update location</button>
+        {/* Right Section: Price and Actions */}
+        <div className="w-[280px] bg-red-800 border rounded-md p-4 shadow-md">
+          <p className="text-2xl font-bold text-[#333]">SAR203.14</p>
+          <p className="text-sm mt-1 text-gray-600">SAR96 delivery 6-9 October</p>
+          <button className="text-blue-500 underline mt-1 text-sm">Details</button>
+          <p className="mt-2 text-sm">
+            Delivery to Riyadh <button className="text-blue-500 underline">Update Location</button>
           </p>
-          <p className="mt-4 text-green-600 font-medium">In Stock</p>
+          <p className="mt-4 text-red-600 font-medium">Usually ships within 4 to 5 days</p>
+
           <div className="mt-4">
-            <label htmlFor="quantity" className="block text-sm font-medium">
+            <label htmlFor="quantity" className="block text-sm font-medium text-gray-600">
               Quantity
             </label>
-            <select id="quantity" className="mt-1 p-2 border rounded-md w-full">
+            <select
+              id="quantity"
+              className="mt-1 p-2 border rounded-md w-full text-sm outline-1 outline-blue-500 border-gray-300"
+            >
               <option>1</option>
               <option>2</option>
               <option>3</option>
+              <option>4</option>
+              <option>5</option>
             </select>
           </div>
 
@@ -179,17 +184,18 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           </button>
 
           <div className="mt-4 text-sm">
-            <p>
-              Ships from <span className="text-[#6ba5b1]">San Diego</span>
+            <p className="text-gray-700">
+              Ships from <span className="text-[#6ba5b1] font-medium">San Diego</span>
             </p>
-            <p>
-              Sold by <span className="text-[#6ba5b1]">VisualStream</span>
+            <p className="text-gray-700">
+              Sold by <span className="text-[#6ba5b1] font-medium">VisualStream</span>
             </p>
-            <p>Payment: Secure transaction</p>
+            <p className="text-gray-700">Payment: Secure transaction</p>
           </div>
 
-          <button className="w-full border py-2 rounded-md mt-4">Add to List</button>
+          <button className="w-full border py-2 rounded-md mt-4 text-sm">Add to List</button>
         </div>
+
       </div>
     </div>
   );
