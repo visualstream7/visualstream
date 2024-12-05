@@ -39,20 +39,6 @@ export type Database = {
             referencedRelation: "Images"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "DeliverableProducts_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "Products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "DeliverableProducts_variant_id_fkey"
-            columns: ["variant_id"]
-            isOneToOne: false
-            referencedRelation: "Variants"
-            referencedColumns: ["id"]
-          },
         ]
       }
       FavouriteImages: {
@@ -147,6 +133,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: number
+          image: string | null
           title: string | null
           type_name: string | null
         }
@@ -154,6 +141,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id: number
+          image?: string | null
           title?: string | null
           type_name?: string | null
         }
@@ -161,58 +149,11 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: number
+          image?: string | null
           title?: string | null
           type_name?: string | null
         }
         Relationships: []
-      }
-      TasksQueue: {
-        Row: {
-          created_at: string | null
-          id: number
-          image_id: number | null
-          product_id: number | null
-          reason: string | null
-          retry_left: number | null
-          status: string | null
-          variant_ids: number[] | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: number
-          image_id?: number | null
-          product_id?: number | null
-          reason?: string | null
-          retry_left?: number | null
-          status?: string | null
-          variant_ids?: number[] | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: number
-          image_id?: number | null
-          product_id?: number | null
-          reason?: string | null
-          retry_left?: number | null
-          status?: string | null
-          variant_ids?: number[] | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "TasksQueue_image_id_fkey"
-            columns: ["image_id"]
-            isOneToOne: false
-            referencedRelation: "Images"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "TasksQueue_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "Products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       Users: {
         Row: {
@@ -255,6 +196,7 @@ export type Database = {
           availability: Json | null
           color_code: string | null
           id: number
+          image: string | null
           in_stock: boolean | null
           price: string | null
           product_id: number
@@ -264,6 +206,7 @@ export type Database = {
           availability?: Json | null
           color_code?: string | null
           id: number
+          image?: string | null
           in_stock?: boolean | null
           price?: string | null
           product_id?: number
@@ -273,6 +216,7 @@ export type Database = {
           availability?: Json | null
           color_code?: string | null
           id?: number
+          image?: string | null
           in_stock?: boolean | null
           price?: string | null
           product_id?: number

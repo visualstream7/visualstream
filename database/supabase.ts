@@ -3,14 +3,12 @@ import { createClient as serverClient } from "./apiClient";
 import { createClient as uiClient } from "./uiClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { addUser as addUserToDatabase } from "./functions/users/addUser";
-import { addTasks as addTasksToDatabase } from "./functions/tasks/addTasks";
 import {
   addImageToDatabase,
   updateImageInDatabase,
 } from "./functions/images/addImageToDatabase";
 
 import { Database, Json } from "./types";
-import { TaskType } from "./functions/tasks/addTasks";
 import { Cat } from "lucide-react";
 import {
   getImageFromDatabase,
@@ -38,6 +36,8 @@ export interface Variant {
   size: string;
   color_code: string;
   availability: Json;
+  in_stock: boolean;
+  image: string;
 }
 
 // Define overload signatures for the constructor
@@ -65,6 +65,42 @@ class SupabaseWrapper {
       this.client = uiClient();
     }
   }
+
+  getProduct = async (
+    id: number,
+  ): Promise<{
+    result: Product | null;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Products")
+        .select("*")
+        .eq("id", id);
+      if (error || !data) {
+        throw new Error(error ? error.message : "No product found");
+      }
+
+      return {
+        result: {
+          id: data[0].id as number,
+          title: data[0].title as string,
+          description: data[0].description as string,
+          type_name: data[0].type_name as string,
+          image: data[0].image as string,
+        },
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
 
   updateImageData = async (
     id: number,
@@ -203,28 +239,6 @@ class SupabaseWrapper {
     }
   };
 
-  addTasks = async (
-    tasks: TaskType[],
-  ): Promise<{
-    result: any;
-    error: string | null;
-  }> => {
-    try {
-      let data = await addTasksToDatabase(tasks, this.client);
-      return {
-        result: data,
-        error: null,
-      };
-    } catch (error) {
-      let message = "Unknown Error";
-      if (error instanceof Error) message = error.message;
-      return {
-        result: null,
-        error: message,
-      };
-    }
-  };
-
   addUser = async (
     id: string,
     email: string,
@@ -277,6 +291,45 @@ class SupabaseWrapper {
     } catch (error) {
       let message = "Unknown Error";
       if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getProductVariants = async (
+    id: number,
+  ): Promise<{
+    result: Variant[] | null;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Variants")
+        .select("*")
+        .eq("product_id", id);
+      if (error || !data) {
+        throw new Error(error ? error.message : "No variant found");
+      }
+
+      return {
+        result: data.map((variant: any) => ({
+          id: variant.id,
+          price: variant.price,
+          product_id: variant.product_id,
+          size: variant.size,
+          color_code: variant.color_code,
+          availability: variant.availability,
+          in_stock: variant.in_stock,
+          image: variant.image,
+        })),
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
       return {
         result: null,
         error: message,
