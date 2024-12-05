@@ -225,7 +225,16 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      let { error } = await this.client.from("Products").upsert(products);
+      let { error: deleteError } = await this.client
+        .from("Products")
+        .delete()
+        .neq("id", 0);
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+
+      let { error } = await this.client.from("Products").insert(products);
       if (error) {
         throw new Error(error.message);
       }
@@ -252,7 +261,16 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      let { error } = await this.client.from("Variants").upsert(variants);
+      let { error: deleteError } = await this.client
+        .from("Variants")
+        .delete()
+        .neq("id", 0);
+
+      if (deleteError) {
+        throw new Error(deleteError.message);
+      }
+
+      let { error } = await this.client.from("Variants").insert(variants);
       if (error) {
         throw new Error(error.message);
       }
