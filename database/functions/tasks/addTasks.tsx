@@ -1,6 +1,12 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "@/database/types";
-import { TaskType } from "@/pages/api/add-image";
+import { Printful } from "@/libs/printful-client/printful-sdk";
+
+export type TaskType = {
+  image_id: number;
+  product_id: number;
+  variant_ids: number[];
+};
 
 async function addTasks(tasks: TaskType[], supabase: SupabaseClient<Database>) {
   const { data, error } = await supabase

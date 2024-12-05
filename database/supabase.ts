@@ -10,7 +10,7 @@ import {
 } from "./functions/images/addImageToDatabase";
 
 import { Database, Json } from "./types";
-import { TaskType } from "@/pages/api/add-image";
+import { TaskType } from "./functions/tasks/addTasks";
 import { Cat } from "lucide-react";
 import {
   getImageFromDatabase,
