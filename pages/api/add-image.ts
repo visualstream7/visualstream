@@ -80,6 +80,7 @@ async function getMockGenerationTasks(
         price: variant.price,
         product_id: variant.product_id,
         size: variant.size,
+        image: variant.image,
       });
 
       // Add the variant id to the group
