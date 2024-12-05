@@ -39,16 +39,22 @@ export default async function handler(
 
   let highResUpload = await utapi.uploadFilesFromUrl(image_url);
 
-  let url = `https://resize.sardo.work/?imageUrl=${image_url}&width=${450}&height=${300}&quality=${50}`;
-  let lowResUpload = await utapi.uploadFilesFromUrl(url);
-
-  if (highResUpload.error || lowResUpload.error)
+  if (highResUpload.error)
     return res.status(500).json({
       result: null,
-      error: highResUpload.error || lowResUpload.error,
+      error: highResUpload.error,
     });
 
-  let analyzer = new ColorAnalyzer(highResUpload.data.url);
+  let url = `https://resize.sardo.work/?imageUrl=${highResUpload.data.url}&width=${450}&height=${300}&quality=${50}`;
+  let lowResUpload = await utapi.uploadFilesFromUrl(url);
+
+  if (lowResUpload.error)
+    return res.status(500).json({
+      result: null,
+      error: lowResUpload.error,
+    });
+
+  let analyzer = new ColorAnalyzer(lowResUpload.data.url);
 
   let { result: colorComposition, error: colorCompositionError } =
     await analyzer.getColorComposition();

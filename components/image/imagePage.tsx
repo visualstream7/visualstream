@@ -41,7 +41,7 @@ export default function ImagePage({ user, image }: UserPropType) {
 
           <div>
             <h1 className="text-2xl lg:text-3xl  text-gray-900">
-              {"Image Title"}
+              {image.title || "Image Title"}
             </h1>
             {/* <p>Yoshua Leisorek</p> */}
           </div>
@@ -73,7 +73,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           </div>
 
           <p className="text-gray-600 text-left lg:w-[28vw] pt-3 ">
-            {image.summary}
+            {image.ai_describe || "Description"}
           </p>
 
           <div className="flex justify-between items-center border-t pt-4">
