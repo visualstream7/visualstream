@@ -37,14 +37,18 @@ export default async function handler(
 
   let database = new SupabaseWrapper("SERVER", req, res);
 
-  let addToBucketResult = await utapi.uploadFilesFromUrl(image_url);
+  let highResUpload = await utapi.uploadFilesFromUrl(image_url);
 
-  if (addToBucketResult.error)
-    return res
-      .status(500)
-      .json({ result: null, error: addToBucketResult.error });
+  let url = `https://resize.sardo.work/?imageUrl=${image_url}&width=${450}&height=${300}&quality=${50}`;
+  let lowResUpload = await utapi.uploadFilesFromUrl(url);
 
-  let analyzer = new ColorAnalyzer(addToBucketResult.data.url);
+  if (highResUpload.error || lowResUpload.error)
+    return res.status(500).json({
+      result: null,
+      error: highResUpload.error || lowResUpload.error,
+    });
+
+  let analyzer = new ColorAnalyzer(highResUpload.data.url);
 
   let { result: colorComposition, error: colorCompositionError } =
     await analyzer.getColorComposition();
@@ -56,7 +60,8 @@ export default async function handler(
   let { result: imageDataSaveResult, error: imageDataSaveError } =
     await database.updateImageData(
       idInt,
-      addToBucketResult.data.url,
+      highResUpload.data.url,
+      lowResUpload.data.url,
       colorComposition,
     );
 

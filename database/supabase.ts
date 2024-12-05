@@ -75,6 +75,7 @@ class SupabaseWrapper {
   updateImageData = async (
     id: number,
     imageUrl: string,
+    lowReslutionImageUrl: string,
     colorPercentage: QuantizedColor[],
   ): Promise<{
     result: any;
@@ -84,6 +85,7 @@ class SupabaseWrapper {
       let data = await updateImageInDatabase(
         id,
         imageUrl,
+        lowReslutionImageUrl,
         colorPercentage,
         this.client,
       );
