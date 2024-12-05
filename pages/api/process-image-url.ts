@@ -1,5 +1,6 @@
 import { SupabaseWrapper } from "@/database/supabase";
 import ColorAnalyzer from "@/libs/ColorAnalyzer/colorAnalyzer";
+import { utapi } from "@/libs/uploadthing";
 import { NextApiRequest, NextApiResponse } from "next";
 
 // This function can run for a maximum of 5 seconds
@@ -35,14 +36,16 @@ export default async function handler(
   }
 
   let database = new SupabaseWrapper("SERVER", req, res);
-  let { result: addToBucketResult, error: addToBucketError } =
-    await database.addImageFromUrlToAssets(image_url);
 
-  if (addToBucketError || !addToBucketResult) {
-    return res.status(500).json({ result: null, error: addToBucketError });
-  }
+  let addToBucketResult = await utapi.uploadFilesFromUrl(image_url);
 
-  let analyzer = new ColorAnalyzer(addToBucketResult.image_url);
+  if (addToBucketResult.error)
+    return res
+      .status(500)
+      .json({ result: null, error: addToBucketResult.error });
+
+  let analyzer = new ColorAnalyzer(addToBucketResult.data.url);
+
   let { result: colorComposition, error: colorCompositionError } =
     await analyzer.getColorComposition();
 
@@ -53,7 +56,7 @@ export default async function handler(
   let { result: imageDataSaveResult, error: imageDataSaveError } =
     await database.updateImageData(
       idInt,
-      addToBucketResult.image_url,
+      addToBucketResult.data.url,
       colorComposition,
     );
 
