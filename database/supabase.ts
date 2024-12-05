@@ -4,7 +4,6 @@ import { createClient as uiClient } from "./uiClient";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { addUser as addUserToDatabase } from "./functions/users/addUser";
 import { addTasks as addTasksToDatabase } from "./functions/tasks/addTasks";
-import { addImageToBucketFromUrl as addImageToBucketFromUrl } from "./functions/images/addImageToBucket";
 import {
   addImageToDatabase,
   updateImageInDatabase,
@@ -49,28 +48,6 @@ class SupabaseWrapper {
       this.client = uiClient();
     }
   }
-
-  addImageFromUrlToAssets = async (
-    imageUrl: string,
-  ): Promise<{
-    result: { image_url: string } | null;
-    error: string | null;
-  }> => {
-    try {
-      let url = await addImageToBucketFromUrl(imageUrl, "assets", this.client);
-      return {
-        result: { image_url: url },
-        error: null,
-      };
-    } catch (error) {
-      let message = "Unknown Error";
-      if (error instanceof Error) message = error.message;
-      return {
-        result: null,
-        error: message,
-      };
-    }
-  };
 
   updateImageData = async (
     id: number,
