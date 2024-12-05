@@ -1,3 +1,4 @@
+import { configuration } from "./config";
 import { ProductResponseType } from "./types";
 
 class Printful {
@@ -39,47 +40,7 @@ class Printful {
     };
   };
 
-  private productsConfigaration = {
-    "71": {
-      x: 240,
-      y: 380,
-      w: 225,
-      h: 300,
-      box_x: 0,
-      box_y: 0,
-      box_w: 0,
-      box_h: 0,
-      box_roundness: 0,
-      overlay_roundness: 0,
-      is_cropped: true,
-    },
-    "206": {
-      x: 240,
-      y: 330,
-      w: 220,
-      h: 170,
-      box_x: 0,
-      box_y: 0,
-      box_w: 0,
-      box_h: 0,
-      box_roundness: 0,
-      overlay_roundness: 0,
-      is_cropped: true,
-    },
-    "380": {
-      x: 240,
-      y: 440,
-      w: 225,
-      h: 300,
-      box_x: 0,
-      box_y: 0,
-      box_w: 0,
-      box_h: 0,
-      box_roundness: 0,
-      overlay_roundness: 0,
-      is_cropped: true,
-    },
-  };
+  private productsConfigaration = configuration;
 
   getMockupImage = async (
     product_image: string,

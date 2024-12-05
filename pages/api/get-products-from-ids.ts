@@ -63,6 +63,7 @@ export default async function handler(
         color_code: variant.color_code,
         availability_status: variant.availability_status,
         image: variant.image,
+        in_stock: variant.in_stock,
       })),
     }),
   );

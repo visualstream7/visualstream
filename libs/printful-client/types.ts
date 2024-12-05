@@ -12,6 +12,7 @@ export type ProductResponseType = {
     color_code: string;
     image: string;
     availability_status: { region: string; status: string }[];
+    in_stock: boolean;
   }[];
 };
 

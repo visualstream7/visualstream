@@ -1,18 +1,88 @@
-import { SignInButton, SignOutButton } from "@clerk/nextjs";
+import { useEffect, useState } from "react";
+import { SupabaseWrapper } from "@/database/supabase";
+import { Printful } from "@/libs/printful-client/printful-sdk";
 import { UserResource } from "@clerk/types";
-
 import Nav from "@/components/nav";
 import { IoArrowBack } from "react-icons/io5";
-import { BoxIcon, MouseIcon } from "lucide-react";
 import Link from "next/link";
 import { Image } from "@/database/functions/images/getImagesFromDatabase";
+import { CircleDashed } from "lucide-react";
 
 type UserPropType = {
   user: UserResource | null | undefined;
   image: Image;
 };
 
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  type_name: string;
+  image: string;
+  mockup?: string;
+  isLoadingMockup?: boolean; // Track loading state
+}
+
 export default function ImagePage({ user, image }: UserPropType) {
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const database = new SupabaseWrapper("CLIENT");
+        const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+
+        // Fetch products from the database
+        const { result: productsFromDB, error } = await database.getProducts();
+        if (error || !productsFromDB) {
+          console.error(error || "No products found");
+          return;
+        }
+
+        // Initialize products with loading state
+        const initialProducts = productsFromDB.map((product: Product) => ({
+          ...product,
+          isLoadingMockup: true,
+        }));
+        setProducts(initialProducts);
+
+        // Fetch mockups for each product individually
+        productsFromDB.forEach(async (product) => {
+          try {
+            const mockup = await client.getMockupImage(
+              product.image,
+              image.image_url!,
+              product.id,
+            );
+            // Update the specific product when its mockup is ready
+            setProducts((prevProducts) =>
+              prevProducts.map((p) =>
+                p.id === product.id
+                  ? { ...p, mockup, isLoadingMockup: false }
+                  : p,
+              ),
+            );
+          } catch (mockupError) {
+            console.error(
+              `Error fetching mockup for product ID ${product.id}:`,
+              mockupError,
+            );
+            // Clear loading state even on error
+            setProducts((prevProducts) =>
+              prevProducts.map((p) =>
+                p.id === product.id ? { ...p, isLoadingMockup: false } : p,
+              ),
+            );
+          }
+        });
+      } catch (err) {
+        console.error("Error fetching products or mockups:", err);
+      }
+    };
+
+    fetchProducts();
+  }, [image.image_url]);
+
   return (
     <div className="flex flex-col lg:max-h-dvh lg:overflow-hidden font-primary">
       <Nav user={user} />
@@ -27,7 +97,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           <img
             src={image.image_url || ""}
             alt="Image Display"
-            className="w-[90vw] lg:w-[30vw] max-h-[60vh] rounded-lg  object-cover m-auto"
+            className="w-[90vw] lg:w-[30vw] max-h-[60vh] rounded-lg object-cover m-auto"
           />
         </div>
 
@@ -40,64 +110,45 @@ export default function ImagePage({ user, image }: UserPropType) {
           </Link>
 
           <div>
-            <h1 className="text-2xl lg:text-3xl  text-gray-900">
+            <h1 className="text-2xl lg:text-3xl text-gray-900">
               {image.title || "Image Title"}
             </h1>
-            {/* <p>Yoshua Leisorek</p> */}
           </div>
 
+          <p className="text-gray-600 text-left lg:w-[28vw] pt-3">
+            {image.ai_describe || "Description"}
+          </p>
+
           <div className="lg:grid grid grid-cols-4 lg:grid-cols-4 gap-4 lg:w-[30vw]">
-            {[
-              "tshirt.png",
-              "shoes.png",
-              "black tshirt.png",
-              "phonecase.png",
-              "shoes.png",
-              "bag.png",
-              "black tshirt.png",
-              "bag.png",
-            ].map((imageName, idx) => (
-              <Link href={`/product/${image.id}/${idx}`}>
-                <div
-                  key={idx}
-                  className="w-full lg:h-30 rounded shadow overflow-hidden border-black "
-                >
-                  <img
-                    src={`/mockImages/${imageName}`}
-                    alt={`Thumbnail ${idx + 1}`}
-                    className="w-full h-full object-cover "
-                  />
+            {products.map((product) => (
+              <Link
+                key={product.id}
+                href={`/product/${image.id}/${product.id}`}
+              >
+                <div className="w-full lg:h-30 rounded shadow overflow-hidden border-black">
+                  <div className="relative w-full h-full">
+                    <img
+                      src={product.mockup || product.image}
+                      alt={`Thumbnail for ${product.title}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {product.isLoadingMockup && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <span className="text-white text-sm animate-spin">
+                          <CircleDashed size={24} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
 
-          <p className="text-gray-600 text-left lg:w-[28vw] pt-3 ">
-            {image.ai_describe || "Description"}
-          </p>
-
-          <div className="flex justify-between items-center border-t pt-4">
-            <p className="text-gray-800 font-bold text-2xl">$120</p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-gray-500">
-              <MouseIcon />
-              <span>Ships from San Diego, California</span>
-            </div>
-            <div className="flex items-center space-x-2 text-gray-500">
-              <BoxIcon />
-              <span>Estimated to ship in 3-7 days within USA</span>
-            </div>
-          </div>
-
           <div className="flex flex-col py-2">
             <button className="lg:w-[30vw] bg-black text-white py-3 rounded shadow hover:bg-gray-900 mb-1">
-              SEARCH BY PRODUCT CATEGORY
+              SEE ALL PRODUCT CATEGORIES
             </button>
-            <p className="text-gray-500">
-              Taxes and shipping fees will apply upon checkout
-            </p>
           </div>
         </div>
       </div>

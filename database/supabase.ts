@@ -28,6 +28,7 @@ export interface Product {
   title: string;
   description: string;
   type_name: string;
+  image: string;
 }
 
 export interface Variant {
@@ -131,6 +132,37 @@ class SupabaseWrapper {
     } catch (error) {
       let message = "Unknown Error";
       if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getProducts = async (): Promise<{
+    result: Product[] | null;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client.from("Products").select("*");
+      if (error || !data) {
+        throw new Error(error ? error.message : "No product found");
+      }
+
+      return {
+        result: data.map((product: any) => ({
+          id: product.id,
+          title: product.title,
+          description: product.description,
+          type_name: product.type_name,
+          image: product.image,
+        })),
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
       return {
         result: null,
         error: message,

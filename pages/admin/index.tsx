@@ -23,18 +23,19 @@ export default function Admin() {
       return;
     }
 
+    console.log(fetched.result);
+
     let products = fetched.result.map((data) => ({
       id: data.id,
       title: data.title,
       description: data.description,
       type_name: data.type_name,
+      image: data.variants[0]?.image,
     }));
 
     let variants = fetched.result
       .map((data) => data.variants)
       .reduce((acc, val) => acc.concat(val), []);
-
-    console.log(variants);
 
     console.log(products);
     let { result: productsResult, error: productsError } =
@@ -51,6 +52,8 @@ export default function Admin() {
           price: variant.price,
           product_id: variant.product_id,
           size: variant.size,
+          image: variant.image,
+          in_stock: variant.in_stock,
         })),
       });
 
