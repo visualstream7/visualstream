@@ -123,9 +123,9 @@ class SupabaseWrapper {
   };
 
   addImageData = async (
+    title: string,
     caption: string,
-    description: string,
-    summary: string,
+    ai_describe: string,
     article_link: string,
     category: string,
   ): Promise<{
@@ -134,9 +134,9 @@ class SupabaseWrapper {
   }> => {
     try {
       let data = await addImageToDatabase(
+        title,
         caption,
-        description,
-        summary,
+        ai_describe,
         article_link,
         category,
         this.client,

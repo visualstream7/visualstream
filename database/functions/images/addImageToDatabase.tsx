@@ -8,9 +8,9 @@ interface QuantizedColor {
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function addImageToDatabase(
+  title: string,
   caption: string,
-  description: string,
-  summary: string,
+  ai_describe: string,
   articleUrl: string,
   category: string,
   supabase: SupabaseClient<Database>,
@@ -19,9 +19,9 @@ async function addImageToDatabase(
     .from("Images")
     .insert([
       {
+        title: title,
         caption: caption,
-        description: description,
-        summary: summary,
+        ai_describe: ai_describe,
         article_link: articleUrl,
         category: category,
       },

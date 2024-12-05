@@ -122,7 +122,12 @@ export default async function handler(
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
   }
 
-  const { caption, description, summary, article_link, category } = req.body;
+  const { caption, title, ai_describe, article_link, category } = req.body;
+
+  if (!title) {
+    return res.status(200).json({ result: null, error: "Title is required" });
+  }
+
   if (!caption) {
     return res.status(200).json({ result: null, error: "Caption is required" });
   }
@@ -133,14 +138,10 @@ export default async function handler(
       .json({ result: null, error: "Category is required" });
   }
 
-  if (!description) {
+  if (!ai_describe) {
     return res
       .status(200)
       .json({ result: null, error: "Description is required" });
-  }
-
-  if (!summary) {
-    return res.status(200).json({ result: null, error: "Summary is required" });
   }
 
   if (!article_link) {
@@ -153,9 +154,9 @@ export default async function handler(
 
   let { result: imageDataSaveResult, error: imageDataSaveError } =
     await database.addImageData(
+      title,
       caption,
-      description,
-      summary,
+      ai_describe,
       article_link,
       category,
     );

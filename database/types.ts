@@ -90,43 +90,43 @@ export type Database = {
       }
       Images: {
         Row: {
+          ai_describe: string | null
           article_link: string | null
           caption: string | null
           category: string | null
           color_composition: Json | null
           created_at: string
-          description: string | null
           id: number
           image_url: string | null
           is_mock_generated: boolean | null
           low_resolution_image_url: string | null
-          summary: string | null
+          title: string | null
         }
         Insert: {
+          ai_describe?: string | null
           article_link?: string | null
           caption?: string | null
           category?: string | null
           color_composition?: Json | null
           created_at?: string
-          description?: string | null
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
           low_resolution_image_url?: string | null
-          summary?: string | null
+          title?: string | null
         }
         Update: {
+          ai_describe?: string | null
           article_link?: string | null
           caption?: string | null
           category?: string | null
           color_composition?: Json | null
           created_at?: string
-          description?: string | null
           id?: number
           image_url?: string | null
           is_mock_generated?: boolean | null
           low_resolution_image_url?: string | null
-          summary?: string | null
+          title?: string | null
         }
         Relationships: []
       }
