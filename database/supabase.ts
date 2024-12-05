@@ -9,7 +9,7 @@ import {
   updateImageInDatabase,
 } from "./functions/images/addImageToDatabase";
 
-import { Database } from "./types";
+import { Database, Json } from "./types";
 import { TaskType } from "@/pages/api/add-image";
 import { Cat } from "lucide-react";
 import {
@@ -21,6 +21,22 @@ import {
 interface QuantizedColor {
   color: string;
   percentage: number;
+}
+
+export interface Product {
+  id: number;
+  title: string;
+  description: string;
+  type_name: string;
+}
+
+export interface Variant {
+  id: number;
+  price: string;
+  product_id: number;
+  size: string;
+  color_code: string;
+  availability: Json;
 }
 
 // Define overload signatures for the constructor
@@ -186,6 +202,83 @@ class SupabaseWrapper {
   }> => {
     try {
       let data = await addUserToDatabase(id, email, this.client);
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  upsertProducts = async ({
+    products,
+  }: {
+    products: Product[];
+  }): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { error } = await this.client.from("Products").upsert(products);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: null,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  upsertVariants = async ({
+    variants,
+  }: {
+    variants: Variant[];
+  }): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { error } = await this.client.from("Variants").upsert(variants);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: null,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getAllProducts = async (): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client.from("Products").select("*");
+      if (error) {
+        throw new Error(error.message);
+      }
       return {
         result: data,
         error: null,
