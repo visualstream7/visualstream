@@ -134,6 +134,7 @@ export type Database = {
           description: string | null
           id: number
           image: string | null
+          mockup: string | null
           title: string | null
           type_name: string | null
         }
@@ -142,6 +143,7 @@ export type Database = {
           description?: string | null
           id: number
           image?: string | null
+          mockup?: string | null
           title?: string | null
           type_name?: string | null
         }
@@ -150,6 +152,7 @@ export type Database = {
           description?: string | null
           id?: number
           image?: string | null
+          mockup?: string | null
           title?: string | null
           type_name?: string | null
         }

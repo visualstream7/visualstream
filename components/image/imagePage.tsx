@@ -7,6 +7,7 @@ import { IoArrowBack } from "react-icons/io5";
 import Link from "next/link";
 import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { CircleDashed } from "lucide-react";
+import { setPriority } from "os";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -19,7 +20,7 @@ interface Product {
   description: string;
   type_name: string;
   image: string;
-  mockup?: string;
+  mockup: string | null;
   isLoadingMockup?: boolean; // Track loading state
 }
 
@@ -28,6 +29,7 @@ export default function ImagePage({ user, image }: UserPropType) {
 
   useEffect(() => {
     const fetchProducts = async () => {
+      if (!image.image_url) return;
       try {
         const database = new SupabaseWrapper("CLIENT");
         const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
@@ -49,11 +51,24 @@ export default function ImagePage({ user, image }: UserPropType) {
         // Fetch mockups for each product individually
         productsFromDB.forEach(async (product) => {
           try {
+            if (product.mockup) {
+              console.log(`Mockup already exists for product ID ${product.id}`);
+              throw new Error("Mockup already exists");
+            }
+
             const mockup = await client.getMockupImage(
               product.image,
               image.image_url!,
               product.id,
             );
+
+            if (!mockup) return;
+
+            const { result, error } = await database.addMockupToProduct(
+              product.id,
+              mockup,
+            );
+
             // Update the specific product when its mockup is ready
             setProducts((prevProducts) =>
               prevProducts.map((p) =>

@@ -1,3 +1,4 @@
+import { utapi } from "../uploadthing";
 import { configuration } from "./config";
 import { ProductResponseType } from "./types";
 
@@ -46,16 +47,20 @@ class Printful {
     product_image: string,
     overlay_image: string,
     product_id: number,
+    variant_id: number | null = null,
   ) => {
     if (!product_image || !overlay_image || !product_id) {
-      return "";
+      return {
+        url: null,
+        base64Image: null,
+      };
     }
 
     let product_id_str = (product_id +
       "") as keyof typeof this.productsConfigaration;
 
     if (!this.productsConfigaration[product_id_str]) {
-      return "";
+      return null;
     }
 
     const response = await fetch("/api/overlay-image", {
@@ -80,8 +85,9 @@ class Printful {
     });
 
     const data = await response.json();
-    if (data.base64Image) return data.base64Image;
-    return product_image;
+
+    let url = data.url || null;
+    return url;
   };
 }
 

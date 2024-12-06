@@ -1,5 +1,5 @@
 import { createCanvas, loadImage } from "canvas";
-
+import { utapi } from "@/libs/uploadthing";
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -133,7 +133,29 @@ export default async function handler(req, res) {
     // Convert the final canvas to a Base64 image
     const base64Image = canvas.toDataURL();
 
-    res.status(200).json({ base64Image });
+    // Function to convert Base64 to a File object
+    function base64ToFile(base64, filename) {
+      const arr = base64.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); // Decode Base64 string
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    }
+
+    // Convert the Base64 string to a File
+    const imageFile = base64ToFile(base64Image, "image.png");
+
+    // Upload the file using your existing upload function
+    let highResUpload = await utapi.uploadFiles(imageFile);
+    console.log("highResUpload", highResUpload.data.url);
+
+    res.status(200).json({ base64Image, url: highResUpload.data.url });
   } catch (error) {
     console.error(error);
     res

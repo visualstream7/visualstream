@@ -27,6 +27,7 @@ export interface Product {
   description: string;
   type_name: string;
   image: string;
+  mockup: string | null;
 }
 
 export interface Variant {
@@ -88,6 +89,7 @@ class SupabaseWrapper {
           description: data[0].description as string,
           type_name: data[0].type_name as string,
           image: data[0].image as string,
+          mockup: data[0].mockup,
         },
         error: null,
       };
@@ -121,6 +123,35 @@ class SupabaseWrapper {
       );
       return {
         result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  addMockupToProduct = async (
+    id: number,
+    mockup: string,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { error } = await this.client
+        .from("Products")
+        .update({ mockup })
+        .eq("id", id);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: null,
         error: null,
       };
     } catch (error) {
@@ -192,6 +223,7 @@ class SupabaseWrapper {
           description: product.description,
           type_name: product.type_name,
           image: product.image,
+          mockup: product.mockup,
         })),
         error: null,
       };

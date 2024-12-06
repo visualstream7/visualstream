@@ -31,6 +31,7 @@ export default function Admin() {
       description: data.description,
       type_name: data.type_name,
       image: data.variants[0]?.image,
+      mockup: null,
     }));
 
     let variants = fetched.result
