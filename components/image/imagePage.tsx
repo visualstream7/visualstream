@@ -53,7 +53,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           try {
             if (product.mockup) {
               console.log(`Mockup already exists for product ID ${product.id}`);
-              throw new Error("Mockup already exists");
+              return;
             }
 
             const mockup = await client.getMockupImage(
