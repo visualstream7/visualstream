@@ -18,7 +18,9 @@ export default function Mockups() {
     async function fetchProducts() {
       setLoading(true);
       const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-      const { result, error } = await client.getProductsFromIds([71, 206, 380]);
+      const { result, error } = await client.getProductsFromIds([
+        71, 206, 380, 358, 1, 3, 588, 534, 181, 394, 19, 382, 474, 279, 84,
+      ]);
       if (result) setProducts(result);
       if (error) console.error(error);
       setLoading(false);
