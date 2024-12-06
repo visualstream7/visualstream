@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SupabaseWrapper } from "@/database/supabase";
 import { Printful } from "@/libs/printful-client/printful-sdk";
 import { UserResource } from "@clerk/types";
@@ -26,10 +26,13 @@ interface Product {
 
 export default function ImagePage({ user, image }: UserPropType) {
   const [products, setProducts] = useState<Product[]>([]);
+  const fetchProducts = useRef(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      if (!image.image_url) return;
+    if (fetchProducts.current) return; // Prevent duplicate calls
+    fetchProducts.current = true;
+
+    const fetchProductsData = async () => {
       try {
         const database = new SupabaseWrapper("CLIENT");
         const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
@@ -53,6 +56,12 @@ export default function ImagePage({ user, image }: UserPropType) {
           try {
             if (product.mockup) {
               console.log(`Mockup already exists for product ID ${product.id}`);
+              // Clear loading state even on error
+              setProducts((prevProducts) =>
+                prevProducts.map((p) =>
+                  p.id === product.id ? { ...p, isLoadingMockup: false } : p,
+                ),
+              );
               return;
             }
 
@@ -73,7 +82,11 @@ export default function ImagePage({ user, image }: UserPropType) {
             setProducts((prevProducts) =>
               prevProducts.map((p) =>
                 p.id === product.id
-                  ? { ...p, mockup, isLoadingMockup: false }
+                  ? {
+                      ...p,
+                      mockup,
+                      isLoadingMockup: false,
+                    }
                   : p,
               ),
             );
@@ -95,8 +108,8 @@ export default function ImagePage({ user, image }: UserPropType) {
       }
     };
 
-    fetchProducts();
-  }, [image.image_url]);
+    fetchProductsData();
+  }, []);
 
   return (
     <div className="flex flex-col lg:max-h-dvh lg:overflow-hidden font-primary">
