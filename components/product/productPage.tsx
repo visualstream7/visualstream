@@ -194,11 +194,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       <Nav user={user} />
       <div className="flex flex-col overflow-auto">
         <div className="flex-1 flex lg:flex-row justify-center items-start mt-10  gap-6 p-6">
-          <div className="flex bg-gray-400 relative">
+          <div className="flex bg-gray-400  relative">
             <img
               src={mockupImage || selectedVariantGroup?.image || ""}
               alt="Product"
-              className="max-w-[80vw] opacity-90"
+              className="max-w-[80vw] flex  opacity-90"
             />
             {generatingMockup && !mockupImage && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
