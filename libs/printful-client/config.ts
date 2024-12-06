@@ -54,19 +54,19 @@ let configuration = {
   },
 
   "1": {
-    x: 240,
-    y: 380,
-    w: 225,
-    h: 300,
-    box_x: 0,
-    box_y: 0,
-    box_w: 0,
-    box_h: 0,
-    box_roundness: 0,
-    overlay_roundness: 0,
-    is_cropped: true,
+    "x": 260,
+    "y": 360,
+    "w": 190,
+    "h": 280,
+    "box_x": 0,
+    "box_y": 0,
+    "box_w": 0,
+    "box_h": 0,
+    "box_roundness": 5,
+    "overlay_roundness": 4,
+    "is_cropped": true
   },
-
+  
   "3": {
     x: 240,
     y: 380,
