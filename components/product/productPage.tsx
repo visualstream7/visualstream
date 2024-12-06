@@ -211,7 +211,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
           {/* Middle Section: Product Details */}
           <div className="flex flex-col">
-            <Link href={`image/${image_id}`}>
+            <Link href={`/image/${image_id}`}>
               <button className="flex items-center text-gray-800 hover:text-gray-800 my-4">
                 <IoArrowBack />
                 <span>Back</span>
