@@ -58,7 +58,7 @@ export default function Home() {
       return;
     }
 
-    const response = await fetch("/api/overlay-image", {
+    const response = await fetch("/api/overlay-image-internal", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -93,6 +93,13 @@ export default function Home() {
       <h1 className="text-3xl mb-6 text-center">
         Image Overlay Tool with Transparency and Roundness
       </h1>
+
+      <img
+        src={"/test1.png"}
+        alt="Product"
+        className="max-w-full bg-[url(/test.png)] bg-center bg-[length:100px_100px] bg-no-repeat"
+      />
+      <img src={"/test.png"} alt="Product" className="max-w-full bg-red-500" />
 
       <div className="space-y-4">
         <div>

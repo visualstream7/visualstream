@@ -171,13 +171,15 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       //
 
       const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-      const mock = await client.getMockupImage(
-        distinctVariantsByColor[0].image,
-        imageResult.image_url!,
-        parseInt(id),
-      );
-
-      setMockupImage(mock);
+      client
+        .getMockupImage(
+          distinctVariantsByColor[0].image,
+          imageResult.image_url!,
+          parseInt(id),
+        )
+        .then((mock) => {
+          setMockupImage(mock);
+        });
 
       setLoading(false);
     }
