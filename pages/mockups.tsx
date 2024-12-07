@@ -55,6 +55,7 @@ export default function Mockups() {
           variant.image,
           overlayImage!,
           product.id,
+          true,
         );
         setMockups((prev) => [...prev, mockupImage]);
         setMockupProgress((prev) => ({

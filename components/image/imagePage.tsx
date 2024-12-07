@@ -69,6 +69,7 @@ export default function ImagePage({ user, image }: UserPropType) {
               product.image,
               image.image_url!,
               product.id,
+              false,
             );
 
             if (!mockup) return;

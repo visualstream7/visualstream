@@ -1,5 +1,5 @@
 import { UserResource } from "@clerk/types";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Nav from "../nav";
 import {
   ChevronDownIcon,
@@ -45,6 +45,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     available_sizes: string[];
   } | null>(null);
 
+  // Cache to store generated mockup URLs
+  const mockupCache = useRef<Record<string, string>>({});
+
   async function handleColorChange(varintGroup: {
     color_code: string;
     image: string;
@@ -53,23 +56,45 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     if (!image) return;
 
     setMockupImage("");
-
     setSelectedVariantGroup(varintGroup);
+
+    // Automatically select the first available size if the current size isn't available
     if (!varintGroup.available_sizes.includes(selectedSize)) {
       setSelectedSize(varintGroup.available_sizes[0]);
     }
 
+    const variantKey = varintGroup.color_code; // Use color_code as the cache key
+
+    // Check if mockup is already cached
+    if (mockupCache.current[variantKey]) {
+      setMockupImage(mockupCache.current[variantKey]);
+      return;
+    }
+
     setGeneratingMockup(true);
-    // we need to change the mockup image here
-    const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-    const mock = await client.getMockupImage(
-      varintGroup.image,
-      image.image_url!,
-      parseInt(id),
-    );
-    setMockupImage(mock);
-    setGeneratingMockup(false);
+
+    try {
+      // Generate mockup image using the Printful SDK
+      const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+      const mock = await client.getMockupImage(
+        varintGroup.image,
+        image.image_url!,
+        parseInt(id),
+        true,
+      );
+
+      // Cache the mockup URL
+      mockupCache.current[variantKey] = mock;
+
+      setMockupImage(mock);
+    } catch (error) {
+      console.error("Error generating mockup image:", error);
+    } finally {
+      setGeneratingMockup(false);
+    }
   }
+
+  // Fetching data logic remains unchanged
 
   function getVariant() {
     // based on the sleected size and color, get the variant id
@@ -90,6 +115,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
+      setGeneratingMockup(true);
       const image_id_number = parseInt(image_id);
       const database = new SupabaseWrapper("CLIENT");
       const { result: imageResult, error: imageError } =
@@ -122,23 +148,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       }
 
       setVariants(variantsResult);
-
-      // let distinctVariantsByColor = variantsResult.reduce(
-      //   (acc, variant) => {
-      //     let found = acc.find(
-      //       (group) => group.color_code === variant.color_code,
-      //     );
-      //     if (!found) {
-      //       acc.push({
-      //         color_code: variant.color_code,
-      //         image: variant.image,
-      //       });
-      //     }
-      //     return acc;
-      //   },
-      //   [] as { color_code: string; image: string }[],
-      // );
-
       let distinctVariantsByColor = variantsResult.reduce(
         (acc, variant) => {
           let found = acc.find(
@@ -171,17 +180,16 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       //
 
       const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-      client
-        .getMockupImage(
-          distinctVariantsByColor[0].image,
-          imageResult.image_url!,
-          parseInt(id),
-        )
-        .then((mock) => {
-          setMockupImage(mock);
-        });
-
       setLoading(false);
+
+      const mock = await client.getMockupImage(
+        distinctVariantsByColor[0].image,
+        imageResult.image_url!,
+        parseInt(id),
+        true,
+      );
+      setGeneratingMockup(false);
+      setMockupImage(mock);
     }
     fetchData();
   }, [image_id]);

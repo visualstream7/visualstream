@@ -47,6 +47,7 @@ class Printful {
     product_image: string,
     overlay_image: string,
     product_id: number,
+    isInternal: boolean,
     variant_id: number | null = null,
   ) => {
     if (!product_image || !overlay_image || !product_id) {
@@ -63,29 +64,34 @@ class Printful {
       return null;
     }
 
-    const response = await fetch("/api/overlay-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        product_image_url: product_image,
-        image_url: overlay_image,
-        x: this.productsConfigaration[product_id_str].x,
-        y: this.productsConfigaration[product_id_str].y,
-        w: this.productsConfigaration[product_id_str].w,
-        h: this.productsConfigaration[product_id_str].h,
-        box_x: this.productsConfigaration[product_id_str].box_x,
-        box_y: this.productsConfigaration[product_id_str].box_y,
-        box_w: this.productsConfigaration[product_id_str].box_w,
-        box_h: this.productsConfigaration[product_id_str].box_h,
-        box_roundness: this.productsConfigaration[product_id_str].box_roundness,
-        overlay_roundness:
-          this.productsConfigaration[product_id_str].overlay_roundness,
-        is_cropped: this.productsConfigaration[product_id_str].is_cropped,
-      }),
-    });
+    const response = await fetch(
+      `/api/overlay-image${isInternal ? "-internal" : ""}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          product_image_url: product_image,
+          image_url: overlay_image,
+          x: this.productsConfigaration[product_id_str].x,
+          y: this.productsConfigaration[product_id_str].y,
+          w: this.productsConfigaration[product_id_str].w,
+          h: this.productsConfigaration[product_id_str].h,
+          box_x: this.productsConfigaration[product_id_str].box_x,
+          box_y: this.productsConfigaration[product_id_str].box_y,
+          box_w: this.productsConfigaration[product_id_str].box_w,
+          box_h: this.productsConfigaration[product_id_str].box_h,
+          box_roundness:
+            this.productsConfigaration[product_id_str].box_roundness,
+          overlay_roundness:
+            this.productsConfigaration[product_id_str].overlay_roundness,
+          is_cropped: this.productsConfigaration[product_id_str].is_cropped,
+        }),
+      },
+    );
 
     const data = await response.json();
 
+    if (isInternal) return data.base64Image;
     let url = data.url || null;
     return url;
   };
