@@ -160,6 +160,7 @@ export type Database = {
       }
       Users: {
         Row: {
+          cart: Json | null
           city: string | null
           country_code: string | null
           created_at: string
@@ -171,6 +172,7 @@ export type Database = {
           zip: number | null
         }
         Insert: {
+          cart?: Json | null
           city?: string | null
           country_code?: string | null
           created_at?: string
@@ -182,6 +184,7 @@ export type Database = {
           zip?: number | null
         }
         Update: {
+          cart?: Json | null
           city?: string | null
           country_code?: string | null
           created_at?: string

@@ -24,6 +24,8 @@ interface ProductPageProps {
   user: UserResource | null | undefined;
 }
 
+const database = new SupabaseWrapper("CLIENT");
+
 const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   const [image, setImage] = useState<Image | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -117,7 +119,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setLoading(true);
       setGeneratingMockup(true);
       const image_id_number = parseInt(image_id);
-      const database = new SupabaseWrapper("CLIENT");
       const { result: imageResult, error: imageError } =
         await database.getImage(image_id_number);
 
@@ -420,7 +421,27 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
               </select>
             </div>
 
-            <button className="w-full bg-[#fed813] text-black font-medium py-2 rounded-3xl mt-4">
+            <button
+              className="w-full bg-[#fed813] text-black font-medium py-2 rounded-3xl mt-4"
+              onClick={async () => {
+                let variant = getVariant();
+                if (variant) {
+                  console.log("Add to cart", variant);
+                }
+                let { result, error } = await database.addCartItem(
+                  user?.id!,
+                  parseInt(id),
+                  variant!.id,
+                  1,
+                );
+                // let { result, error } = await database.removeCartItem(
+                //   user?.id!,
+                //   parseInt(id),
+                //   variant!.id,
+                // );
+                // console.log(result, error);
+              }}
+            >
               Add to Cart
             </button>
             <button className="w-full bg-[#ffa41d] text-white font-bold py-2 rounded-3xl mt-2">
