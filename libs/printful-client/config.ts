@@ -138,16 +138,16 @@ let configuration = {
   },
 
   "19": {
-    x: 240,
-    y: 380,
-    w: 225,
-    h: 300,
+    x: 260,
+    y: 300,
+    w: 300,
+    h: 440,
     box_x: 0,
     box_y: 0,
     box_w: 0,
     box_h: 0,
-    box_roundness: 0,
-    overlay_roundness: 0,
+    box_roundness: 20,
+    overlay_roundness: 10,
     is_cropped: true,
   },
 

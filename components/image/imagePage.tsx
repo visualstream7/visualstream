@@ -116,7 +116,7 @@ export default function ImagePage({ user, image }: UserPropType) {
     <div className="flex flex-col lg:max-h-dvh lg:overflow-hidden font-primary">
       <Nav user={user} />
       <div className="flex-1 flex flex-col lg:flex-row">
-        <div className="flex-1 flex flex-col justify-center">
+        <div className="flex-1 flex flex-col justify-center items-center">
           <Link href="/">
             <button className="flex lg:hidden items-center space-x-2 text-gray-800 hover:text-gray-800 ml-[5vw] my-4">
               <IoArrowBack />
@@ -126,8 +126,11 @@ export default function ImagePage({ user, image }: UserPropType) {
           <img
             src={image.image_url || ""}
             alt="Image Display"
-            className="w-[90vw] lg:w-[30vw] max-h-[60vh] rounded-lg object-cover m-auto"
+            className="w-[90vw] lg:max-w-[30vw] max-h-[60vh] rounded-lg object-cover m-auto"
           />
+          <p className="text-gray-600 text-left lg:w-[28vw] ">
+            {image.ai_describe || "Description"}
+          </p>
         </div>
 
         <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-full max-h-[80vh] lg:overflow-y-scroll">
@@ -143,10 +146,6 @@ export default function ImagePage({ user, image }: UserPropType) {
               {image.title || "Image Title"}
             </h1>
           </div>
-
-          <p className="text-gray-600 text-left lg:w-[28vw] pt-3">
-            {image.ai_describe || "Description"}
-          </p>
 
           <div className="lg:grid grid grid-cols-4 lg:grid-cols-4 gap-4 lg:w-[30vw]">
             {products.map((product) => (
