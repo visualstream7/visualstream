@@ -88,18 +88,21 @@ export type Database = {
         Row: {
           id: number
           image_id: number | null
+          mock: string | null
           product_id: number | null
           variant_id: number | null
         }
         Insert: {
           id?: number
           image_id?: number | null
+          mock?: string | null
           product_id?: number | null
           variant_id?: number | null
         }
         Update: {
           id?: number
           image_id?: number | null
+          mock?: string | null
           product_id?: number | null
           variant_id?: number | null
         }

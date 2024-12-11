@@ -6,6 +6,7 @@ import { HiOutlineShoppingCart } from "react-icons/hi"; // Cart icon
 import { BsChevronDown } from "react-icons/bs"; // Dropdown arrow icon
 import { RiDropdownList } from "react-icons/ri";
 import { MdArrowDropDown } from "react-icons/md";
+import Link from "next/link";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -172,7 +173,9 @@ function LargeScreenNav({ user }: UserPropType) {
           </div>
 
           <div className="cursor-pointer flex items-center">
-            <HiOutlineShoppingCart size={24} />
+            <Link href='/cart'>
+              <HiOutlineShoppingCart size={24} />
+            </Link>
           </div>
         </div>
       </div>

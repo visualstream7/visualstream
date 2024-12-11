@@ -153,9 +153,9 @@ export default async function handler(req, res) {
 
     // Upload the file using your existing upload function
     let highResUpload = await utapi.uploadFiles(imageFile);
-    console.log("highResUpload", highResUpload.data.url);
+    console.log("highResUpload", highResUpload);
 
-    res.status(200).json({ base64Image, url: highResUpload.data.url });
+    res.status(200).json({ base64Image, url: highResUpload?.data?.url || null });
   } catch (error) {
     console.error(error);
     res

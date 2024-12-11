@@ -9,7 +9,7 @@ import {
 } from "./functions/images/addImageToDatabase";
 
 import { Database, Json } from "./types";
-import { Cat } from "lucide-react";
+import { Cat, VariableIcon } from "lucide-react";
 import {
   getImageFromDatabase,
   getImagesFromDatabase,
@@ -136,8 +136,9 @@ class SupabaseWrapper {
     }
   };
 
-  addMockupToProduct = async (
+  addMockupForAllProducts = async (
     id: number,
+    image_id: number,
     mockup: string,
   ): Promise<{
     result: any;
@@ -145,9 +146,8 @@ class SupabaseWrapper {
   }> => {
     try {
       let { error } = await this.client
-        .from("Products")
-        .update({ mockup })
-        .eq("id", id);
+        .from("Mocks")
+        .insert({ product_id: id, image_id: image_id, mock: mockup, variant_id: -1 });
       if (error) {
         throw new Error(error.message);
       }
@@ -206,6 +206,44 @@ class SupabaseWrapper {
       };
     }
   };
+
+  getImageMockups = async (
+    id: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+
+    if (!id) {
+      return {
+        result: null,
+        error: "No image id provided",
+      };
+    }
+    try {
+      let { data, error } = await this.client
+        .from("Mocks")
+        .select("*")
+        .match({
+          variant_id: -1,
+          image_id: id,
+        })
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  }
 
   getProducts = async (): Promise<{
     result: Product[] | null;
@@ -439,15 +477,18 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      let data = await addItemToCart(
+      let { result, error } = await addItemToCart(
         user_id,
         product_id,
         variant_id,
         quantity,
         this.client,
       );
+      if (error) {
+        throw new Error(error);
+      }
       return {
-        result: data,
+        result: result,
         error: null,
       };
     } catch (error) {
@@ -469,14 +510,19 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      let data = await removeItemFromCart(
+      let { result, error } = await removeItemFromCart(
         user_id,
         product_id,
         variant_id,
         this.client,
       );
+
+      if (error) {
+        throw new Error(error);
+      }
+
       return {
-        result: data,
+        result: result,
         error: null,
       };
     } catch (error) {

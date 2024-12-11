@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { SupabaseWrapper } from "@/database/supabase";
 import { Printful } from "@/libs/printful-client/printful-sdk";
@@ -24,6 +25,12 @@ interface Product {
   isLoadingMockup?: boolean; // Track loading state
 }
 
+function getProductMock(product: Product, mocks: any) {
+  const mockData = mocks.find((m: any) => m.product_id === product.id);
+  return mockData ? mockData.mock : null;
+
+}
+
 export default function ImagePage({ user, image }: UserPropType) {
   const [products, setProducts] = useState<Product[]>([]);
   const fetchProducts = useRef(false);
@@ -32,10 +39,19 @@ export default function ImagePage({ user, image }: UserPropType) {
     if (fetchProducts.current) return; // Prevent duplicate calls
     fetchProducts.current = true;
 
+
+
     const fetchProductsData = async () => {
       try {
         const database = new SupabaseWrapper("CLIENT");
         const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+
+
+        const imageId = image.id;
+        const { result: mocks, error: mocksError } = await database.getImageMockups(imageId);
+
+        console.log("mocks", mocks, "imageId", imageId, "mockup Error", mocksError);
+
 
         // Fetch products from the database
         const { result: productsFromDB, error } = await database.getProducts();
@@ -43,6 +59,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           console.error(error || "No products found");
           return;
         }
+
 
         // Initialize products with loading state
         const initialProducts = productsFromDB.map((product: Product) => ({
@@ -54,12 +71,13 @@ export default function ImagePage({ user, image }: UserPropType) {
         // Fetch mockups for each product individually
         productsFromDB.forEach(async (product) => {
           try {
-            if (product.mockup) {
+            let productMock = getProductMock(product, mocks);
+            if (productMock) {
               console.log(`Mockup already exists for product ID ${product.id}`);
               // Clear loading state even on error
               setProducts((prevProducts) =>
                 prevProducts.map((p) =>
-                  p.id === product.id ? { ...p, isLoadingMockup: false } : p,
+                  p.id === product.id ? { ...p, isLoadingMockup: false, mockup: productMock } : p,
                 ),
               );
               return;
@@ -74,8 +92,9 @@ export default function ImagePage({ user, image }: UserPropType) {
 
             if (!mockup) return;
 
-            const { result, error } = await database.addMockupToProduct(
+            const { result, error } = await database.addMockupForAllProducts(
               product.id,
+              image.id,
               mockup,
             );
 
@@ -84,10 +103,10 @@ export default function ImagePage({ user, image }: UserPropType) {
               prevProducts.map((p) =>
                 p.id === product.id
                   ? {
-                      ...p,
-                      mockup,
-                      isLoadingMockup: false,
-                    }
+                    ...p,
+                    mockup,
+                    isLoadingMockup: false,
+                  }
                   : p,
               ),
             );
