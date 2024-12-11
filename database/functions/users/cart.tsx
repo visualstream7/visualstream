@@ -145,7 +145,7 @@ async function removeItemFromCart(
   }
 }
 
-// increment function takse user_id, product_id, variant_id and increases quantity by 1 or if not present adds the item to cart
+// increment function takse user_id, product_id, variant_id and increases quantity by 1 or if not present adds the item to cart 
 // decrement function takes user_id, product_id, variant_id and decreases quantity by 1 or if quantity is 1 removes the item from cart
 
 export { addItemToCart, removeItemFromCart };

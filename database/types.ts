@@ -9,38 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      DeliverableProducts: {
-        Row: {
-          id: number
-          image_id: number
-          mock_image_url: string | null
-          product_id: number
-          variant_id: number
-        }
-        Insert: {
-          id?: number
-          image_id: number
-          mock_image_url?: string | null
-          product_id?: number
-          variant_id: number
-        }
-        Update: {
-          id?: number
-          image_id?: number
-          mock_image_url?: string | null
-          product_id?: number
-          variant_id?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "DeliverableProducts_image_id_fkey"
-            columns: ["image_id"]
-            isOneToOne: false
-            referencedRelation: "Images"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       FavouriteImages: {
         Row: {
           favourited_at: string | null
@@ -115,6 +83,35 @@ export type Database = {
           title?: string | null
         }
         Relationships: []
+      }
+      Mocks: {
+        Row: {
+          id: number
+          image_id: number | null
+          product_id: number | null
+          variant_id: number | null
+        }
+        Insert: {
+          id?: number
+          image_id?: number | null
+          product_id?: number | null
+          variant_id?: number | null
+        }
+        Update: {
+          id?: number
+          image_id?: number | null
+          product_id?: number | null
+          variant_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Mocks_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "Images"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       Orders: {
         Row: {

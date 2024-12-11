@@ -15,7 +15,7 @@ import {
   getImagesFromDatabase,
   Image,
 } from "./functions/images/getImagesFromDatabase";
-import { addItemToCart, removeItemFromCart } from "./functions/users/cart";
+import { addItemToCart, CartItem, removeItemFromCart } from "./functions/users/cart";
 
 interface QuantizedColor {
   color: string;
@@ -488,6 +488,40 @@ class SupabaseWrapper {
       };
     }
   };
+
+  getCartItems = async (
+    user_id: string,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Users")
+        .select("cart")
+        .eq("id", user_id).single();
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      let cart = data?.cart as unknown as { items: CartItem[] };
+      let items = cart ? cart.items : [];
+
+      return {
+        result: items,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
 }
+
+
 
 export { SupabaseWrapper };
