@@ -9,7 +9,7 @@ export default function Product() {
 
   const { user, isLoaded } = useUser();
 
-  const id = router.query.id as string;
+  const id = router?.query?.id as string;
 
   if (!isLoaded) return <FullPageSpinner />;
 
