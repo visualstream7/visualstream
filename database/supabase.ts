@@ -165,6 +165,40 @@ class SupabaseWrapper {
     }
   };
 
+  addMockupForVariant = async (
+    image_id: number,
+    variant_id: number,
+    product_id: number,
+    mockup: string,
+  ): Promise<{
+    result: any,
+    error: string | null,
+  }> => {
+
+    try {
+      let { data, error } = await this.client
+        .from("Mocks")
+        .insert({ product_id: product_id, image_id: image_id, mock: mockup, variant_id: variant_id })
+        .select("*");
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data || null,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+
+  }
+
   getImages = async (): Promise<{
     result: Image[] | null;
     error: string | null;

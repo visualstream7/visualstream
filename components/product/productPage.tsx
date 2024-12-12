@@ -206,6 +206,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
       setSelectedVariantGroup(distinctVariantsByColor[0]);
 
+      let firstVariant = variantsResult.find(
+        (variant) =>
+          variant.color_code === distinctVariantsByColor[0].color_code &&
+          variant.size === distinctVariantsByColor[0].available_sizes[0],
+      );
+
+
       const { result: items, error: cartError } = await database.getCartItems(
         user!.id,
       );
@@ -223,7 +230,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         parseInt(id),
         true,
       );
+
+      // mockupCache.current[variantKey] = mock;
+      mockupCache.current[firstVariant?.color_code!] = mock;
+      console.log("mockupCache", mockupCache.current);
+
       setGeneratingMockup(false);
+
       setMockupImage(mock);
     }
     fetchData();
@@ -308,11 +321,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                     key={index}
                     src={variants.image || ""}
                     alt={"variant mockup"}
-                    className={`w-10 h-10 border rounded-md cursor-pointer ${
-                      selectedVariantGroup?.color_code === variants.color_code
-                        ? "border-blue-500"
-                        : "border-gray-300"
-                    }`}
+                    className={`w-10 h-10 border rounded-md cursor-pointer ${selectedVariantGroup?.color_code === variants.color_code
+                      ? "border-blue-500"
+                      : "border-gray-300"
+                      }`}
                     onClick={() => handleColorChange(variants)}
                   />
                 ))}
