@@ -24,43 +24,69 @@ export default function Cart({ user }: CartProps) {
       size: string;
       mock: string;
       title: string;
+      color: string;
     }[]
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    async function fetchCartData() {
-      setLoading(true);
-      const { result: items, error } = await database.getCartItems(user!.id);
-      if (items) {
-        items.forEach((item: CartItem) => {
-          console.log(item);
-          database
-            .getProductVariantMockAfterJoin(
-              item.product_id,
-              item.variant_id,
-              item.image_id,
-            )
-            .then((res) => {
-              console.log(res);
-              let result = res?.result;
-              if (!result) return;
-              let fetchedItem = {
-                product_id: result.product_id,
-                variant_id: result.variant_id,
-                quantity: item.quantity,
-                image_id: result.image_id,
-                size: result.size,
-                mock: result.mock,
-                title: result.title,
-              };
-              setCartItems((prevItems) => [...prevItems, fetchedItem]);
-            });
-        });
+  async function fetchCartData() {
+    setLoading(true);
+    try {
+      // Fetch basic cart items
+      const { result: cartItems, error: cartError } =
+        await database.getCartItems(user!.id);
+
+      if (cartError) {
+        console.error("Error fetching cart items:", cartError);
+        setLoading(false);
+        return;
       }
+
+      if (cartItems) {
+        // Fetch additional details for each cart item
+        const detailedItems = await Promise.all(
+          cartItems.map(async (item: CartItem) => {
+            try {
+              const { result, error } =
+                await database.getProductVariantMockAfterJoin(
+                  item.product_id,
+                  item.variant_id,
+                  item.image_id,
+                );
+
+              if (error) {
+                console.error("Error fetching product variant data:", error);
+                return null;
+              }
+
+              if (result) {
+                return {
+                  ...item, // Basic cart item properties
+                  title: result.title,
+                  mock: result.mock,
+                  size: result.size,
+                  color: result.color_code,
+                };
+              }
+            } catch (err) {
+              console.error("Error during fetch:", err);
+              return null;
+            }
+          }),
+        );
+
+        // Filter out null values from failed fetches
+        const validItems = detailedItems.filter((item) => item !== null);
+        setCartItems(validItems as typeof cartItems); // Update cart state
+      }
+    } catch (err) {
+      console.error("Unexpected error fetching cart data:", err);
+    } finally {
       setLoading(false);
     }
+  }
 
+  useEffect(() => {
     if (user) {
       fetchCartData();
     }
@@ -72,7 +98,6 @@ export default function Cart({ user }: CartProps) {
     variantId: number,
     image_id: number,
   ) => {
-    // Optimistically update the quantity in the cart
     setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.product_id === productId && item.variant_id === variantId
@@ -82,28 +107,24 @@ export default function Cart({ user }: CartProps) {
     );
 
     try {
-      await incrementCartItem(
+      const { error } = await incrementCartItem(
         user!.id,
         productId,
         variantId,
         image_id,
         database.client,
       );
-      // Sync with database to ensure data consistency
-      const { result: items, error } = await database.getCartItems(user!.id);
-      if (items) {
-        setCartItems(items);
+      if (error) {
+        throw new Error(error);
       }
     } catch (error) {
       console.error("Error incrementing item:", error);
-      // Optionally revert the optimistic update on error
-      await fetchCartData();
+      await fetchCartData(); // Revert optimistic update on error
     }
   };
 
   // Optimistic Decrement
   const handleDecrement = async (productId: number, variantId: number) => {
-    // Optimistically update the quantity in the cart
     setCartItems((prevItems) =>
       prevItems.map((item) =>
         item.product_id === productId && item.variant_id === variantId
@@ -113,16 +134,19 @@ export default function Cart({ user }: CartProps) {
     );
 
     try {
-      await decrementCartItem(user!.id, productId, variantId, database.client);
-      // Sync with database to ensure data consistency
-      const { result: items, error } = await database.getCartItems(user!.id);
-      if (items) {
-        setCartItems(items);
+      const { error } = await decrementCartItem(
+        user!.id,
+        productId,
+        variantId,
+        database.client,
+      );
+
+      if (error) {
+        throw new Error(error);
       }
     } catch (error) {
       console.error("Error decrementing item:", error);
-      // Optionally revert the optimistic update on error
-      await fetchCartData();
+      await fetchCartData(); // Revert optimistic update on error
     }
   };
 
@@ -137,30 +161,20 @@ export default function Cart({ user }: CartProps) {
 
     try {
       // Sync with database to ensure data consistency
-      const { result: items, error } = await database.removeCartItem(
+      const { error } = await database.removeCartItem(
         user!.id,
         productId,
         variantId,
       );
-      console.log(items, "items after remove");
-      if (items) {
-        setCartItems(items);
+
+      if (error) {
+        throw new Error(error);
       }
     } catch (error) {
       console.error("Error decrementing item:", error);
       // Optionally revert the optimistic update on error
       await fetchCartData();
     }
-  }
-
-  // Fetch cart data function for error handling fallback
-  async function fetchCartData() {
-    setLoading(true);
-    const { result: items, error } = await database.getCartItems(user!.id);
-    if (items) {
-      setCartItems(items);
-    }
-    setLoading(false);
   }
 
   return (
