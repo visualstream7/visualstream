@@ -45,6 +45,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   >([]);
   const [cartHasItems, setCartHasItems] = useState<boolean>(false);
   const [quantity, setQuantity] = useState(1);
+  const [rerenderNav, setRerenderNav] = useState<boolean>(false);
 
   const [selectedVariantGroup, setSelectedVariantGroup] = useState<{
     color_code: string;
@@ -55,9 +56,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   // Cache to store generated mockup URLs
   const mockupCache = useRef<Record<string, string>>({});
 
-
   async function addToCart() {
-
     const variant = getVariant();
 
     if (!variant || !variant.id || !user?.id) {
@@ -69,15 +68,15 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       user.id,
       parseInt(id),
       variant.id,
-      quantity // Pass the selected quantity to the database function
+      quantity, // Pass the selected quantity to the database function
     );
 
     if (result.length > 0) {
       setCartHasItems(true);
     }
+    setRerenderNav((prev) => !prev);
 
     console.log("add to cart", result, error);
-
   }
 
   async function handleColorChange(varintGroup: {
@@ -207,7 +206,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
       setSelectedVariantGroup(distinctVariantsByColor[0]);
 
-      const { result: items, error: cartError } = await database.getCartItems(user!.id);
+      const { result: items, error: cartError } = await database.getCartItems(
+        user!.id,
+      );
 
       if (items) {
         setCartHasItems(items.length > 0);
@@ -235,7 +236,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
-      <Nav user={user} />
+      <Nav user={user} rerender={rerenderNav} />
       <div className="flex flex-col overflow-auto">
         <div className="flex-1 flex lg:flex-row justify-center items-start mt-10  gap-6 p-6">
           <div className="flex  bg-gray-400 relative">
@@ -265,23 +266,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
             <h2 className="flex text-2xl font-medium text-[#565958] text-wrap max-w-[30vw] text-justify ">
               {product.title}
             </h2>
-            {/* <div className="flex items-center gap-4 mt-2">
-              <div className="flex items-center">
-                <p>4.5</p>
-                <span className="text-[#de7921] text-xl">★★★★☆</span>
-                <ChevronDownIcon />
-              </div>
-              <a
-                href="#ratings"
-                className="text-[#2e616a] text-sm font-normal "
-              >
-                Total ratings
-              </a>
-              <p className="text-[#575859]">|</p>
-              <a href="#search" className="text-[#2e616a] text-sm font-normal">
-                Search this page
-              </a>
-            </div> */}
 
             <hr className="my-2  border-t-1 border-gray-400" />
 
@@ -305,15 +289,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 className="mt-1 p-2 border text-[#414342] rounded-md w-[5vw] text-sm outline-1 outline-[#6ba5b1] border-[#c2d5d9]"
                 onChange={(e) => setSelectedSize(e.target.value)}
               >
-                {/* <option>Small</option>
-                <option>Medium</option>
-                <option>Large</option>
-                <option>X-Large</option>
-                <option>XX-Large</option> */}
-                {/* {selectedVariantGroup?.available_sizes.map((size, index) => (
-                  <option key={index}>{size}</option>
-                ))} */}
-
                 {selectedVariantGroup?.available_sizes.map((size, index) => (
                   <option key={index}>{size}</option>
                 ))}
@@ -333,10 +308,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                     key={index}
                     src={variants.image || ""}
                     alt={"variant mockup"}
-                    className={`w-10 h-10 border rounded-md cursor-pointer ${selectedVariantGroup?.color_code === variants.color_code
-                      ? "border-blue-500"
-                      : "border-gray-300"
-                      }`}
+                    className={`w-10 h-10 border rounded-md cursor-pointer ${
+                      selectedVariantGroup?.color_code === variants.color_code
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
                     onClick={() => handleColorChange(variants)}
                   />
                 ))}
@@ -435,7 +411,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
             </p>
 
             <div className="mt-4">
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-600">
+              <label
+                htmlFor="quantity"
+                className="block text-sm font-medium text-gray-600"
+              >
                 Quantity
               </label>
               <div className="flex items-center mt-1">
@@ -452,9 +431,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                   value={quantity}
                   min="1"
                   className="h-10 w-full  lg:text-center p-2 border-t border-b border-gray-300 outline-1 outline-blue-500"
-                  onChange={(e) => setQuantity(Math.max(Number(e.target.value), 1))}
+                  onChange={(e) =>
+                    setQuantity(Math.max(Number(e.target.value), 1))
+                  }
                 />
-
 
                 <button
                   type="button"
@@ -472,15 +452,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 Add to Cart
               </button>
 
-              {
-                cartHasItems &&
+              {cartHasItems && (
                 <Link href="/cart">
                   <button className="w-full bg-[#ffa41d] text-white font-bold py-2 rounded-3xl mt-2">
                     View Cart
                   </button>
                 </Link>
-              }
-
+              )}
             </div>
 
             <div className="mt-4 text-sm">

@@ -15,6 +15,11 @@ type UserPropType = {
   user: UserResource | null | undefined;
 };
 
+type NavPropType = {
+  user: UserResource | null | undefined;
+  rerender?: boolean;
+};
+
 type ComponentPropType = {
   user: UserResource | null | undefined;
   count: number;
@@ -215,7 +220,7 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
 }
 
 // NavBar Component
-export default function Nav({ user }: UserPropType) {
+export default function Nav({ user, rerender }: NavPropType) {
   const [cartCount, setCartCount] = useState(0);
   useEffect(() => {
     const fetchCartCount = async () => {
@@ -231,7 +236,7 @@ export default function Nav({ user }: UserPropType) {
     if (user) {
       fetchCartCount();
     }
-  }, [user]);
+  }, [user, rerender]);
 
   return (
     <>
