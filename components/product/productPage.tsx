@@ -241,6 +241,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         const imageResult = await fetchImage();
         const productResult = await fetchProduct();
         const variantsResult = await fetchVariants();
+
+        setLoading(false);
         let fetchedMocks = await fetchVariantMocks(
           productResult.id,
           parseInt(image_id),
@@ -254,6 +256,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         if (firstMock) {
           setMockupImage(firstMock.mock);
         } else {
+          setGeneratingMockup(true);
           console.log("Generating mockup for first variant group");
           const mockup = await getMockupImage(
             distinct[0],
@@ -272,6 +275,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
+        setGeneratingMockup(false);
       }
     };
 
