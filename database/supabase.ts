@@ -15,7 +15,11 @@ import {
   getImagesFromDatabase,
   Image,
 } from "./functions/images/getImagesFromDatabase";
-import { addItemToCart, CartItem, removeItemFromCart } from "./functions/users/cart";
+import {
+  addItemToCart,
+  CartItem,
+  removeItemFromCart,
+} from "./functions/users/cart";
 
 interface QuantizedColor {
   color: string;
@@ -145,9 +149,12 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      let { error } = await this.client
-        .from("Mocks")
-        .insert({ product_id: id, image_id: image_id, mock: mockup, variant_id: -1 });
+      let { error } = await this.client.from("Mocks").insert({
+        product_id: id,
+        image_id: image_id,
+        mock: mockup,
+        variant_id: -1,
+      });
       if (error) {
         throw new Error(error.message);
       }
@@ -171,14 +178,10 @@ class SupabaseWrapper {
     product_id: number,
     mockup: string,
   ): Promise<{
-    result: any,
-    error: string | null,
+    result: any;
+    error: string | null;
   }> => {
-
-
-
     try {
-
       const newMocks = variant_ids.map((variant_id) => {
         return {
           product_id: product_id,
@@ -186,7 +189,7 @@ class SupabaseWrapper {
           mock: mockup,
           variant_id: variant_id,
         };
-      })
+      });
 
       let { data, error } = await this.client
         .from("Mocks")
@@ -208,8 +211,7 @@ class SupabaseWrapper {
         error: message,
       };
     }
-
-  }
+  };
 
   getImages = async (): Promise<{
     result: Image[] | null;
@@ -259,7 +261,6 @@ class SupabaseWrapper {
     result: any;
     error: string | null;
   }> => {
-
     if (!id) {
       return {
         result: null,
@@ -267,13 +268,44 @@ class SupabaseWrapper {
       };
     }
     try {
+      let { data, error } = await this.client.from("Mocks").select("*").match({
+        variant_id: -1,
+        image_id: id,
+      });
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  async getAllMockupsForProduct(
+    product_id: number,
+    image_id: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> {
+    try {
       let { data, error } = await this.client
         .from("Mocks")
         .select("*")
         .match({
-          variant_id: -1,
-          image_id: id,
+          product_id: product_id,
+          image_id: image_id,
         })
+        .neq("variant_id", -1);
+
       if (error) {
         throw new Error(error.message);
       }
@@ -591,7 +623,8 @@ class SupabaseWrapper {
       let { data, error } = await this.client
         .from("Users")
         .select("cart")
-        .eq("id", user_id).single();
+        .eq("id", user_id)
+        .single();
       if (error) {
         throw new Error(error.message);
       }
@@ -613,7 +646,5 @@ class SupabaseWrapper {
     }
   };
 }
-
-
 
 export { SupabaseWrapper };

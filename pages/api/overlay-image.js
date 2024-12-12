@@ -1,12 +1,10 @@
 import { createCanvas, loadImage } from "canvas";
 import { utapi } from "@/libs/uploadthing";
 
-
 // This function can run for a maximum of 5 seconds
 export const config = {
   maxDuration: 40,
 };
-
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -163,10 +161,10 @@ export default async function handler(req, res) {
     let highResUpload = await utapi.uploadFiles(imageFile);
     console.log("highResUpload", highResUpload);
 
-    res.status(200).json({ base64Image, url: highResUpload?.data?.url || null });
+    return res.status(200).json({ url: highResUpload?.data?.url || null });
   } catch (error) {
     console.error(error);
-    res
+    return res
       .status(500)
       .json({ error: "An error occurred while processing the images." });
   }

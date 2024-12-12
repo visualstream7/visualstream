@@ -57,9 +57,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     available_sizes: string[];
   } | null>(null);
 
-  // Cache to store generated mockup URLs
-  const mockupCache = useRef<Record<string, string>>({});
-
   async function addToCart() {
     const variant = getVariant();
 
@@ -122,7 +119,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         varintGroup.image,
         image.image_url!,
         parseInt(id),
-        true,
+        false,
       );
 
       if (!mock) {
@@ -295,16 +292,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       );
 
       setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
-
-      let firstVariant =
-        variantsResult.find(
-          (variant) =>
-            variant.color_code === distinctVariantsByColor[0].color_code,
-        ) || null;
-
-      // mockupCache.current[variantKey] = mock;
-      mockupCache.current[firstVariant?.color_code!] = mock;
-      console.log("mockupCache", mockupCache.current);
 
       setGeneratingMockup(false);
 
