@@ -1,24 +1,20 @@
+import React, { useEffect, useState } from "react";
 import { UserResource } from "@clerk/types";
-import React, { useEffect, useState, useRef } from "react";
 import Nav from "../nav";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  CircleDashed,
-  LocateIcon,
-  MapIcon,
-  MapPinCheckIcon,
-  MinusIcon,
-  PlusIcon,
-} from "lucide-react";
-import { TbLocationDiscount } from "react-icons/tb";
-import { Image } from "@/database/functions/images/getImagesFromDatabase";
-import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
 import { Printful } from "@/libs/printful-client/printful-sdk";
+import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CircleDashed,
+  MapPinCheckIcon,
+  MinusIcon,
+  PlusIcon,
+} from "lucide-react";
+import { Json } from "@/database/types";
 
 interface ProductPageProps {
   id: string;
@@ -26,317 +22,261 @@ interface ProductPageProps {
   user: UserResource | null | undefined;
 }
 
+interface DistinctVariantGroup {
+  color_code: string;
+  image: string;
+  available_sizes: string[];
+  variant_ids: number[];
+}
+
+interface Mockup {
+  variant_id: number;
+  mock: string;
+}
+
+type Image = {
+  id: number; // bigint corresponds to number in TypeScript
+  image_url?: string | null; // "text null" allows null values\
+  color_composition?: Json | null; // JSON null default
+  is_mock_generated?: boolean | null; // "boolean null" allows null values
+  created_at: string; // Timestamp with timezone, represented as ISO string
+  caption?: string | null; // Optional field, allowing null values
+  ai_describe?: string | null; // Optional field, allowing null values
+  article_link?: string | null; // Optional field, allowing null values
+  category?: string | null; // Optional field, allowing null values
+  low_resolution_image_url?: string | null; // Optional field, allowing null values
+  title: string | null; // Optional field, allowing null values
+};
+
 const database = new SupabaseWrapper("CLIENT");
 
 const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
+  // State management
   const [image, setImage] = useState<Image | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [variantMocks, setVariantMocks] = useState<
-    { variant_id: number; mock: string }[]
-  >([]);
   const [distinctVariants, setDistinctVariants] = useState<
-    {
-      color_code: string;
-      image: string;
-      available_sizes: string[];
-      variant_ids: number[];
-    }[]
+    DistinctVariantGroup[]
   >([]);
-  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [variantMocks, setVariantMocks] = useState<Mockup[]>([]);
   const [mockupImage, setMockupImage] = useState<string>("");
+
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [selectedVariantGroup, setSelectedVariantGroup] =
+    useState<DistinctVariantGroup | null>(null);
+
+  const [loading, setLoading] = useState<boolean>(true);
   const [generatingMockup, setGeneratingMockup] = useState<boolean>(false);
   const [cartHasItems, setCartHasItems] = useState<boolean>(false);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState<number>(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
 
-  const [selectedVariantGroup, setSelectedVariantGroup] = useState<{
-    color_code: string;
-    image: string;
-    available_sizes: string[];
-  } | null>(null);
+  // Helper functions
 
-  async function addToCart() {
+  const fetchImage = async (): Promise<Image> => {
+    const image_id_number = parseInt(image_id);
+    const { result, error } = await database.getImage(image_id_number);
+    if (error || !result) throw new Error(error || "No image found");
+    setImage(result);
+    return result;
+  };
+
+  const fetchProduct = async (): Promise<Product> => {
+    const { result, error } = await database.getProduct(parseInt(id));
+    if (error || !result) throw new Error(error || "No product found");
+    setProduct(result);
+    return result;
+  };
+
+  const fetchVariants = async (): Promise<Variant[]> => {
+    const { result, error } = await database.getProductVariants(parseInt(id));
+    if (error || !result) throw new Error(error || "No variants found");
+    setVariants(result);
+    return result;
+  };
+
+  const fetchVariantMocks = async (
+    productId: number,
+    imageId: number,
+  ): Promise<Mockup[]> => {
+    const { result, error } = await database.getAllMockupsForProduct(
+      productId,
+      imageId,
+    );
+    console.log("Mockups for product:", result);
+    if (error) throw new Error(error);
+    setVariantMocks(result || []);
+    return result || [];
+  };
+
+  const initializeDistinctVariants = (
+    variants: Variant[],
+  ): DistinctVariantGroup[] => {
+    const groupedVariants = variants.reduce<DistinctVariantGroup[]>(
+      (acc, variant) => {
+        const group = acc.find((g) => g.color_code === variant.color_code);
+        if (group) {
+          group.available_sizes.push(variant.size);
+          group.variant_ids.push(variant.id);
+        } else {
+          acc.push({
+            color_code: variant.color_code,
+            image: variant.image,
+            available_sizes: [variant.size],
+            variant_ids: [variant.id],
+          });
+        }
+        return acc;
+      },
+      [],
+    );
+    setDistinctVariants(groupedVariants);
+    setSelectedSize(groupedVariants[0]?.available_sizes[0] || "");
+    setSelectedVariantGroup(groupedVariants[0] || null);
+    return groupedVariants;
+  };
+
+  const getMockupImage = async (
+    group: DistinctVariantGroup,
+    imageUrl: string,
+    productId: number,
+  ): Promise<string> => {
+    const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+    const mock = await client.getMockupImage(
+      group.image,
+      imageUrl,
+      productId,
+      false,
+    );
+    if (!mock) throw new Error("Error generating mockup image");
+    return mock;
+  };
+
+  const addMockupToDatabase = async (
+    imageId: number,
+    variantIds: number[],
+    productId: number,
+    mock: string,
+  ): Promise<void> => {
+    const { result, error } = await database.addMockupForVariants(
+      imageId,
+      variantIds,
+      productId,
+      mock,
+    );
+    // setVariantMocks((prev) => [...prev, { variant_id: variantIds[0], mock }]);
+    if (result)
+      setVariantMocks((prev) => [...prev, { variant_id: variantIds[0], mock }]);
+    if (error) throw new Error(error);
+  };
+
+  const addToCart = async (): Promise<void> => {
     const variant = getVariant();
-
-    if (!variant || !variant.id || !user?.id) {
-      console.error("Variant or user ID is undefined");
-      return;
-    }
+    if (!variant || !user?.id) return;
 
     const { result, error } = await database.addCartItem(
       user.id,
       parseInt(id),
       variant.id,
-      quantity, // Pass the selected quantity to the database function
+      quantity,
     );
-
-    if (result.length > 0) {
-      setCartHasItems(true);
-    }
+    if (result.length > 0) setCartHasItems(true);
     setRerenderNav((prev) => !prev);
+    console.log("Add to cart result:", result, error);
+  };
 
-    console.log("add to cart", result, error);
-  }
-
-  async function handleColorChange(varintGroup: {
-    color_code: string;
-    image: string;
-    available_sizes: string[];
-    variant_ids: number[];
-  }) {
-    if (!image) return;
-
-    console.log("Selected color", varintGroup);
-
-    setMockupImage("https://fakeimg.pl/300x400?text=generating");
-    setSelectedVariantGroup(varintGroup);
-
-    // Automatically select the first available size if the current size isn't available
-    if (!varintGroup.available_sizes.includes(selectedSize)) {
-      setSelectedSize(varintGroup.available_sizes[0]);
+  const handleColorChange = async (
+    group: DistinctVariantGroup,
+  ): Promise<void> => {
+    setSelectedVariantGroup(group);
+    if (!group.available_sizes.includes(selectedSize)) {
+      setSelectedSize(group.available_sizes[0]);
     }
 
-    const variantIds = varintGroup.variant_ids;
-
-    let storedMockups = [...variantMocks];
-    let variantHasMockup = storedMockups.find((mock) =>
-      variantIds.includes(mock.variant_id),
+    const mock = variantMocks.find((m) =>
+      group.variant_ids.includes(m.variant_id),
     );
-
-    if (variantHasMockup) {
-      setMockupImage(variantHasMockup.mock);
+    if (mock) {
+      setMockupImage(mock.mock);
       return;
     }
 
     setGeneratingMockup(true);
-
     try {
-      // Generate mockup image using the Printful SDK
-      const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-      const mock = await client.getMockupImage(
-        varintGroup.image,
-        image.image_url!,
+      const mockup = await getMockupImage(
+        group,
+        image?.image_url!,
         parseInt(id),
-        false,
       );
-
-      if (!mock) {
-        console.error("Error generating mockup image");
-        setGeneratingMockup(false);
-        return;
-      }
-
-      let image_id_number = parseInt(image_id);
-
-      const { result: uploadedMocks, error: uploadMockError } =
-        await database.addMockupForVariants(
-          image_id_number,
-          varintGroup.variant_ids,
-          parseInt(id!),
-          mock,
-        );
-
-      if (!uploadedMocks || uploadMockError) {
-        console.error("Error saving mockup to DB");
-        setGeneratingMockup(false);
-        return;
-      }
-
-      let uploadedVariantMocks = uploadedMocks.map(
-        (data: { variant_id: number; mock: string }) => ({
-          variant_id: data.variant_id,
-          mockup: data.mock,
-        }),
+      await addMockupToDatabase(
+        parseInt(image_id),
+        group.variant_ids,
+        parseInt(id),
+        mockup,
       );
-
-      setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
-
-      setMockupImage(mock);
-    } catch (error) {
-      console.error("Error generating mockup image:", error);
+      setMockupImage(mockup);
+    } catch (err) {
+      console.error(err);
     } finally {
       setGeneratingMockup(false);
     }
-  }
+  };
 
-  // Fetching data logic remains unchanged
-
-  function getVariant() {
-    // based on the sleected size and color, get the variant id
-
-    if (!selectedVariantGroup || !selectedSize) {
-      return null;
-    }
-
-    let variant = variants.find(
-      (variant) =>
-        variant.color_code === selectedVariantGroup.color_code &&
-        variant.size === selectedSize,
+  const getVariant = (): Variant | null => {
+    if (!selectedVariantGroup || !selectedSize) return null;
+    return (
+      variants.find(
+        (variant) =>
+          variant.color_code === selectedVariantGroup.color_code &&
+          variant.size === selectedSize,
+      ) || null
     );
+  };
 
-    return variant;
-  }
-
+  // Fetch data on mount
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       setLoading(true);
-      setGeneratingMockup(true);
-      const image_id_number = parseInt(image_id);
-      const { result: imageResult, error: imageError } =
-        await database.getImage(image_id_number);
-
-      if (imageError || !imageResult) {
-        console.error(imageError || "No image found");
-        setLoading(false);
-        return;
-      }
-      setImage(imageResult);
-
-      const { result: productResult, error: productError } =
-        await database.getProduct(parseInt(id));
-
-      if (productError || !productResult) {
-        console.error(productError || "No product found");
-        setLoading(false);
-        return;
-      }
-      setProduct(productResult);
-
-      const { result: variantsResult, error: variantsError } =
-        await database.getProductVariants(parseInt(id));
-
-      if (variantsError || !variantsResult) {
-        console.error(variantsError || "No variants found");
-        setLoading(false);
-        return;
-      }
-
-      setVariants(variantsResult);
-
-      const { result: allMocks, error: allMocksError } =
-        await database.getAllMockupsForProduct(
+      try {
+        const imageResult = await fetchImage();
+        const productResult = await fetchProduct();
+        const variantsResult = await fetchVariants();
+        let fetchedMocks = await fetchVariantMocks(
           productResult.id,
           parseInt(image_id),
         );
 
-      if (allMocks) {
-        setVariantMocks(allMocks);
-      }
+        const distinct = initializeDistinctVariants(variantsResult);
+        const firstMock = fetchedMocks.find(
+          (mock) => mock.variant_id === distinct[0]?.variant_ids[0],
+        );
 
-      let distinctVariantsByColor = variantsResult.reduce(
-        (acc, variant) => {
-          let found = acc.find(
-            (group) => group.color_code === variant.color_code,
+        if (firstMock) {
+          setMockupImage(firstMock.mock);
+        } else {
+          console.log("Generating mockup for first variant group");
+          const mockup = await getMockupImage(
+            distinct[0],
+            imageResult.image_url!,
+            parseInt(id),
           );
-          if (!found) {
-            acc.push({
-              color_code: variant.color_code,
-              image: variant.image,
-              available_sizes: [variant.size],
-              variant_ids: [variant.id],
-            });
-          } else {
-            found.available_sizes.push(variant.size);
-            found.variant_ids.push(variant.id);
-          }
-          return acc;
-        },
-        [] as {
-          color_code: string;
-          image: string;
-          available_sizes: string[];
-          variant_ids: number[];
-        }[],
-      );
-
-      console.log(distinctVariantsByColor);
-      setDistinctVariants(distinctVariantsByColor);
-      setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
-      setSelectedVariantGroup(distinctVariantsByColor[0]);
-
-      // if the mock for the first variant is already generated, set it as the mockup image
-
-      let storedMockups = [...allMocks];
-      let firstVariant = distinctVariantsByColor[0].variant_ids[0];
-
-      console.log(storedMockups, firstVariant);
-
-      console.log("Checking if mockup exists for variant", firstVariant);
-      let variantHasMockup = storedMockups.find(
-        (mock) => mock.variant_id === firstVariant,
-      );
-      if (variantHasMockup) {
-        console.log(
-          "Mockup found for variant",
-          firstVariant,
-          variantHasMockup.mock,
-        );
-        setMockupImage(variantHasMockup.mock);
-        setGeneratingMockup(false);
-      }
-
-      if (user) {
-        const { result: items, error: cartError } = await database.getCartItems(
-          user!.id,
-        );
-        if (items) {
-          setCartHasItems(items.length > 0);
+          await addMockupToDatabase(
+            parseInt(image_id),
+            distinct[0].variant_ids,
+            parseInt(id),
+            mockup,
+          );
+          setMockupImage(mockup);
         }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-      setLoading(false);
-
-      if (variantHasMockup) return;
-
-      const mock = await client.getMockupImage(
-        distinctVariantsByColor[0].image,
-        imageResult.image_url!,
-        parseInt(id),
-        false,
-      );
-
-      if (!mock) {
-        console.error("Error generating mockup image");
-        setGeneratingMockup(false);
-        return;
-      }
-
-      const { result: uploadedMocks, error: uploadMockError } =
-        await database.addMockupForVariants(
-          image_id_number,
-          distinctVariantsByColor[0].variant_ids,
-          parseInt(id!),
-          mock,
-        );
-
-      if (!uploadedMocks || uploadMockError) {
-        console.error("Error saving mockup to DB");
-        setGeneratingMockup(false);
-        return;
-      }
-
-      let uploadedVariantMocks = uploadedMocks.map(
-        (data: { variant_id: number; mock: string }) => ({
-          variant_id: data.variant_id,
-          mockup: data.mock,
-        }),
-      );
-
-      setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
-
-      setGeneratingMockup(false);
-
-      setMockupImage(mock);
-    }
     if (image_id) fetchData();
   }, [image_id]);
-
-  useEffect(() => {
-    console.log(variantMocks);
-  }, [variantMocks]);
 
   if (loading) return <FullPageSpinner />;
 
@@ -350,11 +290,16 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         <div className="flex-1 flex lg:flex-row justify-center items-start mt-10  gap-6 p-6">
           <div className="flex  bg-gray-400 relative">
             <img
-              src={mockupImage || selectedVariantGroup?.image || ""}
+              src={generatingMockup ? selectedVariantGroup?.image : mockupImage}
+              onLoad={() => {
+                if (selectedVariantGroup?.image !== mockupImage) {
+                  // setGeneratingMockup(false);
+                }
+              }}
               alt="Product"
               className="max-w-[50vw] max-h-[40vw] flex  opacity-90"
             />
-            {generatingMockup && !mockupImage && (
+            {generatingMockup && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                 <span className="text-white text-lg animate-spin">
                   <CircleDashed size={32} />
