@@ -1,15 +1,23 @@
 import { SignInButton, SignOutButton } from "@clerk/nextjs";
 import { UserResource } from "@clerk/types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiSearch, FiMenu } from "react-icons/fi"; // For icons
 import { HiOutlineShoppingCart } from "react-icons/hi"; // Cart icon
 import { BsChevronDown } from "react-icons/bs"; // Dropdown arrow icon
 import { RiDropdownList } from "react-icons/ri";
 import { MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
+import { SupabaseWrapper } from "@/database/supabase";
+
+const database = new SupabaseWrapper("CLIENT");
 
 type UserPropType = {
   user: UserResource | null | undefined;
+};
+
+type ComponentPropType = {
+  user: UserResource | null | undefined;
+  count: number;
 };
 
 // UserButton Component
@@ -77,7 +85,7 @@ export const UserButton = ({ user }: UserPropType) => {
 };
 
 // MobileNavBar Component
-function MobileNav({ user }: UserPropType) {
+function MobileNav({ user }: ComponentPropType) {
   return (
     <div className="w-full block lg:hidden">
       <div className="bg-[#25384c] text-white py-2 px-4 flex items-center justify-between w-full">
@@ -91,7 +99,7 @@ function MobileNav({ user }: UserPropType) {
   );
 }
 
-function LargeScreenNav({ user }: UserPropType) {
+function LargeScreenNav({ user, count }: ComponentPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
   const [returnOrders, setReturnOrders] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
@@ -173,8 +181,13 @@ function LargeScreenNav({ user }: UserPropType) {
           </div>
 
           <div className="cursor-pointer flex items-center">
-            <Link href='/cart'>
+            <Link href="/cart" className="flex items-center gap-1">
               <HiOutlineShoppingCart size={24} />
+              {count > 0 && (
+                <span className="bg-danger text-white rounded-full px-1">
+                  {count}
+                </span>
+              )}
             </Link>
           </div>
         </div>
@@ -203,10 +216,27 @@ function LargeScreenNav({ user }: UserPropType) {
 
 // NavBar Component
 export default function Nav({ user }: UserPropType) {
+  const [cartCount, setCartCount] = useState(0);
+  useEffect(() => {
+    const fetchCartCount = async () => {
+      const { result: items, error: cartError } = await database.getCartItems(
+        user!.id,
+      );
+      console.log("items", items, "cartError", cartError);
+
+      if (items) {
+        setCartCount(items.length);
+      }
+    };
+    if (user) {
+      fetchCartCount();
+    }
+  }, [user]);
+
   return (
     <>
-      <LargeScreenNav user={user} />
-      <MobileNav user={user} />
+      <LargeScreenNav user={user} count={cartCount} />
+      <MobileNav user={user} count={cartCount} />
     </>
   );
 }
