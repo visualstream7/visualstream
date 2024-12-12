@@ -33,16 +33,18 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [mockupImage, setMockupImage] = useState<string>("");
-  const [generatingMockup, setGeneratingMockup] = useState<boolean>(false);
+  const [variantMocks, setVariantMocks] = useState<{ variant_id: number, mockup: string }[]>([]);
   const [distinctVariants, setDistinctVariants] = useState<
     {
       color_code: string;
       image: string;
       available_sizes: string[];
+      variant_ids: number[];
     }[]
   >([]);
+  const [selectedSize, setSelectedSize] = useState<string>("");
+  const [mockupImage, setMockupImage] = useState<string>("");
+  const [generatingMockup, setGeneratingMockup] = useState<boolean>(false);
   const [cartHasItems, setCartHasItems] = useState<boolean>(false);
   const [quantity, setQuantity] = useState(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
@@ -83,6 +85,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     color_code: string;
     image: string;
     available_sizes: string[];
+    variant_ids: number[];
   }) {
     if (!image) return;
 
@@ -96,9 +99,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
     const variantKey = varintGroup.color_code; // Use color_code as the cache key
 
-    // Check if mockup is already cached
-    if (mockupCache.current[variantKey]) {
-      setMockupImage(mockupCache.current[variantKey]);
+    const variantIds = varintGroup.variant_ids;
+
+    let storedMockups = [...variantMocks];
+    let variantHasMockup = storedMockups.find((mock) => variantIds.includes(mock.variant_id));
+
+    if (variantHasMockup) {
+      setMockupImage(variantHasMockup.mockup);
       return;
     }
 
@@ -114,8 +121,29 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         true,
       );
 
-      // Cache the mockup URL
-      mockupCache.current[variantKey] = mock;
+      if (!mock) {
+        console.error("Error generating mockup image");
+        setGeneratingMockup(false);
+        return;
+      }
+
+      let image_id_number = parseInt(image_id);
+
+      const { result: uploadedMocks, error: uploadMockError } = await database.addMockupForVariants(image_id_number, varintGroup.variant_ids, parseInt(id!), mock);
+
+      if (!uploadedMocks || uploadMockError) {
+        console.error("Error saving mockup to DB");
+        setGeneratingMockup(false);
+        return;
+      }
+
+      let uploadedVariantMocks = uploadedMocks.map((data: { variant_id: number, mock: string }) => ({
+        variant_id: data.variant_id,
+        mockup: data.mock,
+      }));
+
+      setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
+
 
       setMockupImage(mock);
     } catch (error) {
@@ -188,9 +216,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
               color_code: variant.color_code,
               image: variant.image,
               available_sizes: [variant.size],
+              variant_ids: [variant.id],
             });
           } else {
             found.available_sizes.push(variant.size);
+            found.variant_ids.push(variant.id);
           }
           return acc;
         },
@@ -198,6 +228,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           color_code: string;
           image: string;
           available_sizes: string[];
+          variant_ids: number[];
         }[],
       );
 
@@ -205,12 +236,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setDistinctVariants(distinctVariantsByColor);
       setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
       setSelectedVariantGroup(distinctVariantsByColor[0]);
-
-      let firstVariant = variantsResult.find(
-        (variant) =>
-          variant.color_code === distinctVariantsByColor[0].color_code &&
-          variant.size === distinctVariantsByColor[0].available_sizes[0],
-      );
 
 
       const { result: items, error: cartError } = await database.getCartItems(
@@ -228,8 +253,34 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         distinctVariantsByColor[0].image,
         imageResult.image_url!,
         parseInt(id),
-        true,
+        false,
       );
+
+      if (!mock) {
+        console.error("Error generating mockup image");
+        setGeneratingMockup(false);
+        return;
+      }
+
+
+      const { result: uploadedMocks, error: uploadMockError } = await database.addMockupForVariants(image_id_number, distinctVariantsByColor[0].variant_ids, parseInt(id!), mock);
+
+      if (!uploadedMocks || uploadMockError) {
+        console.error("Error saving mockup to DB");
+        setGeneratingMockup(false);
+        return;
+      }
+
+      let uploadedVariantMocks = uploadedMocks.map((data: { variant_id: number, mock: string }) => ({
+        variant_id: data.variant_id,
+        mockup: data.mock,
+      }));
+
+      setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
+
+      let firstVariant = variantsResult.find(
+        (variant) => variant.color_code === distinctVariantsByColor[0].color_code,
+      ) || null;
 
       // mockupCache.current[variantKey] = mock;
       mockupCache.current[firstVariant?.color_code!] = mock;
@@ -241,6 +292,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     }
     fetchData();
   }, [image_id]);
+
+  useEffect(() => {
+    console.log(variantMocks);
+  }, [variantMocks]);
 
   if (loading) return <FullPageSpinner />;
 

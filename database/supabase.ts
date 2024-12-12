@@ -165,9 +165,9 @@ class SupabaseWrapper {
     }
   };
 
-  addMockupForVariant = async (
+  addMockupForVariants = async (
     image_id: number,
-    variant_id: number,
+    variant_ids: number[],
     product_id: number,
     mockup: string,
   ): Promise<{
@@ -175,10 +175,22 @@ class SupabaseWrapper {
     error: string | null,
   }> => {
 
+
+
     try {
+
+      const newMocks = variant_ids.map((variant_id) => {
+        return {
+          product_id: product_id,
+          image_id: image_id,
+          mock: mockup,
+          variant_id: variant_id,
+        };
+      })
+
       let { data, error } = await this.client
         .from("Mocks")
-        .insert({ product_id: product_id, image_id: image_id, mock: mockup, variant_id: variant_id })
+        .insert([...newMocks])
         .select("*");
 
       if (error) {
