@@ -33,7 +33,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [variants, setVariants] = useState<Variant[]>([]);
-  const [variantMocks, setVariantMocks] = useState<{ variant_id: number, mockup: string }[]>([]);
+  const [variantMocks, setVariantMocks] = useState<
+    { variant_id: number; mockup: string }[]
+  >([]);
   const [distinctVariants, setDistinctVariants] = useState<
     {
       color_code: string;
@@ -102,7 +104,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     const variantIds = varintGroup.variant_ids;
 
     let storedMockups = [...variantMocks];
-    let variantHasMockup = storedMockups.find((mock) => variantIds.includes(mock.variant_id));
+    let variantHasMockup = storedMockups.find((mock) =>
+      variantIds.includes(mock.variant_id),
+    );
 
     if (variantHasMockup) {
       setMockupImage(variantHasMockup.mockup);
@@ -129,7 +133,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
       let image_id_number = parseInt(image_id);
 
-      const { result: uploadedMocks, error: uploadMockError } = await database.addMockupForVariants(image_id_number, varintGroup.variant_ids, parseInt(id!), mock);
+      const { result: uploadedMocks, error: uploadMockError } =
+        await database.addMockupForVariants(
+          image_id_number,
+          varintGroup.variant_ids,
+          parseInt(id!),
+          mock,
+        );
 
       if (!uploadedMocks || uploadMockError) {
         console.error("Error saving mockup to DB");
@@ -137,13 +147,14 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         return;
       }
 
-      let uploadedVariantMocks = uploadedMocks.map((data: { variant_id: number, mock: string }) => ({
-        variant_id: data.variant_id,
-        mockup: data.mock,
-      }));
+      let uploadedVariantMocks = uploadedMocks.map(
+        (data: { variant_id: number; mock: string }) => ({
+          variant_id: data.variant_id,
+          mockup: data.mock,
+        }),
+      );
 
       setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
-
 
       setMockupImage(mock);
     } catch (error) {
@@ -237,13 +248,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
       setSelectedVariantGroup(distinctVariantsByColor[0]);
 
-
-      const { result: items, error: cartError } = await database.getCartItems(
-        user!.id,
-      );
-
-      if (items) {
-        setCartHasItems(items.length > 0);
+      if (user) {
+        const { result: items, error: cartError } = await database.getCartItems(
+          user!.id,
+        );
+        if (items) {
+          setCartHasItems(items.length > 0);
+        }
       }
 
       const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
@@ -262,8 +273,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         return;
       }
 
-
-      const { result: uploadedMocks, error: uploadMockError } = await database.addMockupForVariants(image_id_number, distinctVariantsByColor[0].variant_ids, parseInt(id!), mock);
+      const { result: uploadedMocks, error: uploadMockError } =
+        await database.addMockupForVariants(
+          image_id_number,
+          distinctVariantsByColor[0].variant_ids,
+          parseInt(id!),
+          mock,
+        );
 
       if (!uploadedMocks || uploadMockError) {
         console.error("Error saving mockup to DB");
@@ -271,16 +287,20 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         return;
       }
 
-      let uploadedVariantMocks = uploadedMocks.map((data: { variant_id: number, mock: string }) => ({
-        variant_id: data.variant_id,
-        mockup: data.mock,
-      }));
+      let uploadedVariantMocks = uploadedMocks.map(
+        (data: { variant_id: number; mock: string }) => ({
+          variant_id: data.variant_id,
+          mockup: data.mock,
+        }),
+      );
 
       setVariantMocks((prev) => [...prev, ...uploadedVariantMocks]);
 
-      let firstVariant = variantsResult.find(
-        (variant) => variant.color_code === distinctVariantsByColor[0].color_code,
-      ) || null;
+      let firstVariant =
+        variantsResult.find(
+          (variant) =>
+            variant.color_code === distinctVariantsByColor[0].color_code,
+        ) || null;
 
       // mockupCache.current[variantKey] = mock;
       mockupCache.current[firstVariant?.color_code!] = mock;
@@ -376,10 +396,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                     key={index}
                     src={variants.image || ""}
                     alt={"variant mockup"}
-                    className={`w-10 h-10 border rounded-md cursor-pointer ${selectedVariantGroup?.color_code === variants.color_code
-                      ? "border-blue-500"
-                      : "border-gray-300"
-                      }`}
+                    className={`w-10 h-10 border rounded-md cursor-pointer ${
+                      selectedVariantGroup?.color_code === variants.color_code
+                        ? "border-blue-500"
+                        : "border-gray-300"
+                    }`}
                     onClick={() => handleColorChange(variants)}
                   />
                 ))}
