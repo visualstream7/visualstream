@@ -34,7 +34,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [variants, setVariants] = useState<Variant[]>([]);
   const [variantMocks, setVariantMocks] = useState<
-    { variant_id: number; mockup: string }[]
+    { variant_id: number; mock: string }[]
   >([]);
   const [distinctVariants, setDistinctVariants] = useState<
     {
@@ -88,15 +88,15 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
   }) {
     if (!image) return;
 
-    setMockupImage("");
+    console.log("Selected color", varintGroup);
+
+    setMockupImage("https://fakeimg.pl/300x400?text=generating");
     setSelectedVariantGroup(varintGroup);
 
     // Automatically select the first available size if the current size isn't available
     if (!varintGroup.available_sizes.includes(selectedSize)) {
       setSelectedSize(varintGroup.available_sizes[0]);
     }
-
-    const variantKey = varintGroup.color_code; // Use color_code as the cache key
 
     const variantIds = varintGroup.variant_ids;
 
@@ -106,7 +106,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     );
 
     if (variantHasMockup) {
-      setMockupImage(variantHasMockup.mockup);
+      setMockupImage(variantHasMockup.mock);
       return;
     }
 
@@ -214,6 +214,17 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       }
 
       setVariants(variantsResult);
+
+      const { result: allMocks, error: allMocksError } =
+        await database.getAllMockupsForProduct(
+          productResult.id,
+          parseInt(image_id),
+        );
+
+      if (allMocks) {
+        setVariantMocks(allMocks);
+      }
+
       let distinctVariantsByColor = variantsResult.reduce(
         (acc, variant) => {
           let found = acc.find(
@@ -245,6 +256,27 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       setSelectedSize(distinctVariantsByColor[0].available_sizes[0]);
       setSelectedVariantGroup(distinctVariantsByColor[0]);
 
+      // if the mock for the first variant is already generated, set it as the mockup image
+
+      let storedMockups = [...allMocks];
+      let firstVariant = distinctVariantsByColor[0].variant_ids[0];
+
+      console.log(storedMockups, firstVariant);
+
+      console.log("Checking if mockup exists for variant", firstVariant);
+      let variantHasMockup = storedMockups.find(
+        (mock) => mock.variant_id === firstVariant,
+      );
+      if (variantHasMockup) {
+        console.log(
+          "Mockup found for variant",
+          firstVariant,
+          variantHasMockup.mock,
+        );
+        setMockupImage(variantHasMockup.mock);
+        setGeneratingMockup(false);
+      }
+
       if (user) {
         const { result: items, error: cartError } = await database.getCartItems(
           user!.id,
@@ -256,6 +288,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
       const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
       setLoading(false);
+
+      if (variantHasMockup) return;
 
       const mock = await client.getMockupImage(
         distinctVariantsByColor[0].image,
@@ -297,7 +331,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
 
       setMockupImage(mock);
     }
-    fetchData();
+    if (image_id) fetchData();
   }, [image_id]);
 
   useEffect(() => {
