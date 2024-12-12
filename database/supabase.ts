@@ -193,7 +193,7 @@ class SupabaseWrapper {
 
       let { data, error } = await this.client
         .from("Mocks")
-        .insert([...newMocks])
+        .upsert([...newMocks])
         .select("*");
 
       if (error) {
