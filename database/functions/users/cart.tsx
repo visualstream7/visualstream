@@ -4,6 +4,7 @@ import { Database } from "@/database/types";
 export interface CartItem {
   product_id: number;
   variant_id: number;
+  image_id: number;
   quantity: number;
 }
 
@@ -11,6 +12,7 @@ async function addItemToCart(
   user_id: string,
   product_id: number,
   variant_id: number,
+  image_id: number,
   quantity: number,
   client: SupabaseClient,
 ): Promise<{
@@ -47,6 +49,7 @@ async function addItemToCart(
       previousCart.items.push({
         product_id,
         variant_id,
+        image_id,
         quantity,
       });
     }
@@ -149,12 +152,13 @@ async function incrementCartItem(
   user_id: string,
   product_id: number,
   variant_id: number,
+  image_id: number,
   client: SupabaseClient,
 ): Promise<{
   result: CartItem[] | null;
   error: string | null;
 }> {
-  return addItemToCart(user_id, product_id, variant_id, 1, client);
+  return addItemToCart(user_id, product_id, variant_id,image_id, 1, client);
 }
 
 async function decrementCartItem(

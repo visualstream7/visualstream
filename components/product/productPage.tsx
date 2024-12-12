@@ -178,6 +178,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       user.id,
       parseInt(id),
       variant.id,
+      parseInt(image_id),
       quantity,
     );
     if (result.length > 0) setCartHasItems(true);
@@ -542,9 +543,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
               </ul>
             </div>
 
-            <button className="w-full border bg-[#edfcff] border-[#62888f] hover:bg-[#f3f6f7] py-2 rounded-xl mt-4 text-sm">
-              Add to List
-            </button>
           </div>
         </div>
         <div className="mt-8 flex justify-center mb-10">

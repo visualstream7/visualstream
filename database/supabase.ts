@@ -549,6 +549,7 @@ class SupabaseWrapper {
     user_id: string,
     product_id: number,
     variant_id: number,
+    image_id: number,
     quantity: number,
   ): Promise<{
     result: any;
@@ -559,6 +560,7 @@ class SupabaseWrapper {
         user_id,
         product_id,
         variant_id,
+        image_id,
         quantity,
         this.client,
       );
@@ -644,6 +646,66 @@ class SupabaseWrapper {
         error: message,
       };
     }
+  };
+
+  getProductVariantMockAfterJoin = async (
+    product_id: number,
+    variant_id: number,
+    image_id: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    // get product data
+
+    const { data: productData, error: productError } = await this.client
+      .from('Products')
+      .select('*')
+      .eq('id', product_id)
+      .single();
+    
+    if(productError) {
+      return {
+        result: null,
+        error: productError.message,
+      };
+    }
+    // get variant data
+    const { data: variantData, error: variantError } = await this.client
+      .from('Variants')
+      .select('*')
+      .eq('id', variant_id)
+      .single();
+    
+    if (variantError) {
+      return {
+        result: null,
+        error: variantError.message,
+      };
+    }
+    // get mock data for (product_id, image_id, variant_id)
+    const { data: mockData, error: mockError } = await this.client
+      .from('Mocks')
+      .select('*')
+      .eq('product_id', product_id)
+      .eq('image_id', image_id)
+      .eq('variant_id', variant_id)
+      .single();
+    
+    if(mockError) {
+      return {
+        result: null,
+        error: mockError.message,
+      };
+    }
+    
+    // combine all data and return (basically manually join)
+    let data = { ...productData, ...variantData, ...mockData };
+    return {
+      result: data,
+      error: null,
+    };
+  
   };
 }
 

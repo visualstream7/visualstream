@@ -34,7 +34,7 @@ export default function Cart({ user }: CartProps) {
     }, [user]);
 
     // Optimistic Increment
-    const handleIncrement = async (productId: number, variantId: number) => {
+    const handleIncrement = async (productId: number, variantId: number, image_id: number) => {
         // Optimistically update the quantity in the cart
         setCartItems((prevItems) =>
             prevItems.map((item) =>
@@ -45,7 +45,7 @@ export default function Cart({ user }: CartProps) {
         );
 
         try {
-            await incrementCartItem(user!.id, productId, variantId, database.client);
+            await incrementCartItem(user!.id, productId, variantId, image_id, database.client);
             // Sync with database to ensure data consistency
             const { result: items, error } = await database.getCartItems(user!.id);
             if (items) {
@@ -144,7 +144,7 @@ export default function Cart({ user }: CartProps) {
                                 </button>
                                 <span className="w-8 text-center">{item.quantity}</span>
                                 <button
-                                    onClick={() => handleIncrement(item.product_id, item.variant_id)}
+                                    onClick={() => handleIncrement(item.product_id, item.variant_id, item.image_id)}
                                     className="h-8 w-8 bg-gray-200 hover:bg-gray-300 rounded"
                                 >
                                     +
