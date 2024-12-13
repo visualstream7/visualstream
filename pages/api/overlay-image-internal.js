@@ -131,17 +131,7 @@ export default async function handler(req, res) {
 
     // Convert the final canvas to a Base64 image
     const base64Image = canvas.toDataURL();
-
-
-    // Convert the Base64 string to a File
-    // const imageFile = base64ToFile(base64Image, "image.png");
-
-    // Upload the file using your existing upload function
-    // let highResUpload = await utapi.uploadFiles(imageFile);
-    // console.log("highResUpload", highResUpload.data.url);
     res.status(200).json({ base64Image });
-
-    //res.status(200).json({ base64Image, url: highResUpload.data.url });
   } catch (error) {
     console.error(error);
     res

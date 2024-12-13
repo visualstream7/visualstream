@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { UserResource } from "@clerk/types";
 import Nav from "../nav";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
@@ -66,12 +66,18 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     useState<DistinctVariantGroup | null>(null);
 
   const [loading, setLoading] = useState<boolean>(true);
-  const [generatingMockup, setGeneratingMockup] = useState<boolean>(false);
   const [cartHasItems, setCartHasItems] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
 
-  // Helper functions
+  const getMockupOfSelectedVariant = (): Mockup | null => {
+    let x =
+      variantMocks.find((mock) =>
+        selectedVariantGroup?.variant_ids.includes(mock.variant_id),
+      ) || null;
+
+    return x;
+  };
 
   const fetchImage = async (): Promise<Image> => {
     const image_id_number = parseInt(image_id);
@@ -103,7 +109,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       productId,
       imageId,
     );
-    console.log("Mockups for product:", result);
     if (error) throw new Error(error);
     setVariantMocks(result || []);
     return result || [];
@@ -183,7 +188,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     );
     if (result.length > 0) setCartHasItems(true);
     setRerenderNav((prev) => !prev);
-    console.log("Add to cart result:", result, error);
   };
 
   const handleColorChange = async (
@@ -198,11 +202,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       group.variant_ids.includes(m.variant_id),
     );
     if (mock) {
-      setMockupImage(mock.mock);
       return;
     }
 
-    setGeneratingMockup(true);
     try {
       const mockup = await getMockupImage(
         group,
@@ -215,11 +217,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         parseInt(id),
         mockup,
       );
-      setMockupImage(mockup);
     } catch (err) {
       console.error(err);
-    } finally {
-      setGeneratingMockup(false);
     }
   };
 
@@ -250,33 +249,30 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         );
 
         const distinct = initializeDistinctVariants(variantsResult);
-        const firstMock = fetchedMocks.find(
-          (mock) => mock.variant_id === distinct[0]?.variant_ids[0],
+        const firstMock = fetchedMocks.find((mock) =>
+          distinct[0].variant_ids.includes(mock.variant_id),
         );
 
         if (firstMock) {
-          setMockupImage(firstMock.mock);
-        } else {
-          setGeneratingMockup(true);
-          console.log("Generating mockup for first variant group");
-          const mockup = await getMockupImage(
-            distinct[0],
-            imageResult.image_url!,
-            parseInt(id),
-          );
-          await addMockupToDatabase(
-            parseInt(image_id),
-            distinct[0].variant_ids,
-            parseInt(id),
-            mockup,
-          );
-          setMockupImage(mockup);
+          setSelectedVariantGroup(distinct[0]);
+          setVariantMocks(fetchedMocks);
+          return;
         }
+
+        const mockup = await getMockupImage(
+          distinct[0],
+          imageResult.image_url!,
+          parseInt(id),
+        );
+        await addMockupToDatabase(
+          parseInt(image_id),
+          distinct[0].variant_ids,
+          parseInt(id),
+          mockup,
+        );
       } catch (error) {
-        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
-        setGeneratingMockup(false);
       }
     };
 
@@ -303,19 +299,14 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           <div className="flex bg-gray-400 relative max-w-full m-auto lg:max-w-[40vw]">
             <img
               src={
-                generatingMockup
-                  ? selectedVariantGroup?.image
-                  : mockupImage || ""
+                getMockupOfSelectedVariant()?.mock ||
+                selectedVariantGroup?.image
               }
-              onLoad={() => {
-                if (selectedVariantGroup?.image !== mockupImage) {
-                  // setGeneratingMockup(false);
-                }
-              }}
+              onLoad={() => {}}
               alt="Product"
               className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
             />
-            {generatingMockup && (
+            {!getMockupOfSelectedVariant()?.mock && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                 <span className="text-white text-lg animate-spin">
                   <CircleDashed size={32} />
@@ -378,12 +369,15 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                     key={index}
                     src={variants.image || ""}
                     alt="variant mockup"
-                    className={`w-10 h-10 border rounded-md cursor-pointer ${
+                    className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
                       selectedVariantGroup?.color_code === variants.color_code
-                        ? "border-blue-500"
+                        ? "border-blue-800"
                         : "border-gray-300"
                     }`}
                     onClick={() => handleColorChange(variants)}
+                    onMouseEnter={() => {
+                      handleColorChange(variants);
+                    }}
                   />
                 ))}
               </div>

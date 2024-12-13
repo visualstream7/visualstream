@@ -33,7 +33,6 @@ export default async function handler(
   });
 
   const responses = await Promise.all(queries);
-  console.log(responses);
   const data = await Promise.all(responses.map((response) => response.json()));
 
   if (data.some((d: any) => d.error)) {

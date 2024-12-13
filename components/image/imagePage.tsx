@@ -87,15 +87,6 @@ export default function ImagePage({ user, image }: UserPropType) {
         const { result: mocks, error: mocksError } =
           await database.getImageMockups(imageId);
 
-        console.log(
-          "mocks",
-          mocks,
-          "imageId",
-          imageId,
-          "mockup Error",
-          mocksError,
-        );
-
         // Fetch products from the database
         const { result: productsFromDB, error } = await database.getProducts();
         if (error || !productsFromDB) {
@@ -115,7 +106,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           try {
             let productMock = getProductMock(product, mocks);
             if (productMock) {
-              console.log(`Mockup already exists for product ID ${product.id}`);
+              // console.log(`Mockup already exists for product ID ${product.id}`);
               // Clear loading state even on error
               setProducts((prevProducts) =>
                 prevProducts.map((p) =>

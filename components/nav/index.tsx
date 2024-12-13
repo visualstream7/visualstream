@@ -228,7 +228,6 @@ export default function Nav({ user, rerender }: NavPropType) {
       const { result: items, error: cartError } = await database.getCartItems(
         user!.id,
       );
-      console.log("items", items, "cartError", cartError);
 
       if (items) {
         setCartCount(items.length);
