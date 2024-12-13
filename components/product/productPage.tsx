@@ -59,7 +59,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     DistinctVariantGroup[]
   >([]);
   const [variantMocks, setVariantMocks] = useState<Mockup[]>([]);
-  const [mockupImage, setMockupImage] = useState<string>("");
+  const [mockupImage, setMockupImage] = useState<string | null>(null);
 
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedVariantGroup, setSelectedVariantGroup] =
@@ -295,7 +295,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
         <div className="flex-1 flex lg:flex-row justify-center items-start mt-10  gap-6 p-6">
           <div className="flex  bg-gray-400 relative">
             <img
-              src={generatingMockup ? selectedVariantGroup?.image : mockupImage}
+              src={
+                generatingMockup
+                  ? selectedVariantGroup?.image
+                  : mockupImage || ""
+              }
               onLoad={() => {
                 if (selectedVariantGroup?.image !== mockupImage) {
                   // setGeneratingMockup(false);
@@ -542,7 +546,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 </li>
               </ul>
             </div>
-
           </div>
         </div>
         <div className="mt-8 flex justify-center mb-10">
