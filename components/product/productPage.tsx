@@ -292,8 +292,15 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     <div className="flex h-dvh flex-col overflow-hidden">
       <Nav user={user} rerender={rerenderNav} />
       <div className="flex flex-col overflow-auto">
-        <div className="flex-1 flex lg:flex-row justify-center items-start mt-10  gap-6 p-6">
-          <div className="flex  bg-gray-400 relative">
+        <Link href={`/image/${image_id}`}>
+          <button className="flex items-center text-gray-800 hover:text-gray-800 m-4 lg:hidden">
+            <IoArrowBack />
+            <span>Back</span>
+          </button>
+        </Link>
+        <div className="flex-1 flex flex-col lg:flex-row justify-center items-start mt-6 gap-4 lg:gap-6 p-4 sm:p-6">
+          {/* Left Section: Product Image */}
+          <div className="flex bg-gray-400 relative max-w-full m-auto lg:max-w-[40vw]">
             <img
               src={
                 generatingMockup
@@ -306,7 +313,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 }
               }}
               alt="Product"
-              className="max-w-[50vw] max-h-[40vw] flex  opacity-90"
+              className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
             />
             {generatingMockup && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -318,19 +325,19 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           </div>
 
           {/* Middle Section: Product Details */}
-          <div className="flex flex-col ">
+          <div className="flex flex-col w-full lg:w-auto">
             <Link href={`/image/${image_id}`}>
-              <button className="flex items-center text-gray-800 hover:text-gray-800 my-4">
+              <button className="hidden lg:flex items-center text-gray-800 hover:text-gray-800 my-4">
                 <IoArrowBack />
                 <span>Back</span>
               </button>
             </Link>
             <h3 className="text-[#41747d] text-sm">Approved by VisualStream</h3>
-            <h2 className="flex text-2xl font-medium text-[#565958] text-wrap max-w-[30vw] text-justify ">
+            <h2 className="text-2xl font-medium text-[#565958] text-wrap text-justify max-w-full lg:max-w-[30vw]">
               {product.title}
             </h2>
 
-            <hr className="my-2  border-t-1 border-gray-400" />
+            <hr className="my-2 border-t-1 border-gray-400" />
 
             <div>
               <div className="flex items-center gap-2">
@@ -343,13 +350,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
             <div className="mt-4">
               <label
                 htmlFor="size"
-                className="block text-sm text-[#646464]  font-medium"
+                className="block text-sm text-[#646464] font-medium"
               >
                 Size
               </label>
               <select
                 id="size"
-                className="mt-1 p-2 border text-[#414342] rounded-md w-[5vw] text-sm outline-1 outline-[#6ba5b1] border-[#c2d5d9]"
+                className="mt-1 p-2 border text-[#414342] rounded-md w-full sm:w-[20vw] lg:w-[5vw] text-sm outline-1 outline-[#6ba5b1] border-[#c2d5d9]"
                 onChange={(e) => setSelectedSize(e.target.value)}
               >
                 {selectedVariantGroup?.available_sizes.map((size, index) => (
@@ -370,7 +377,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                   <img
                     key={index}
                     src={variants.image || ""}
-                    alt={"variant mockup"}
+                    alt="variant mockup"
                     className={`w-10 h-10 border rounded-md cursor-pointer ${
                       selectedVariantGroup?.color_code === variants.color_code
                         ? "border-blue-500"
@@ -413,48 +420,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 </li>
               </ul>
             </div>
-
-            <hr className="my-6 border-t-1 border-gray-400" />
-
-            <div>
-              <h3 className="text-lg font-semibold">About this item</h3>
-              <ul className="list-none pl-0 mt-2 text-sm">
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">
-                    Regular Fit
-                  </span>
-                  <span className="text-gray-700">
-                    Comfortable, easy fit through the shoulders, chest, and
-                    waist
-                  </span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">Fabric</span>
-                  <span className="text-gray-700">
-                    Lightweight French Terry: Naturally soft, stretchy, and
-                    breathable
-                  </span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">Style</span>
-                  <span className="text-gray-700">
-                    Lightweight and comfortable for all-day wear
-                  </span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">
-                    Details
-                  </span>
-                  <span className="text-gray-700">
-                    Hood, kangaroo pocket, full zipper, ribbing at cuffs and hem
-                  </span>
-                </li>
-              </ul>
-            </div>
           </div>
 
           {/* Right Section: Price and Actions */}
-          <div className="min-w-[280px]  border border-gray-500 rounded-md p-4 shadow-md">
+          <div className="w-full lg:w-[50%] lg:min-w-[240px] border border-gray-500 rounded-md p-4 shadow-md">
             <p className="text-2xl font-medium text-[#565958]">SAR203.14</p>
             <p className="text-sm mt-1 text-gray-600">
               SAR96 delivery 6-9 October
@@ -462,7 +431,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
             <button className="text-[#2e616a] font-medium mt-1 text-sm">
               Details
             </button>
-            <p className="mt-2 text-sm text-[#2e616a] ">
+            <p className="mt-2 text-sm text-[#2e616a]">
               <MapPinCheckIcon className="h-4 w-4 inline mr-1" />
               Delivery to Riyadh{" "}
               <button className="text-[#2e616a] font-medium">
@@ -493,12 +462,11 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                   type="number"
                   value={quantity}
                   min="1"
-                  className="h-10 w-full  lg:text-center p-2 border-t border-b border-gray-300 outline-1 outline-blue-500"
+                  className="h-10 flex-1 w-full sm:w-[60px] text-center p-2 border-t border-b border-gray-300 outline-1 outline-blue-500"
                   onChange={(e) =>
                     setQuantity(Math.max(Number(e.target.value), 1))
                   }
                 />
-
                 <button
                   type="button"
                   onClick={() => setQuantity((prev) => prev + 1)}
@@ -509,13 +477,13 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
               </div>
 
               <button
-                className="w-full bg-[#fed813] text-black font-medium py-2 rounded-3xl mt-4"
+                className="w-full p-4 bg-[#fed813] text-black font-medium py-2 rounded-3xl mt-4"
                 onClick={addToCart}
               >
-                Add to Cart
+                {cartHasItems ? "Add to Cart" : "Go to Cart"}
               </button>
 
-              {cartHasItems && (
+              {!cartHasItems && (
                 <Link href="/cart">
                   <button className="w-full bg-[#ffa41d] text-white font-bold py-2 rounded-3xl mt-2">
                     View Cart
@@ -523,51 +491,27 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 </Link>
               )}
             </div>
-
-            <div className="mt-4 text-sm">
-              <ul className="list-none pl-0">
-                <li className="flex mt-2">
-                  <span className="w-20 font-medium text-gray-900">
-                    Ships from
-                  </span>
-                  <span className="text-[#6ba5b1]">San Diego</span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-20 font-medium text-gray-900">
-                    Sold by
-                  </span>
-                  <span className="text-[#6ba5b1]">VisualStream</span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-20 font-medium text-gray-900">
-                    Payment
-                  </span>
-                  <span className="text-gray-700">Secure transaction</span>
-                </li>
-              </ul>
-            </div>
           </div>
         </div>
-        <div className="mt-8 flex justify-center mb-10">
-          <div>
-            {/* Title Section */}
-            <div className="text-xl font-semibold mb-4">
-              <h3 className="text-left">Products related to this item</h3>
-            </div>
 
-            {/* Carousel Section */}
-            <div className="relative flex items-center">
-              {/* Left Arrow */}
-              <button className="bg-gray-300 border rounded-full shadow p-2">
+        {/* Related Products */}
+        <div className="mt-8 flex justify-center mb-10 px-4 w-max mx-auto">
+          <div className="w-full">
+            <h3 className="text-xl font-semibold mb-4 text-left sm:ml-4 lg:ml-16">
+              Products related to this item
+            </h3>
+            <div className="relative flex items-center gap-2 sm:gap-4">
+              <button
+                className="hidden sm:flex bg-gray-300 border rounded-full shadow p-2"
+                aria-label="Scroll Left"
+              >
                 <ChevronLeftIcon />
               </button>
-
-              {/* Carousel */}
-              <div className="flex gap-4 overflow-x-auto no-scrollbar">
-                {[13, 14, 15, 16, 17].map((item) => (
+              <div className="flex gap-4 overflow-x-auto no-scrollbar w-full px-2 max-w-[80vw]">
+                {[13, 14, 15, 16].map((item) => (
                   <div
                     key={item}
-                    className="flex flex-col border rounded-lg shadow-sm w-[200px] min-w-[200px] bg-white p-3"
+                    className="flex flex-col border rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
                   >
                     <img
                       src={`/productImages/${item}.jpg`}
@@ -575,19 +519,20 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                       className="rounded-md mb-2"
                     />
                     <p className="text-sm font-medium text-[#007185] truncate">
-                      Product Title Goes Here {item}
+                      Product Title {item}
                     </p>
                     <p className="text-sm text-gray-500">SAR 106.86</p>
-                    <p className="flex items-center text-sm">
+                    <p className="flex items-center text-sm flex-wrap">
                       <span className="text-[#de7921] text-xl">★★★★☆</span>
                       <span className="text-gray-500 text-xs ml-1">(321)</span>
                     </p>
                   </div>
                 ))}
               </div>
-
-              {/* Right Arrow */}
-              <button className="bg-gray-300 border rounded-full shadow p-2">
+              <button
+                className="hidden sm:flex bg-gray-300 border rounded-full shadow p-2"
+                aria-label="Scroll Right"
+              >
                 <ChevronRightIcon />
               </button>
             </div>

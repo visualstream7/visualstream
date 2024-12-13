@@ -24,6 +24,45 @@ interface Product {
   isLoadingMockup?: boolean; // Track loading state
 }
 
+function ImageComponent({
+  hoveredImage,
+  image,
+}: {
+  hoveredImage: string | null;
+  image: Image;
+}) {
+  const [displayedImage, setDisplayedImage] = useState(image.image_url || "");
+  const [isFading, setIsFading] = useState(false);
+
+  useEffect(() => {
+    if (!hoveredImage) {
+      setDisplayedImage(image.image_url || "");
+    }
+    if (hoveredImage !== displayedImage) {
+      setIsFading(true);
+      const fadeTimeout = setTimeout(() => {
+        setDisplayedImage(hoveredImage || image.image_url || "");
+        setIsFading(false);
+      }, 100); // Match the transition duration
+
+      return () => clearTimeout(fadeTimeout);
+    }
+  }, [hoveredImage, image.image_url, displayedImage]);
+
+  return (
+    <img
+      src={displayedImage}
+      alt="Image Display"
+      className={`
+        rounded-lg object-cover m-auto
+        ${hoveredImage ? "h-[60vh]" : "w-[90vw] lg:max-w-[30vw] max-h-[60vh]"}
+        transition-all duration-100 ease-in-out
+        ${isFading ? "opacity-0" : "opacity-100"}
+      `}
+    />
+  );
+}
+
 function getProductMock(product: Product, mocks: any) {
   const mockData = mocks.find((m: any) => m.product_id === product.id);
   return mockData ? mockData.mock : null;
@@ -32,6 +71,8 @@ function getProductMock(product: Product, mocks: any) {
 export default function ImagePage({ user, image }: UserPropType) {
   const [products, setProducts] = useState<Product[]>([]);
   const fetchProducts = useRef(false);
+
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (fetchProducts.current) return; // Prevent duplicate calls
@@ -140,22 +181,27 @@ export default function ImagePage({ user, image }: UserPropType) {
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex flex-col justify-center items-center">
           <Link href="/">
-            <button className="flex lg:hidden items-center space-x-2 text-gray-800 hover:text-gray-800 ml-[5vw] my-4">
+            <button className="flex lg:hidden items-center space-x-2 text-gray-800 hover:text-gray-800 my-4 w-[90vw]">
               <IoArrowBack />
               <span>Back</span>
             </button>
           </Link>
-          <img
-            src={image.image_url || ""}
+          <ImageComponent hoveredImage={hoveredImage} image={image} />
+          {/* <img
+            src={hoveredImage || image.image_url || ""}
             alt="Image Display"
-            className="w-[90vw] lg:max-w-[30vw] max-h-[60vh] rounded-lg object-cover m-auto"
-          />
-          <p className="text-gray-600 text-left lg:w-[28vw] ">
+            className={`
+              rounded-lg object-cover m-auto
+              ${hoveredImage ? "h-[60vh]" : "w-[90vw] lg:max-w-[30vw] max-h-[60vh]"}
+              transition-all duration-300 ease-in-out
+            `}
+          /> */}
+          <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
             {image.ai_describe || "Description"}
           </p>
         </div>
 
-        <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-full max-h-[80vh] lg:overflow-y-scroll">
+        <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-[80vh] lg:overflow-y-hidden flex flex-col">
           <Link href="/">
             <button className="hidden lg:flex items-center space-x-2 text-gray-800 hover:text-gray-800">
               <IoArrowBack />
@@ -169,7 +215,10 @@ export default function ImagePage({ user, image }: UserPropType) {
             </h1>
           </div>
 
-          <div className="lg:grid grid grid-cols-4 lg:grid-cols-4 gap-4 lg:w-[30vw]">
+          <div
+            className="lg:grid grid grid-cols-4 lg:grid-cols-4 gap-4 lg:w-[30vw] overflow-y-scroll p-8 custom-scrollbar"
+            onMouseLeave={() => setHoveredImage(null)}
+          >
             {products.map((product) => (
               <Link
                 key={product.id}
@@ -181,6 +230,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                       src={product.mockup || product.image}
                       alt={`Thumbnail for ${product.title}`}
                       className="w-full h-full object-cover"
+                      onMouseEnter={() => setHoveredImage(product.mockup)}
                     />
                     {product.isLoadingMockup && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -195,11 +245,11 @@ export default function ImagePage({ user, image }: UserPropType) {
             ))}
           </div>
 
-          <div className="flex flex-col py-2">
+          {/* <div className="flex flex-col py-2">
             <button className="lg:w-[30vw] bg-black text-white py-3 rounded shadow hover:bg-gray-900 mb-1">
               SEE ALL PRODUCT CATEGORIES
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

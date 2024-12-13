@@ -123,8 +123,9 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
       {/* UpperNavbar */}
       <div className="bg-[#25384c] text-white py-2 px-4 flex items-center justify-between w-full">
         {/* Logo Section */}
-        <div className="text-xl font-bold">VisualStream</div>
-
+        <Link href="/">
+          <div className="text-xl font-bold">VisualStream</div>
+        </Link>
         {/* SearchBar Section */}
         <div className="flex items-center bg-white text-black rounded-sm w-1/2">
           <div className="relative">

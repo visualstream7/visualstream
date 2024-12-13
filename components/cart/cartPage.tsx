@@ -191,7 +191,7 @@ export default function Cart({ user }: CartProps) {
             ) : cartItems.length === 0 ? (
               <p className="text-gray-600">Your cart is empty.</p>
             ) : (
-              <ul className="space-y-4 overflow-auto flex-1 h-[90%] overflow-y-scroll p-4">
+              <ul className="space-y-4 overflow-auto flex-1 h-[90%] overflow-y-scroll p-4 custom-scrollbar">
                 {cartItems.map((item) => (
                   <li
                     key={`${item.product_id}-${item.variant_id}`}
