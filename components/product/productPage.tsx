@@ -316,7 +316,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           </div>
 
           {/* Middle Section: Product Details */}
-          <div className="flex flex-col w-full lg:w-auto">
+          <div className="flex flex-col w-full lg:w-auto flex-1">
             <Link href={`/image/${image_id}`}>
               <button className="hidden lg:flex items-center text-gray-800 hover:text-gray-800 my-4">
                 <IoArrowBack />
@@ -417,7 +417,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           </div>
 
           {/* Right Section: Price and Actions */}
-          <div className="w-full lg:w-[50%] lg:min-w-[240px] border border-gray-500 rounded-md p-4 shadow-md">
+          <div className="w-full lg:w-[50%] lg:max-w-[240px] border border-gray-500 rounded-md p-4 shadow-md">
             <p className="text-2xl font-medium text-[#565958]">SAR203.14</p>
             <p className="text-sm mt-1 text-gray-600">
               SAR96 delivery 6-9 October
