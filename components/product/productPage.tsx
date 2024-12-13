@@ -59,7 +59,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     DistinctVariantGroup[]
   >([]);
   const [variantMocks, setVariantMocks] = useState<Mockup[]>([]);
-  const [mockupImage, setMockupImage] = useState<string | null>(null);
 
   const [selectedSize, setSelectedSize] = useState<string>("");
   const [selectedVariantGroup, setSelectedVariantGroup] =
@@ -77,6 +76,34 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       ) || null;
 
     return x;
+  };
+
+  // get a list of unique src of mockups from variantMocks
+
+  const getUniqueMockupSrcArray = (): string[] => {
+    const mockupSrcArray = variantMocks.map((mock) => mock.mock);
+    const uniqueMockupSrcArray = Array.from(new Set(mockupSrcArray));
+    return uniqueMockupSrcArray;
+  };
+
+  const cacheImageSourceArray = async (): Promise<void> => {
+    const uniqueMockupSrcArray = getUniqueMockupSrcArray(); // Assuming it returns an array of image URLs.
+
+    const promises = uniqueMockupSrcArray.map((src) => {
+      return new Promise<void>((resolve, reject) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = (err) => reject(err);
+      });
+    });
+
+    try {
+      await Promise.all(promises);
+      console.log("All images cached successfully.");
+    } catch (error) {
+      console.error("Error caching images:", error);
+    }
   };
 
   const fetchImage = async (): Promise<Image> => {
@@ -232,6 +259,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
       ) || null
     );
   };
+
+  useEffect(() => {
+    cacheImageSourceArray();
+  }, [variantMocks]);
 
   // Fetch data on mount
   useEffect(() => {
