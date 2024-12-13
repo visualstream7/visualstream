@@ -124,17 +124,17 @@ let configuration = {
   },
 
   "394": {
-    x: 240,
-    y: 380,
-    w: 225,
-    h: 300,
-    box_x: 0,
-    box_y: 0,
-    box_w: 0,
-    box_h: 0,
-    box_roundness: 0,
-    overlay_roundness: 0,
-    is_cropped: true,
+    "x": 96,
+    "y": 308,
+    "w": 510,
+    "h": 392,
+    "box_x": 0,
+    "box_y": 0,
+    "box_w": 0,
+    "box_h": 0,
+    "box_roundness": 20,
+    "overlay_roundness": 45,
+    "is_cropped": true
   },
 
   "19": {
