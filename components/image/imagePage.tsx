@@ -31,14 +31,13 @@ function ImageComponent({
   hoveredImage: string | null;
   image: Image;
 }) {
-  const [displayedImage, setDisplayedImage] = useState(image.image_url || "");
+  const [displayedImage, setDisplayedImage] = useState(image.image_url);
   const [isFading, setIsFading] = useState(false);
 
   useEffect(() => {
     if (!hoveredImage) {
       setDisplayedImage(image.image_url || "");
-    }
-    if (hoveredImage !== displayedImage) {
+    } else if (hoveredImage !== displayedImage) {
       setIsFading(true);
       const fadeTimeout = setTimeout(() => {
         setDisplayedImage(hoveredImage || image.image_url || "");
@@ -47,11 +46,11 @@ function ImageComponent({
 
       return () => clearTimeout(fadeTimeout);
     }
-  }, [hoveredImage, image.image_url, displayedImage]);
+  }, [hoveredImage, image.image_url]);
 
   return (
     <img
-      src={displayedImage}
+      src={displayedImage || ""}
       alt="Image Display"
       className={`
         rounded-lg object-cover m-auto
