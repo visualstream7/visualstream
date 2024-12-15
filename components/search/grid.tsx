@@ -22,6 +22,95 @@ const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
     </div>
   );
 };
+
+const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
+  return (
+    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 auto-rows-[70px]">
+        {images.map((image: ImageWithSimilarity) => (
+          <div
+            key={image.id}
+            className="relative group overflow-hidden rounded-lg shadow-md"
+          >
+            <Link key={image.id} href={`/image/${image.id}`} className="h-full">
+              <ImageComponent image={image} />
+            </Link>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
+  // Split the images array into chunks of 7 elements
+
+  let count = 48;
+  const imageChunks = chunkArray(images, count);
+
+  function getColSpan(i: number) {
+    if (i === 1) return "col-span-2";
+    if (i === 5) return "col-span-2";
+    if (i === 6) return "col-span-2";
+    if (i === 15) return "col-span-2";
+    if (i === 17) return "col-span-2";
+    if (i === 23) return "col-span-2";
+    if (i === 28) return "col-span-2";
+    return "";
+  }
+
+  function getRowSpan(i: number) {
+    if (i === 0) return "row-span-2";
+    if (i === 2) return "row-span-2";
+    if (i === 3) return "row-span-3";
+    if (i === 5) return "row-span-2";
+    if (i === 7) return "row-span-3";
+    if (i === 10) return "row-span-2";
+    if (i === 13) return "row-span-2";
+    if (i === 19) return "row-span-2";
+    if (i === 20) return "row-span-2";
+    if (i === 23) return "row-span-2";
+    if (i === 25) return "row-span-2";
+    if (i === 28) return "row-span-2";
+    return "";
+  }
+
+  return (
+    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] overflow-y-auto custom-scrollbar flex flex-col gap-2 p-2">
+      {imageChunks.map((chunk, chunkIndex) => (
+        <div
+          key={chunkIndex}
+          className="grid auto-rows-[70px] grid-cols-12 gap-2"
+        >
+          {chunk.map((image, i) => (
+            <div
+              key={image.id}
+              className={`${getRowSpan(i)} rounded-xl ${getColSpan(i)} relative`}
+            >
+              <img
+                src={image.image_url!}
+                alt={image.ai_describe!}
+                className="w-full h-full object-cover"
+              />
+              <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
+                {chunkIndex * count + i} - {i}
+              </p>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function Grid({
   images,
   isImagesLoading,
@@ -29,15 +118,30 @@ export default function Grid({
   images: ImageWithSimilarity[];
   isImagesLoading: boolean;
 }) {
+  const [isBento, setIsBento] = useState(true);
+
   return (
-    <div className="lg:flex-[0.7] w-full max-h-[100%] overflow-y-auto bg-light custom-scrollbar">
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 flex-1">
-        {images?.map((image) => (
-          <Link key={image.id} href={`/image/${image.id}`}>
-            <ImageComponent key={image.id} image={image} />
-          </Link>
-        ))}
-      </div>
+    <div className="flex flex-col w-full h-[100%] flex-[1]">
+      {isBento ? (
+        <BentoGrid
+          images={[
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+            ...images,
+          ]}
+        />
+      ) : (
+        <NormalGrid
+          images={[...images, ...images, ...images, ...images, ...images]}
+        />
+      )}
     </div>
   );
 }
