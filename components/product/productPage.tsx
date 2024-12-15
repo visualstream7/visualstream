@@ -333,7 +333,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 getMockupOfSelectedVariant()?.mock ||
                 selectedVariantGroup?.image
               }
-              onLoad={() => {}}
+              onLoad={() => { }}
               alt="Product"
               className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
             />
@@ -400,11 +400,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                     key={index}
                     src={variants.image || ""}
                     alt="variant mockup"
-                    className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
-                      selectedVariantGroup?.color_code === variants.color_code
+                    className={`w-10 h-10 border-2 rounded-md cursor-pointer ${selectedVariantGroup?.color_code === variants.color_code
                         ? "border-blue-800"
                         : "border-gray-300"
-                    }`}
+                      }`}
                     onClick={() => handleColorChange(variants)}
                     onMouseEnter={() => {
                       handleColorChange(variants);
@@ -505,7 +504,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 className="w-full p-4 bg-[#fed813] text-black font-medium py-2 rounded-3xl mt-4"
                 onClick={addToCart}
               >
-                {cartHasItems ? "Add to Cart" : "Go to Cart"}
+                {"Add to Cart"}
               </button>
 
               {!cartHasItems && (

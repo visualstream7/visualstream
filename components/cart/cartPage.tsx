@@ -177,7 +177,7 @@ export default function Cart({ user }: CartProps) {
     (acc, item) => acc + item.price * item.quantity,
     0,
   );
-  const shipping = 5.99;
+  const shipping = 0;
   const tax = subtotal * 0.08;
 
   return (
