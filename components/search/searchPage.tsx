@@ -5,7 +5,7 @@ import Nav from "@/components/nav";
 import Grid from "./grid";
 import PickerContainer, { Color } from "./pickerContainer";
 import useImageSearch from "@/hooks/useImageSearch";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -14,17 +14,31 @@ type UserPropType = {
 export default function SearchPage({ user }: UserPropType) {
   const [selectedColors, setSelectedColors] = useState<Color[]>([]);
   const [isResizing, setIsResizing] = useState<number | null>(null);
+  const [isNormalGrid, setIsNormalGrid] = useState<boolean>(true);
 
   const { images, isImagesLoading } = useImageSearch({
     selectedColors: selectedColors,
     isResizing: isResizing,
   });
 
+  useEffect(() => {
+    console.log(selectedColors.length);
+    if (selectedColors.length > 0) {
+      setIsNormalGrid(false);
+    } else {
+      setIsNormalGrid(true);
+    }
+  }, [selectedColors]);
+
   return (
     <div className="flex flex-col h-dvh font-primary">
       <Nav user={user} />
       <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
-        <Grid images={images} isImagesLoading={isImagesLoading} />
+        <Grid
+          images={images}
+          isImagesLoading={isImagesLoading}
+          normalGrid={isNormalGrid}
+        />
         <PickerContainer
           selectedColors={selectedColors}
           setSelectedColors={setSelectedColors}

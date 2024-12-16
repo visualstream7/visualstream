@@ -37,6 +37,7 @@ function ImageComponent({
   useEffect(() => {
     if (!hoveredImage) {
       setDisplayedImage(image.image_url || "");
+      setIsFading(false);
     } else if (hoveredImage !== displayedImage) {
       setIsFading(true);
       const fadeTimeout = setTimeout(() => {
@@ -46,11 +47,11 @@ function ImageComponent({
 
       return () => clearTimeout(fadeTimeout);
     }
-  }, [hoveredImage, image.image_url]);
+  }, [hoveredImage]);
 
   return (
     <img
-      src={displayedImage || ""}
+      src={displayedImage || image.image_url || ""}
       alt="Image Display"
       className={`
         rounded-lg object-cover m-auto

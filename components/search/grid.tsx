@@ -2,7 +2,7 @@ import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import { FullContainerSpinner } from "../spinners/fullContainerSpinner";
 import { useState } from "react";
-import { CircleDashed } from "lucide-react";
+import { CircleDashed, XIcon } from "lucide-react";
 import Link from "next/link";
 import { ImageWithSimilarity } from "@/libs/ColorAnalyzer/colorAnalyzer";
 
@@ -25,8 +25,8 @@ const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
 
 const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
   return (
-    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
-      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 auto-rows-[70px]">
+    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
             key={image.id}
@@ -83,26 +83,53 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
     return "";
   }
 
+  const [selectedImage, setSelectedImage] =
+    useState<ImageWithSimilarity | null>(null);
+
   return (
-    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] overflow-y-auto custom-scrollbar flex flex-col gap-2 p-2">
+    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col">
       {imageChunks.map((chunk, chunkIndex) => (
         <div
           key={chunkIndex}
-          className="grid auto-rows-[70px] grid-cols-12 gap-2"
+          className="grid auto-rows-[70px] grid-cols-12 gap-1"
         >
           {chunk.map((image, i) => (
             <div
               key={image.id}
               className={`${getRowSpan(i)} rounded-xl ${getColSpan(i)} relative`}
             >
-              <img
-                src={image.image_url!}
-                alt={image.ai_describe!}
-                className="w-full h-full object-cover"
-              />
-              <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
+              <div className="w-full h-full relative">
+                {selectedImage?.id === image.id && (
+                  <div
+                    className={`absolute flex flex-col gap-2 top-0 w-[300px] h-[max-content] bg-white z-20 p-4 shadow-md border border-black
+                      right-0 translate-x-[300px] rounded-lg`}
+                  >
+                    <XIcon
+                      className=" cursor-pointer ml-auto"
+                      onClick={() => setSelectedImage(null)}
+                    />
+                    <img src={image.image_url!} alt={image.ai_describe!} />
+                    <p className="text-sm text-gray-500 text-justify">
+                      {image.ai_describe}
+                    </p>
+                    <Link href={`/image/${image.id}`}>
+                      <p className="text-blue-500 w-full text-center">
+                        View Products
+                      </p>
+                    </Link>
+                  </div>
+                )}
+
+                <img
+                  src={image.image_url!}
+                  alt={image.ai_describe!}
+                  className={`w-full h-full object-cover`}
+                  onClick={() => setSelectedImage(image)}
+                />
+              </div>
+              {/* <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
                 {chunkIndex * count + i} - {i}
-              </p>
+              </p> */}
             </div>
           ))}
         </div>
@@ -114,33 +141,19 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
 export default function Grid({
   images,
   isImagesLoading,
+  normalGrid,
 }: {
   images: ImageWithSimilarity[];
   isImagesLoading: boolean;
+  normalGrid: boolean;
 }) {
-  const [isBento, setIsBento] = useState(true);
-
   return (
     <div className="flex flex-col w-full h-[100%] flex-[1]">
-      {isBento ? (
-        <BentoGrid
-          images={[
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-            ...images,
-          ]}
-        />
+      {!normalGrid ? (
+        // <BentoGrid images={[...images, ...images, ...images, ...images]} />
+        <BentoGrid images={images} />
       ) : (
-        <NormalGrid
-          images={[...images, ...images, ...images, ...images, ...images]}
-        />
+        <NormalGrid images={images} />
       )}
     </div>
   );
