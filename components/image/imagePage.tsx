@@ -215,7 +215,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                 key={product.id}
                 href={`/product/${image.id}/${product.id}`}
               >
-                <div className="w-full lg:h-30 rounded shadow overflow-hidden border-black">
+                <div className="w-full h-[150px] rounded shadow overflow-hidden border-black">
                   <div className="relative w-full h-full">
                     <img
                       src={product.mockup || product.image}
