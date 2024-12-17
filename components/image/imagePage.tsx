@@ -63,6 +63,10 @@ function ImageComponent({
   );
 }
 
+function getProductType(product: Product) {
+  return product.type_name;
+}
+
 function getProductMock(product: Product, mocks: any) {
   const mockData = mocks.find((m: any) => m.product_id === product.id);
   return mockData ? mockData.mock : null;
@@ -178,21 +182,13 @@ export default function ImagePage({ user, image }: UserPropType) {
             </button>
           </Link>
           <ImageComponent hoveredImage={hoveredImage} image={image} />
-          {/* <img
-            src={hoveredImage || image.image_url || ""}
-            alt="Image Display"
-            className={`
-              rounded-lg object-cover m-auto
-              ${hoveredImage ? "h-[60vh]" : "w-[90vw] lg:max-w-[30vw] max-h-[60vh]"}
-              transition-all duration-300 ease-in-out
-            `}
-          /> */}
+
           <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
             {image.ai_describe || "Description"}
           </p>
         </div>
 
-        <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-[80vh] lg:overflow-y-hidden flex flex-col">
+        <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-[86vh] lg:overflow-y-hidden flex flex-col">
           <Link href="/">
             <button className="hidden lg:flex items-center space-x-2 text-gray-800 hover:text-gray-800">
               <IoArrowBack />
@@ -207,7 +203,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           </div>
 
           <div
-            className="lg:grid grid grid-cols-4 lg:grid-cols-4 gap-4 lg:w-[30vw] overflow-y-scroll p-8 custom-scrollbar"
+            className="lg:grid grid grid-cols-4 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-8 custom-scrollbar"
             onMouseLeave={() => setHoveredImage(null)}
           >
             {products.map((product) => (
@@ -215,8 +211,8 @@ export default function ImagePage({ user, image }: UserPropType) {
                 key={product.id}
                 href={`/product/${image.id}/${product.id}`}
               >
-                <div className="w-full h-[150px] rounded shadow overflow-hidden border-black">
-                  <div className="relative w-full h-full">
+                <div className="w-full rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4">
+                  <div className="relative w-full h-full min-h-max my-auto">
                     <img
                       src={product.mockup || product.image}
                       alt={`Thumbnail for ${product.title}`}
@@ -231,6 +227,9 @@ export default function ImagePage({ user, image }: UserPropType) {
                       </div>
                     )}
                   </div>
+                  <p className="text-xs font-semibold text-center">
+                    {getProductType(product)}
+                  </p>
                 </div>
               </Link>
             ))}
