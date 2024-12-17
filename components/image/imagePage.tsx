@@ -24,6 +24,47 @@ interface Product {
   isLoadingMockup?: boolean; // Track loading state
 }
 
+function getSortedProducts(products: Product[]): Product[] {
+  // Define the desired sort order based on product IDs
+  const sortOrder: number[] = [
+    206, // Hat
+    380, // Hoodie
+    71, // T-Shirt
+    279, // All-Over Print Backpack
+    474, // Spiral Notebook
+    19, // Mug
+    181, // iPhone Case
+    382, // Stainless Steel Water Bottle
+    84, // All-Over Print Tote Bag
+    1, // Enhanced Matte Paper Poster (in)
+    588, // Glossy Metal Print
+    3, // Canvas
+    358, // Kiss Cut Stickers (in)
+    534, // Jigsaw Puzzle
+    394, // Laptop Sleeve
+  ];
+
+  // Create a map for quick lookup of the sort order position based on ID
+  const orderMap: { [key: number]: number } = {};
+  sortOrder.forEach((id, index) => {
+    orderMap[id] = index;
+  });
+
+  // Sort the products based on the orderMap (which is based on their ID)
+  return products.sort((a, b) => {
+    const aOrder = orderMap[a.id];
+    const bOrder = orderMap[b.id];
+
+    // If both products are found in the order map, compare them by their order
+    if (aOrder !== undefined && bOrder !== undefined) {
+      return aOrder - bOrder;
+    }
+
+    // If any of the products is not in the orderMap, put it at the end
+    return aOrder === undefined ? 1 : -1;
+  });
+}
+
 function ImageComponent({
   hoveredImage,
   image,
@@ -33,6 +74,11 @@ function ImageComponent({
 }) {
   const [displayedImage, setDisplayedImage] = useState(image.image_url);
   const [isFading, setIsFading] = useState(false);
+
+  interface Product {
+    id: number;
+    type: string;
+  }
 
   useEffect(() => {
     if (!hoveredImage) {
@@ -64,6 +110,7 @@ function ImageComponent({
 }
 
 function getProductType(product: Product) {
+  console.log(product.type_name, product.id);
   return product.type_name;
 }
 
@@ -203,21 +250,23 @@ export default function ImagePage({ user, image }: UserPropType) {
           </div>
 
           <div
-            className="lg:grid grid grid-cols-4 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-8 custom-scrollbar"
+            className="lg:grid grid grid-cols-2 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-8 custom-scrollbar"
             onMouseLeave={() => setHoveredImage(null)}
           >
-            {products.map((product) => (
+            {getSortedProducts(products).map((product) => (
               <Link
                 key={product.id}
                 href={`/product/${image.id}/${product.id}`}
               >
-                <div className="w-full rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4">
+                <div
+                  className="w-full rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4"
+                  onMouseEnter={() => setHoveredImage(product.mockup)}
+                >
                   <div className="relative w-full h-full min-h-max my-auto">
                     <img
                       src={product.mockup || product.image}
                       alt={`Thumbnail for ${product.title}`}
                       className="w-full h-full object-cover"
-                      onMouseEnter={() => setHoveredImage(product.mockup)}
                     />
                     {product.isLoadingMockup && (
                       <div className="absolute inset-0 flex items-center justify-center bg-black/50">
