@@ -366,7 +366,6 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
                 <span className="text-sm">Price:</span>
                 <p className="text-xl text-[#803d2c]">{getVariant()?.price}</p>
               </div>
-              <p className="text-gray-500 mt-1">All prices include VAT</p>
             </div>
 
             <div className="mt-4">
