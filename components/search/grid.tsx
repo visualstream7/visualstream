@@ -101,7 +101,7 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
               <div className="w-full h-full relative">
                 {selectedImage?.id === image.id && (
                   <div
-                    className={`absolute flex flex-col gap-2 top-0 w-[300px] h-[max-content] bg-white z-20 p-4 shadow-md border border-black
+                    className={`absolute flex flex-col gap-4 top-0 w-[300px] h-[max-content] bg-white z-20 p-4 shadow-md border border-black
                       right-0 translate-x-[300px] rounded-lg`}
                   >
                     <XIcon
@@ -109,9 +109,6 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                       onClick={() => setSelectedImage(null)}
                     />
                     <img src={image.image_url!} alt={image.ai_describe!} />
-                    <p className="text-sm text-gray-500 text-justify">
-                      {image.ai_describe}
-                    </p>
                     <Link href={`/image/${image.id}`}>
                       <p className="text-blue-500 w-full text-center">
                         View Products
@@ -127,9 +124,6 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                   onClick={() => setSelectedImage(image)}
                 />
               </div>
-              {/* <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
-                {chunkIndex * count + i} - {i}
-              </p> */}
             </div>
           ))}
         </div>
