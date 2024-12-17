@@ -100,9 +100,9 @@ export default function Home() {
         className="max-w-full bg-[url(/test.png)] bg-center bg-[length:100px_100px] bg-no-repeat"
       />
       <img
-        src={"/test.png"}
+        src={"/t.png"}
         alt="Product"
-        className="max-w-full bg-[#ffffff] "
+        className="max-w-full bg-[#ffffff] m-[300px]"
       />
 
       <div className="space-y-4">
