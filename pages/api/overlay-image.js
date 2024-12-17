@@ -155,7 +155,7 @@ export default async function handler(req, res) {
     }
 
     // Convert the Base64 string to a File
-    const imageFile = base64ToFile(base64Image, "image.png");
+    const imageFile = base64ToFile(base64Image, "mock.png");
 
     // Upload the file using your existing upload function
     let highResUpload = await utapi.uploadFiles(imageFile);
