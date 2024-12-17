@@ -24,6 +24,16 @@ interface Product {
   isLoadingMockup?: boolean; // Track loading state
 }
 
+function extract_type_name(product: Product | null): string | null {
+  if (!product) return null;
+  let typename = product.type_name;
+  // remove (in) from the typename
+  if (typename.includes("(in)")) {
+    typename = typename.replace("(in)", "");
+  }
+  return typename;
+}
+
 function getSortedProducts(products: Product[]): Product[] {
   // Define the desired sort order based on product IDs
   const sortOrder: number[] = [
@@ -65,6 +75,10 @@ function getSortedProducts(products: Product[]): Product[] {
   });
 }
 
+function getProductFromMock(mock: string, products: Product[]): Product | null {
+  return products.find((product) => product.mockup === mock) || null;
+}
+
 function ImageComponent({
   hoveredImage,
   image,
@@ -74,11 +88,6 @@ function ImageComponent({
 }) {
   const [displayedImage, setDisplayedImage] = useState(image.image_url);
   const [isFading, setIsFading] = useState(false);
-
-  interface Product {
-    id: number;
-    type: string;
-  }
 
   useEffect(() => {
     if (!hoveredImage) {
@@ -107,11 +116,6 @@ function ImageComponent({
       `}
     />
   );
-}
-
-function getProductType(product: Product) {
-  console.log(product.type_name, product.id);
-  return product.type_name;
 }
 
 function getProductMock(product: Product, mocks: any) {
@@ -230,6 +234,11 @@ export default function ImagePage({ user, image }: UserPropType) {
           </Link>
           <ImageComponent hoveredImage={hoveredImage} image={image} />
 
+          {hoveredImage && (
+            <h2 className="text-2xl text-gray-900 text-center m-4 lg:w-[30vw]">
+              {extract_type_name(getProductFromMock(hoveredImage, products))}
+            </h2>
+          )}
           <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
             {image.ai_describe || "Description"}
           </p>
@@ -277,18 +286,12 @@ export default function ImagePage({ user, image }: UserPropType) {
                     )}
                   </div>
                   <p className="text-xs font-semibold text-center">
-                    {getProductType(product)}
+                    {extract_type_name(product)}
                   </p>
                 </div>
               </Link>
             ))}
           </div>
-
-          {/* <div className="flex flex-col py-2">
-            <button className="lg:w-[30vw] bg-black text-white py-3 rounded shadow hover:bg-gray-900 mb-1">
-              SEE ALL PRODUCT CATEGORIES
-            </button>
-          </div> */}
         </div>
       </div>
     </div>
