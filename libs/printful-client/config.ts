@@ -1,16 +1,16 @@
 let configuration = {
   "71": {
-    x: 260,
-    y: 347,
-    w: 190,
-    h: 238,
-    box_x: 0,
-    box_y: 0,
-    box_w: 0,
-    box_h: 0,
-    box_roundness: 20,
-    overlay_roundness: 10,
-    is_cropped: true,
+    "x": 159,
+    "y": 200,
+    "w": 200,
+    "h": 220,
+    "box_x": 0,
+    "box_y": 0,
+    "box_w": 0,
+    "box_h": 0,
+    "box_roundness": 20,
+    "overlay_roundness": 10,
+    "is_cropped": true
   },
   "206": {
     x: 240,

@@ -102,7 +102,7 @@ export default function Home() {
       <img
         src={"/t.png"}
         alt="Product"
-        className="max-w-full bg-[#ffffff] m-[300px]"
+        className="max-w-full bg-[#302d4b] m-[300px]"
       />
 
       <div className="space-y-4">
