@@ -54,7 +54,10 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
   // Split the images array into chunks of 7 elements
 
   let count = 48;
-  const imageChunks = chunkArray(images, count);
+  const imageChunks = chunkArray(
+    images.filter((image) => image.similarity > 0.5),
+    count,
+  );
 
   function getColSpan(i: number) {
     if (i === 1) return "col-span-2";
@@ -175,6 +178,9 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                   }}
                   ref={selectedImage?.id === image.id ? selectedImageRef : null}
                 />
+                <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
+                  {image.similarity.toFixed(2)}
+                </p>
               </div>
             </div>
           ))}

@@ -306,15 +306,33 @@ const RelatedProductsCarousel = ({
                     key={index}
                     className="h-full flex cursor-pointer flex-col border rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
                   >
-                    <img
-                      src={
-                        product.isLoadingMockup
-                          ? product.image
-                          : product.mockup || product.image
-                      }
-                      alt={product.title}
-                      className="rounded-md m-auto"
-                    />
+                    {
+                      // show for puzzle
+                      product.id === 534 && (
+                        <img
+                          src="/puzzle.png"
+                          style={{
+                            background: `url('${product_image?.image_url || ""}') center/contain no-repeat`,
+                          }}
+                          alt={product.title}
+                          className="m-auto w-[150px] h-[100px]"
+                        />
+                      )
+                    }
+                    {
+                      // don't show for puzzle
+                      product.id !== 534 && (
+                        <img
+                          src={
+                            product.isLoadingMockup
+                              ? product.image
+                              : product.mockup || product.image
+                          }
+                          alt={product.title}
+                          className="rounded-md m-auto"
+                        />
+                      )
+                    }
 
                     {product.isLoadingMockup && (
                       <CircleDashed
@@ -628,22 +646,38 @@ const ProductPage: React.FC<ProductPageProps> = ({
         <div className="flex-1 flex flex-col lg:flex-row justify-center items-start mt-6 gap-4 lg:gap-6 p-4 sm:p-6">
           {/* Left Section: Product Image */}
           <div className="flex bg-gray-400 relative max-w-full m-auto lg:max-w-[40vw]">
-            <img
-              src={
-                getMockupOfSelectedVariant()?.mock ||
-                selectedVariantGroup?.image
-              }
-              onLoad={() => {}}
-              alt="Product"
-              className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
-            />
-            {!getMockupOfSelectedVariant()?.mock && (
+            {product.id !== 534 && (
+              <img
+                src={
+                  getMockupOfSelectedVariant()?.mock ||
+                  selectedVariantGroup?.image
+                }
+                onLoad={() => {}}
+                alt=""
+                className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
+              />
+            )}
+            {!getMockupOfSelectedVariant()?.mock && product.id !== 534 && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                 <span className="text-white text-lg animate-spin">
                   <CircleDashed size={32} />
                 </span>
               </div>
             )}
+
+            {
+              // Puzzle image
+              product.id === 534 && (
+                <img
+                  src={"/puzzle.png"}
+                  alt="Product"
+                  className={`w-[600px] h-[600px] flex`}
+                  style={{
+                    background: `url('${product_image?.image_url || ""}') center/contain no-repeat`,
+                  }}
+                />
+              )
+            }
           </div>
 
           {/* Middle Section: Product Details */}
