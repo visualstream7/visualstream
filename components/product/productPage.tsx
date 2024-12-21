@@ -390,7 +390,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
 
-  const { count } = useCart({
+  const { cartItems } = useCart({
     rerender: rerenderNav,
     setRerenderNav: setRerenderNav,
     user,
@@ -557,6 +557,12 @@ const ProductPage: React.FC<ProductPageProps> = ({
   };
 
   const addToCart = async (): Promise<void> => {
+    // if mockup is not generated, alert user to wait
+    if (!getMockupOfSelectedVariant()?.mock) {
+      alert("Please wait for the mockup to be generated.");
+      return;
+    }
+
     if (!user) {
       // Handle unsigned user
       return unsignedAddToCart();
@@ -675,7 +681,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
-      <Nav user={user} cartCount={count} />
+      <Nav user={user} cartCount={cartItems.length} />
       <div className="flex flex-col overflow-auto">
         <Link href={`/image/${image_id}`}>
           <button className="flex items-center text-gray-800 hover:text-gray-800 m-4 lg:hidden">

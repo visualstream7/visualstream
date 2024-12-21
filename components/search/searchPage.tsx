@@ -31,7 +31,7 @@ export default function SearchPage({ user }: UserPropType) {
     }
   }, [selectedColors]);
 
-  const { count } = useCart({
+  const { cartItems } = useCart({
     user: user,
     rerender: false,
     setRerenderNav: () => {},
@@ -39,7 +39,7 @@ export default function SearchPage({ user }: UserPropType) {
 
   return (
     <div className="flex flex-col h-dvh font-primary">
-      <Nav user={user} cartCount={count} />
+      <Nav user={user} cartCount={cartItems.length} />
       <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
         <Grid
           images={images}
