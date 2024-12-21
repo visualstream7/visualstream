@@ -126,6 +126,28 @@ function getProductMock(product: Product, mocks: any) {
   const mockData = mocks.find((m: any) => m.product_id === product.id);
   return mockData ? mockData.mock : null;
 }
+const ProductDescription = ({ description }: { description: string }) => {
+  // Split the input text into main description and bullet points
+  const [mainDescription, ...bulletPoints] = description
+    .split("•")
+    .map((item) => item.trim());
+
+  return (
+    <div className="bg-white rounded-lg max-w-lg">
+      {/* Main Description */}
+      <p className="text-lg font-medium mb-4 text-gray-800">
+        {mainDescription}
+      </p>
+
+      {/* Bullet Points */}
+      <ul className="list-disc list-inside text-gray-600">
+        {bulletPoints.map((point, index) => (
+          <li key={index}>{point}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
 
 const RelatedProductsCarousel = ({
   product_image,
@@ -693,34 +715,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
             <div className="mt-6">
               <h3 className="text-lg font-semibold">Product Details</h3>
-              <ul className="list-none pl-0 mt-2 text-sm">
-                <li className="flex">
-                  <span className="w-40 font-medium text-gray-900">
-                    Material composition
-                  </span>
-                  <span className="text-gray-700">
-                    99% Polyester, 1% Elastane
-                  </span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">
-                    Closure type
-                  </span>
-                  <span className="text-gray-700">Pull On</span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">
-                    Neck style
-                  </span>
-                  <span className="text-gray-700">Scoop Neck</span>
-                </li>
-                <li className="flex mt-2">
-                  <span className="w-40 font-medium text-gray-900">
-                    Sleeve type
-                  </span>
-                  <span className="text-gray-700">Short Sleeve</span>
-                </li>
-              </ul>
+              <ProductDescription description={product.description} />
             </div>
           </div>
 
