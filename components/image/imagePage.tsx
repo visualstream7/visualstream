@@ -232,7 +232,37 @@ export default function ImagePage({ user, image }: UserPropType) {
               <span>Back</span>
             </button>
           </Link>
-          <ImageComponent hoveredImage={hoveredImage} image={image} />
+          {getProductFromMock(hoveredImage!, products)?.id !== 534 &&
+            getProductFromMock(hoveredImage!, products)?.id !== 358 && (
+              <ImageComponent hoveredImage={hoveredImage} image={image} />
+            )}
+          {
+            // Jigsaw Puzzle image
+            getProductFromMock(hoveredImage!, products)?.id === 534 && (
+              <div className="w-[90vw] lg:max-w-[30vw] h-[60vh] m-auto">
+                <img
+                  src="/puzzle.png"
+                  style={{
+                    background: `url('${image.image_url || ""}') center/600px 300px no-repeat`,
+                  }}
+                  alt="Jigsaw Puzzle"
+                  className="w-[600px] m-auto"
+                />
+              </div>
+            )
+          }
+          {
+            // Sticker image
+            getProductFromMock(hoveredImage!, products)?.id === 358 && (
+              <div className="w-[90vw] lg:max-w-[30vw] h-[60vh] m-auto flex items-center">
+                <img
+                  src={image.image_url || ""}
+                  alt="Sticker"
+                  className="w-[20vw] border border-[#00000010] m-auto shadow-lg p-3"
+                />
+              </div>
+            )
+          }
 
           {hoveredImage && (
             <h2 className="text-2xl text-gray-900 text-center m-4 lg:w-[30vw]">
@@ -272,18 +302,43 @@ export default function ImagePage({ user, image }: UserPropType) {
                   onMouseEnter={() => setHoveredImage(product.mockup)}
                 >
                   <div className="relative w-full h-full min-h-max my-auto">
-                    <img
-                      src={product.mockup || product.image}
-                      alt={`Thumbnail for ${product.title}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {product.isLoadingMockup && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                        <span className="text-white text-sm animate-spin">
-                          <CircleDashed size={24} />
-                        </span>
+                    {product.id !== 534 && product.id !== 358 && (
+                      <img
+                        src={product.mockup || product.image}
+                        alt={`Thumbnail for ${product.title}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {product.id === 534 && (
+                      <img
+                        src="/puzzle.png"
+                        style={{
+                          background: `url('${image.image_url || ""}') center/150px 75px no-repeat`,
+                        }}
+                        alt={product.title}
+                        className="w-[150px]"
+                      />
+                    )}
+
+                    {product.id === 358 && (
+                      <div className="w-[90%] border border-[#00000010] m-auto shadow-lg p-2">
+                        <img
+                          src={image.image_url || ""}
+                          alt="Sticker"
+                          className="w-full"
+                        />
                       </div>
                     )}
+
+                    {product.isLoadingMockup &&
+                      product.id !== 534 &&
+                      product.id !== 358 && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                          <span className="text-white text-sm animate-spin">
+                            <CircleDashed size={24} />
+                          </span>
+                        </div>
+                      )}
                   </div>
                   <p className="text-xs font-semibold text-center">
                     {extract_type_name(product)}

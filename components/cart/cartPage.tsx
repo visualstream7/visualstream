@@ -198,7 +198,7 @@ export default function Cart({ user }: CartProps) {
                     className="flex items-center justify-between shadow-lg p-4 rounded-xl border-b hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center space-x-4">
-                      {item.mock && (
+                      {item.mock && item.product_id !== 534 && (
                         <img
                           src={item.mock}
                           alt={item.title}
@@ -213,19 +213,15 @@ export default function Cart({ user }: CartProps) {
                             {item.title}
                           </h3>
                         </Link>
-                        {/* <p className="text-sm text-gray-500">
-                          Product Id: {item.product_id}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Variant Id: {item.variant_id}
-                        </p> */}
-                        <div className="flex items-center space-x-2">
-                          <p className="text-sm text-gray-500">Color:</p>
-                          <div
-                            className="w-4 h-4 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                        </div>
+                        {item.color && (
+                          <div className="flex items-center space-x-2">
+                            <p className="text-sm text-gray-500">Color:</p>
+                            <div
+                              className="w-4 h-4 rounded-full"
+                              style={{ backgroundColor: item.color }}
+                            />
+                          </div>
+                        )}
                         <p className="text-sm text-gray-500">
                           Size: {item.size}
                         </p>

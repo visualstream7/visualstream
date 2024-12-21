@@ -32,16 +32,6 @@ interface Product {
   isLoadingMockup?: boolean; // Track loading state
 }
 
-function extract_type_name(product: Product | null): string | null {
-  if (!product) return null;
-  let typename = product.type_name;
-  // remove (in) from the typename
-  if (typename.includes("(in)")) {
-    typename = typename.replace("(in)", "");
-  }
-  return typename;
-}
-
 interface ProductPageProps {
   id: string;
   image_id: string;
@@ -312,16 +302,28 @@ const RelatedProductsCarousel = ({
                         <img
                           src="/puzzle.png"
                           style={{
-                            background: `url('${product_image?.image_url || ""}') center/contain no-repeat`,
+                            background: `url('${product_image?.image_url || ""}') center/150px 75px no-repeat`,
                           }}
                           alt={product.title}
-                          className="m-auto w-[150px] h-[100px]"
+                          className="m-auto w-[150px]"
                         />
                       )
                     }
                     {
+                      // show for sticker
+                      product.id === 358 && (
+                        <div className="m-auto flex items-center">
+                          <img
+                            src={product_image?.image_url || ""}
+                            alt="Sticker"
+                            className="w-[100px] border border-[#00000010] m-auto shadow-lg p-2"
+                          />
+                        </div>
+                      )
+                    }
+                    {
                       // don't show for puzzle
-                      product.id !== 534 && (
+                      product.id !== 534 && product.id !== 358 && (
                         <img
                           src={
                             product.isLoadingMockup
@@ -514,7 +516,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
       productId,
       mock,
     );
-    // setVariantMocks((prev) => [...prev, { variant_id: variantIds[0], mock }]);
     if (result)
       setVariantMocks((prev) => [...prev, { variant_id: variantIds[0], mock }]);
     if (error) throw new Error(error);
@@ -645,8 +646,8 @@ const ProductPage: React.FC<ProductPageProps> = ({
         </Link>
         <div className="flex-1 flex flex-col lg:flex-row justify-center items-start mt-6 gap-4 lg:gap-6 p-4 sm:p-6">
           {/* Left Section: Product Image */}
-          <div className="flex bg-gray-400 relative max-w-full m-auto lg:max-w-[40vw]">
-            {product.id !== 534 && (
+          <div className="flex relative max-w-full m-auto lg:max-w-[40vw]">
+            {product.id !== 534 && product.id !== 358 && (
               <img
                 src={
                   getMockupOfSelectedVariant()?.mock ||
@@ -657,13 +658,15 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
               />
             )}
-            {!getMockupOfSelectedVariant()?.mock && product.id !== 534 && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                <span className="text-white text-lg animate-spin">
-                  <CircleDashed size={32} />
-                </span>
-              </div>
-            )}
+            {!getMockupOfSelectedVariant()?.mock &&
+              product.id !== 534 &&
+              product.id !== 358 && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <span className="text-white text-lg animate-spin">
+                    <CircleDashed size={32} />
+                  </span>
+                </div>
+              )}
 
             {
               // Puzzle image
@@ -671,13 +674,21 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 <img
                   src={"/puzzle.png"}
                   alt="Product"
-                  className={`w-[600px] h-[600px] flex`}
+                  className={`w-[600px] flex`}
                   style={{
-                    background: `url('${product_image?.image_url || ""}') center/contain no-repeat`,
+                    background: `url('${product_image?.image_url || ""}') center/600px 300px no-repeat`,
                   }}
                 />
               )
             }
+            {product.id === 358 && (
+              // Sticker image
+              <img
+                src={product_image?.image_url || ""}
+                alt="Product"
+                className={`w-[50%] shadow-lg p-3 border border-[#00000010] m-auto`}
+              />
+            )}
           </div>
 
           {/* Middle Section: Product Details */}
@@ -720,32 +731,36 @@ const ProductPage: React.FC<ProductPageProps> = ({
               </select>
             </div>
 
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-500">
-                Color:{" "}
-                <span className="text-gray-700">
-                  {selectedVariantGroup?.color_code}
-                </span>
-              </p>
-              <div className="flex gap-2 mt-2 flex-wrap">
-                {distinctVariants?.map((variants, index) => (
-                  <img
-                    key={index}
-                    src={variants.image || ""}
-                    alt="variant mockup"
-                    className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
-                      selectedVariantGroup?.color_code === variants.color_code
-                        ? "border-blue-800"
-                        : "border-gray-300"
-                    }`}
-                    onClick={() => handleColorChange(variants)}
-                    onMouseEnter={() => {
-                      handleColorChange(variants);
-                    }}
-                  />
-                ))}
+            {selectedVariantGroup?.color_code && (
+              <div className="mt-4">
+                <p className="text-sm font-medium text-gray-500">
+                  Color:{" "}
+                  <span className="text-gray-700">
+                    {selectedVariantGroup?.color_code}
+                  </span>
+                </p>
+                <div className="flex gap-2 mt-2 flex-wrap">
+                  {distinctVariants?.length > 1 &&
+                    distinctVariants?.map((variants, index) => (
+                      <img
+                        key={index}
+                        src={variants.image || ""}
+                        alt="variant mockup"
+                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
+                          selectedVariantGroup?.color_code ===
+                          variants.color_code
+                            ? "border-blue-800"
+                            : "border-gray-300"
+                        }`}
+                        onClick={() => handleColorChange(variants)}
+                        onMouseEnter={() => {
+                          handleColorChange(variants);
+                        }}
+                      />
+                    ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="mt-6">
               <h3 className="text-lg font-semibold">Product Details</h3>

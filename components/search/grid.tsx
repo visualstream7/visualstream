@@ -55,7 +55,8 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
 
   let count = 48;
   const imageChunks = chunkArray(
-    images.filter((image) => image.similarity > 0.5),
+    images,
+    // images.filter((image) => image.similarity > 0.5),
     count,
   );
 
@@ -168,7 +169,7 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                 <img
                   src={image.image_url!}
                   alt={image.ai_describe!}
-                  className={`w-full h-full object-cover`}
+                  className={`w-full h-full object-cover ${image.similarity > 0.4 ? "border-8 border-green-500" : ""}`}
                   onClick={() => {
                     if (selectedImage) {
                       setSelectedImage(image);
