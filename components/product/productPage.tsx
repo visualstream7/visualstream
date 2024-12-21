@@ -1,24 +1,51 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { UserResource } from "@clerk/types";
 import Nav from "../nav";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
 import { Printful } from "@/libs/printful-client/printful-sdk";
-import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
+import { SupabaseWrapper, Variant } from "@/database/supabase";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
-  CircleDashed,
   MapPinCheckIcon,
   MinusIcon,
   PlusIcon,
 } from "lucide-react";
+import { CircleDashed } from "lucide-react";
+import { setPriority } from "os";
 import { Json } from "@/database/types";
+
+type UserPropType = {
+  user: UserResource | null | undefined;
+  image: Image;
+};
+
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  type_name: string;
+  image: string;
+  mockup: string | null;
+  isLoadingMockup?: boolean; // Track loading state
+}
+
+function extract_type_name(product: Product | null): string | null {
+  if (!product) return null;
+  let typename = product.type_name;
+  // remove (in) from the typename
+  if (typename.includes("(in)")) {
+    typename = typename.replace("(in)", "");
+  }
+  return typename;
+}
 
 interface ProductPageProps {
   id: string;
   image_id: string;
+  product_image: Image | null;
   user: UserResource | null | undefined;
 }
 
@@ -50,7 +77,258 @@ type Image = {
 
 const database = new SupabaseWrapper("CLIENT");
 
-const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
+function getSortedProducts(products: Product[]): Product[] {
+  // Define the desired sort order based on product IDs
+  const sortOrder: number[] = [
+    206, // Hat
+    380, // Hoodie
+    71, // T-Shirt
+    279, // All-Over Print Backpack
+    474, // Spiral Notebook
+    19, // Mug
+    181, // iPhone Case
+    382, // Stainless Steel Water Bottle
+    84, // All-Over Print Tote Bag
+    1, // Enhanced Matte Paper Poster (in)
+    588, // Glossy Metal Print
+    3, // Canvas
+    358, // Kiss Cut Stickers (in)
+    534, // Jigsaw Puzzle
+    394, // Laptop Sleeve
+  ];
+
+  // Create a map for quick lookup of the sort order position based on ID
+  const orderMap: { [key: number]: number } = {};
+  sortOrder.forEach((id, index) => {
+    orderMap[id] = index;
+  });
+
+  // Sort the products based on the orderMap (which is based on their ID)
+  return products.sort((a, b) => {
+    const aOrder = orderMap[a.id];
+    const bOrder = orderMap[b.id];
+
+    // If both products are found in the order map, compare them by their order
+    if (aOrder !== undefined && bOrder !== undefined) {
+      return aOrder - bOrder;
+    }
+
+    // If any of the products is not in the orderMap, put it at the end
+    return aOrder === undefined ? 1 : -1;
+  });
+}
+
+function getProductFromMock(mock: string, products: Product[]): Product | null {
+  return products.find((product) => product.mockup === mock) || null;
+}
+
+function getProductMock(product: Product, mocks: any) {
+  const mockData = mocks.find((m: any) => m.product_id === product.id);
+  return mockData ? mockData.mock : null;
+}
+
+const RelatedProductsCarousel = ({
+  product_image,
+  current_product_id,
+}: {
+  product_image: Image | null;
+  current_product_id: number;
+}) => {
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+  const fetchProducts = useRef<boolean>(false);
+
+  const [products, setProducts] = useState<Product[]>([]);
+
+  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+
+  if (!product_image) return null;
+
+  useEffect(() => {
+    if (fetchProducts.current) return; // Prevent duplicate calls
+    fetchProducts.current = true;
+
+    const fetchProductsData = async () => {
+      try {
+        const database = new SupabaseWrapper("CLIENT");
+        const client = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+
+        const { result: mocks, error: mocksError } =
+          await database.getImageMockups(product_image.id);
+
+        // Fetch products from the database
+        const { result: productsFromDB, error } = await database.getProducts();
+        if (error || !productsFromDB) {
+          console.error(error || "No products found");
+          return;
+        }
+
+        // Initialize products with loading state
+        const initialProducts = productsFromDB.map((product: Product) => ({
+          ...product,
+          isLoadingMockup: true,
+        }));
+        setProducts(initialProducts);
+
+        // Fetch mockups for each product individually
+        productsFromDB.forEach(async (product) => {
+          try {
+            let productMock = getProductMock(product, mocks);
+            if (productMock) {
+              // console.log(`Mockup already exists for product ID ${product.id}`);
+              // Clear loading state even on error
+              setProducts((prevProducts) =>
+                prevProducts.map((p) =>
+                  p.id === product.id
+                    ? { ...p, isLoadingMockup: false, mockup: productMock }
+                    : p,
+                ),
+              );
+              return;
+            }
+
+            const mockup = await client.getMockupImage(
+              product.image,
+              product_image.image_url!,
+              product.id,
+              false,
+            );
+
+            if (!mockup) return;
+
+            const { result, error } = await database.addMockupForAllProducts(
+              product.id,
+              product_image.id,
+              mockup,
+            );
+
+            // Update the specific product when its mockup is ready
+            setProducts((prevProducts) =>
+              prevProducts.map((p) =>
+                p.id === product.id
+                  ? {
+                      ...p,
+                      mockup,
+                      isLoadingMockup: false,
+                    }
+                  : p,
+              ),
+            );
+          } catch (mockupError) {
+            console.error(
+              `Error fetching mockup for product ID ${product.id}:`,
+              mockupError,
+            );
+            // Clear loading state even on error
+            setProducts((prevProducts) =>
+              prevProducts.map((p) =>
+                p.id === product.id ? { ...p, isLoadingMockup: false } : p,
+              ),
+            );
+          }
+        });
+      } catch (err) {
+        console.error("Error fetching products or mockups:", err);
+      }
+    };
+
+    if (product_image) fetchProductsData();
+  }, [product_image]);
+
+  const scrollLeft = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({
+        left: -carouselRef.current.offsetWidth,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  const scrollRight = () => {
+    if (carouselRef.current) {
+      carouselRef.current.scrollBy({
+        left: carouselRef.current.offsetWidth,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  return (
+    <div className="mt-8 flex justify-center mb-10 px-2 md:px-4 w-max mx-auto max-w-[100vw] lg:max-w-[60vw]">
+      <div className="w-full">
+        <h3 className="text-xl font-semibold mb-4 text-left sm:ml-4 lg:ml-16">
+          Products related to this item
+        </h3>
+        <div className="relative flex items-center gap-2">
+          {/* Left Scroll Button */}
+          <button
+            onClick={scrollLeft}
+            className="hidden md:flex bg-gray-300 border rounded-full shadow p-2"
+            aria-label="Scroll Left"
+          >
+            <ChevronLeftIcon className="h-6 w-6" />
+          </button>
+
+          {/* Carousel */}
+          <div
+            ref={carouselRef}
+            className="flex gap-4 overflow-x-auto no-scrollbar w-full px-2 max-w-[80vw] no-scrollbar"
+          >
+            {products
+              .filter((product) => product.id !== current_product_id)
+              .map((product, index) => (
+                <Link
+                  key={index}
+                  href={`/product/${product_image.id}/${product.id}`}
+                >
+                  <div
+                    key={index}
+                    className="h-full flex cursor-pointer flex-col border rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
+                  >
+                    <img
+                      src={
+                        product.isLoadingMockup
+                          ? product.image
+                          : product.mockup || product.image
+                      }
+                      alt={product.title}
+                      className="rounded-md m-auto"
+                    />
+
+                    {product.isLoadingMockup && (
+                      <CircleDashed
+                        size={32}
+                        className="animate-spin text-black mx-auto"
+                      />
+                    )}
+
+                    <p className="truncate text-sm font-medium text-center text-[#007185]">
+                      {product.title}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+          </div>
+
+          {/* Right Scroll Button */}
+          <button
+            onClick={scrollRight}
+            className="hidden md:flex bg-gray-300 border rounded-full shadow p-2"
+            aria-label="Scroll Right"
+          >
+            <ChevronRightIcon className="h-6 w-6" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ProductPage: React.FC<ProductPageProps> = ({
+  id,
+  image_id,
+  product_image,
+  user,
+}) => {
   // State management
   const [image, setImage] = useState<Image | null>(null);
   const [product, setProduct] = useState<Product | null>(null);
@@ -308,7 +586,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
     };
 
     if (image_id) fetchData();
-  }, [image_id]);
+  }, [image_id, id]);
 
   if (loading) return <FullPageSpinner />;
 
@@ -518,50 +796,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ id, image_id, user }) => {
           </div>
         </div>
 
-        {/* Related Products */}
-        <div className="mt-8 flex justify-center mb-10 px-4 w-max mx-auto">
-          <div className="w-full">
-            <h3 className="text-xl font-semibold mb-4 text-left sm:ml-4 lg:ml-16">
-              Products related to this item
-            </h3>
-            <div className="relative flex items-center gap-2 sm:gap-4">
-              <button
-                className="hidden sm:flex bg-gray-300 border rounded-full shadow p-2"
-                aria-label="Scroll Left"
-              >
-                <ChevronLeftIcon />
-              </button>
-              <div className="flex gap-4 overflow-x-auto no-scrollbar w-full px-2 max-w-[80vw]">
-                {[13, 14, 15, 16].map((item) => (
-                  <div
-                    key={item}
-                    className="flex flex-col border rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
-                  >
-                    <img
-                      src={`/productImages/${item}.jpg`}
-                      alt={`Product ${item}`}
-                      className="rounded-md mb-2"
-                    />
-                    <p className="text-sm font-medium text-[#007185] truncate">
-                      Product Title {item}
-                    </p>
-                    <p className="text-sm text-gray-500">SAR 106.86</p>
-                    <p className="flex items-center text-sm flex-wrap">
-                      <span className="text-[#de7921] text-xl">★★★★☆</span>
-                      <span className="text-gray-500 text-xs ml-1">(321)</span>
-                    </p>
-                  </div>
-                ))}
-              </div>
-              <button
-                className="hidden sm:flex bg-gray-300 border rounded-full shadow p-2"
-                aria-label="Scroll Right"
-              >
-                <ChevronRightIcon />
-              </button>
-            </div>
-          </div>
-        </div>
+        <RelatedProductsCarousel
+          product_image={product_image}
+          current_product_id={parseInt(id)}
+        />
       </div>
     </div>
   );
