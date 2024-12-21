@@ -16,6 +16,7 @@ import {
 import { CircleDashed } from "lucide-react";
 import { setPriority } from "os";
 import { Json } from "@/database/types";
+import useCart from "../nav/useCart";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -389,6 +390,12 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
 
+  const { count } = useCart({
+    rerender: rerenderNav,
+    setRerenderNav: setRerenderNav,
+    user,
+  });
+
   const getMockupOfSelectedVariant = (): Mockup | null => {
     let x =
       variantMocks.find((mock) =>
@@ -668,7 +675,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
-      <Nav user={user} rerender={rerenderNav} />
+      <Nav user={user} cartCount={count} />
       <div className="flex flex-col overflow-auto">
         <Link href={`/image/${image_id}`}>
           <button className="flex items-center text-gray-800 hover:text-gray-800 m-4 lg:hidden">

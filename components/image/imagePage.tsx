@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { CircleDashed } from "lucide-react";
 import { setPriority } from "os";
+import useCart from "../nav/useCart";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -221,9 +222,15 @@ export default function ImagePage({ user, image }: UserPropType) {
     fetchProductsData();
   }, []);
 
+  const { count } = useCart({
+    rerender: true,
+    user: user,
+    setRerenderNav: () => {},
+  });
+
   return (
     <div className="flex flex-col lg:max-h-dvh lg:overflow-hidden font-primary">
-      <Nav user={user} />
+      <Nav user={user} cartCount={count} />
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex flex-col justify-center items-center">
           <Link href="/">

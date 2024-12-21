@@ -9,6 +9,7 @@ import {
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Nav from "../nav";
 import Link from "next/link";
+import useCart from "../nav/useCart";
 
 interface CartProps {
   user: UserResource | null | undefined;
@@ -18,222 +19,14 @@ const database = new SupabaseWrapper("CLIENT");
 
 export default function Cart({ user }: CartProps) {
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<
-    {
-      product_id: number;
-      variant_id: number;
-      quantity: number;
-      image_id: number;
-      size: string;
-      mock: string;
-      title: string;
-      color: string;
-      price: number;
-      image: string;
-    }[]
-  >([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  async function fetchCartData() {
-    setLoading(true);
-    try {
-      let cartItems;
-
-      if (user) {
-        const { result: cartData, error: cartError } =
-          await database.getCartItems(user!.id);
-
-        if (cartError) {
-          console.error("Error fetching cart items:", cartError);
-          setLoading(false);
-          return;
-        }
-        cartItems = cartData;
-      } else {
-        cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
-        console.log("cartItems", cartItems);
-      }
-
-      console.log("cartItems", cartItems);
-
-      if (cartItems) {
-        const detailedItems = await Promise.all(
-          cartItems.map(async (item: CartItem) => {
-            try {
-              const { result, error } =
-                await database.getProductVariantMockAfterJoin(
-                  item.product_id,
-                  item.variant_id,
-                  item.image_id,
-                );
-
-              if (error) {
-                console.error("Error fetching product variant data:", error);
-                return null;
-              }
-
-              if (result) {
-                return {
-                  ...item,
-                  title: result.title,
-                  mock: result.mock,
-                  size: result.size,
-                  color: result.color_code,
-                  price: result.price,
-                  image: result.image_url,
-                };
-              }
-            } catch (err) {
-              console.error("Error during fetch:", err);
-              return null;
-            }
-          }),
-        );
-
-        const validItems = detailedItems.filter((item) => item !== null);
-        setCartItems(validItems as typeof cartItems);
-      }
-    } catch (err) {
-      console.error("Unexpected error fetching cart data:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    fetchCartData();
-  }, [user]);
-
-  const handleIncrement = async (
-    productId: number,
-    variantId: number,
-    image_id: number,
-  ) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId && item.variant_id === variantId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item,
-      ),
-    );
-
-    if (!user) {
-      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      let updatedCart = cart.map((item: CartItem) => {
-        if (item.product_id === productId && item.variant_id === variantId) {
-          item.quantity += 1;
-        }
-        return item;
-      });
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      return;
-    }
-
-    try {
-      const { error } = await incrementCartItem(
-        user!.id,
-        productId,
-        variantId,
-        image_id,
-        database.client,
-      );
-      if (error) {
-        throw new Error(error);
-      }
-    } catch (error) {
-      console.error("Error incrementing item:", error);
-      await fetchCartData();
-    }
-  };
-
-  const handleDecrement = async (
-    productId: number,
-    variantId: number,
-    quantity: number,
-  ) => {
-    setCartItems(
-      (prevItems) =>
-        prevItems
-          .map((item) =>
-            item.product_id === productId && item.variant_id === variantId
-              ? { ...item, quantity: item.quantity - 1 }
-              : item,
-          )
-          .filter((item) => item.quantity > 0), // Remove items with quantity <= 0
-    );
-
-    if (!user) {
-      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      let updatedCart = cart.map((item: CartItem) => {
-        if (item.product_id === productId && item.variant_id === variantId) {
-          item.quantity -= 1;
-        }
-        return item;
-      });
-      updatedCart = updatedCart.filter((item: CartItem) => item.quantity > 0);
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-      if (quantity === 1) {
-        await removeItemFromCart(productId, variantId);
-        setRerenderNav((prev) => !prev);
-      }
-      return;
-    }
-
-    try {
-      const { error } = await decrementCartItem(
-        user!.id,
-        productId,
-        variantId,
-        database.client,
-      );
-
-      if (error) {
-        throw new Error(error);
-      }
-    } catch (error) {
-      console.error("Error decrementing item:", error);
-      await fetchCartData();
-    }
-  };
-
-  async function removeItemFromCart(productId: number, variantId: number) {
-    setCartItems((prevItems) =>
-      prevItems.filter(
-        (item) =>
-          !(item.product_id === productId && item.variant_id === variantId),
-      ),
-    );
-
-    if (!user) {
-      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      let updatedCart = cart.filter(
-        (item: CartItem) =>
-          !(item.product_id === productId && item.variant_id === variantId),
-      );
-      localStorage.setItem("cart", JSON.stringify(updatedCart));
-      setRerenderNav((prev) => !prev);
-      return;
-    }
-
-    try {
-      const { error } = await database.removeCartItem(
-        user!.id,
-        productId,
-        variantId,
-      );
-
-      if (error) {
-        throw new Error(error);
-      }
-
-      setRerenderNav((prev) => !prev);
-    } catch (error) {
-      console.error("Error removing item:", error);
-      await fetchCartData();
-      setRerenderNav((prev) => !prev);
-    }
-  }
+  const {
+    cartItems,
+    count,
+    loading,
+    handleIncrement,
+    handleDecrement,
+    removeItemFromCart,
+  } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -244,7 +37,7 @@ export default function Cart({ user }: CartProps) {
 
   return (
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
-      <Nav user={user} rerender={rerenderNav} />
+      <Nav user={user} cartCount={cartItems.length} />
       <div className="flex-1 flex flex-col lg:flex-row p-6">
         <div className="lg:pr-4 flex flex-col flex-1 h-[80vh]">
           <div className="h-full pr-2 flex-1 flex flex-col">
@@ -256,7 +49,7 @@ export default function Cart({ user }: CartProps) {
               <ul className="space-y-4 overflow-auto flex-1 h-[90%] overflow-y-scroll p-4 custom-scrollbar">
                 {cartItems.map((item) => (
                   <li
-                    key={`${item.product_id}-${item.variant_id}`}
+                    key={`${item.product_id}-${item.variant_id}-${item.image_id}`}
                     className="flex items-center justify-between shadow-lg p-4 rounded-xl border-b hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center space-x-4">
@@ -319,6 +112,7 @@ export default function Cart({ user }: CartProps) {
                               handleDecrement(
                                 item.product_id,
                                 item.variant_id,
+                                item.image_id,
                                 item.quantity,
                               )
                             }
@@ -346,7 +140,11 @@ export default function Cart({ user }: CartProps) {
                     </div>
                     <TrashIcon
                       onClick={() =>
-                        removeItemFromCart(item.product_id, item.variant_id)
+                        removeItemFromCart(
+                          item.product_id,
+                          item.variant_id,
+                          item.image_id,
+                        )
                       }
                       className="w-6 h-6 text-red-500 cursor-pointer hover:text-red-700"
                     />

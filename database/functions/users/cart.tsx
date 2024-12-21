@@ -158,7 +158,7 @@ async function incrementCartItem(
   result: CartItem[] | null;
   error: string | null;
 }> {
-  return addItemToCart(user_id, product_id, variant_id,image_id, 1, client);
+  return addItemToCart(user_id, product_id, variant_id, image_id, 1, client);
 }
 
 async function decrementCartItem(
@@ -231,5 +231,9 @@ async function decrementCartItem(
   }
 }
 
-export { addItemToCart, removeItemFromCart, incrementCartItem, decrementCartItem };
-
+export {
+  addItemToCart,
+  removeItemFromCart,
+  incrementCartItem,
+  decrementCartItem,
+};

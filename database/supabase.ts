@@ -581,6 +581,37 @@ class SupabaseWrapper {
     }
   };
 
+  updateCartItems = async (
+    user_id: string,
+    items: any[],
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Users")
+        .update({ cart: { items: items } })
+        .eq("id", user_id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
   removeCartItem = async (
     user_id: string,
     product_id: number,

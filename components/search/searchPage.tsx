@@ -6,6 +6,7 @@ import Grid from "./grid";
 import PickerContainer, { Color } from "./pickerContainer";
 import useImageSearch from "@/hooks/useImageSearch";
 import { useEffect, useState } from "react";
+import useCart from "../nav/useCart";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -30,9 +31,15 @@ export default function SearchPage({ user }: UserPropType) {
     }
   }, [selectedColors]);
 
+  const { count } = useCart({
+    user: user,
+    rerender: false,
+    setRerenderNav: () => {},
+  });
+
   return (
     <div className="flex flex-col h-dvh font-primary">
-      <Nav user={user} />
+      <Nav user={user} cartCount={count} />
       <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
         <Grid
           images={images}

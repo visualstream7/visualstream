@@ -8,6 +8,7 @@ import { RiDropdownList } from "react-icons/ri";
 import { MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
 import { SupabaseWrapper } from "@/database/supabase";
+import useCart from "./useCart";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -17,7 +18,7 @@ type UserPropType = {
 
 type NavPropType = {
   user: UserResource | null | undefined;
-  rerender?: boolean;
+  cartCount: number;
 };
 
 type ComponentPropType = {
@@ -47,7 +48,7 @@ export const UserButton = ({ user }: UserPropType) => {
           />
         </div>
         {showContextMenu && (
-          <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-10">
+          <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-30">
             <ul className="text-dark font-medium text-center">
               <li className="px-4 pt-2">
                 <p className="text-dark font-bold">{user.fullName}</p>
@@ -221,32 +222,7 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
 }
 
 // NavBar Component
-export default function Nav({ user, rerender }: NavPropType) {
-  const [cartCount, setCartCount] = useState(0);
-  useEffect(() => {
-    const fetchCartCount = async () => {
-      const { result: items, error: cartError } = await database.getCartItems(
-        user!.id,
-      );
-
-      if (items) {
-        setCartCount(items.length);
-      }
-    };
-    const fetchCartCountForGuest = async () => {
-      const cartItems = localStorage.getItem("cart");
-      if (cartItems) {
-        setCartCount(JSON.parse(cartItems).length);
-      }
-    };
-
-    if (user) {
-      fetchCartCount();
-    } else {
-      fetchCartCountForGuest();
-    }
-  }, [user, rerender]);
-
+export default function Nav({ user, cartCount }: NavPropType) {
   return (
     <>
       <LargeScreenNav user={user} count={cartCount} />
