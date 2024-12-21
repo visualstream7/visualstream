@@ -28,6 +28,7 @@ export default function Cart({ user }: CartProps) {
       title: string;
       color: string;
       price: number;
+      image: string;
     }[]
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -68,6 +69,7 @@ export default function Cart({ user }: CartProps) {
                   size: result.size,
                   color: result.color_code,
                   price: result.price,
+                  image: result.image_url,
                 };
               }
             } catch (err) {
@@ -198,11 +200,34 @@ export default function Cart({ user }: CartProps) {
                     className="flex items-center justify-between shadow-lg p-4 rounded-xl border-b hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center space-x-4">
-                      {item.mock && item.product_id !== 534 && (
+                      {item.mock &&
+                        item.product_id !== 534 && // 534 is the product_id for the puzzle
+                        item.product_id !== 358 && ( // 358 is the product_id for the sticker
+                          <img
+                            src={item.mock}
+                            alt={item.title}
+                            className="w-30 h-24 object-cover rounded-md shadow-md"
+                          />
+                        )}
+
+                      {item.product_id === 534 && (
+                        // 534 is the product_id for the puzzle
                         <img
-                          src={item.mock}
+                          src={"/puzzle.png"}
+                          alt="Product"
+                          className={`w-[120px]`}
+                          style={{
+                            background: `url('${item?.image || ""}') center/120px 120px no-repeat`,
+                          }}
+                        />
+                      )}
+
+                      {item.product_id === 358 && (
+                        // 358 is the product_id for the sticker
+                        <img
+                          src={item.image}
                           alt={item.title}
-                          className="w-30 h-24 object-cover rounded-md shadow-md"
+                          className="w-[120px] object-cover rounded-md shadow-md border border-[#00000010] p-2"
                         />
                       )}
                       <div className="w-3/4">

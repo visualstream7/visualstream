@@ -302,7 +302,7 @@ const RelatedProductsCarousel = ({
                         <img
                           src="/puzzle.png"
                           style={{
-                            background: `url('${product_image?.image_url || ""}') center/150px 75px no-repeat`,
+                            background: `url('${product_image?.image_url || ""}') center/150px 100px no-repeat`,
                           }}
                           alt={product.title}
                           className="m-auto w-[150px]"
@@ -646,7 +646,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
         </Link>
         <div className="flex-1 flex flex-col lg:flex-row justify-center items-start mt-6 gap-4 lg:gap-6 p-4 sm:p-6">
           {/* Left Section: Product Image */}
-          <div className="flex relative max-w-full m-auto lg:max-w-[40vw]">
+          <div className="flex relative max-w-full w-[90vw] md:w-[30vw]">
             {product.id !== 534 && product.id !== 358 && (
               <img
                 src={
@@ -655,7 +655,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 }
                 onLoad={() => {}}
                 alt=""
-                className="max-w-full lg:max-w-[50vw] max-h-[40vw] flex opacity-90"
+                className="max-w-[40%] lg:max-w-[30vw] m-auto flex opacity-90"
               />
             )}
             {!getMockupOfSelectedVariant()?.mock &&
@@ -671,23 +671,27 @@ const ProductPage: React.FC<ProductPageProps> = ({
             {
               // Puzzle image
               product.id === 534 && (
-                <img
-                  src={"/puzzle.png"}
-                  alt="Product"
-                  className={`w-[600px] flex`}
-                  style={{
-                    background: `url('${product_image?.image_url || ""}') center/600px 300px no-repeat`,
-                  }}
-                />
+                <div className="flex items-center justify-center w-[90vw] md:w-[30vw] lg:h-[80vh]">
+                  <img
+                    src={"/puzzle.png"}
+                    alt="Product"
+                    className={`w-[400px] m-auto`}
+                    style={{
+                      background: `url('${product_image?.image_url || ""}') center/400px 320px no-repeat`,
+                    }}
+                  />
+                </div>
               )
             }
             {product.id === 358 && (
               // Sticker image
-              <img
-                src={product_image?.image_url || ""}
-                alt="Product"
-                className={`w-[50%] shadow-lg p-3 border border-[#00000010] m-auto`}
-              />
+              <div className="flex items-center justify-center w-[90vw] md:w-[30vw] lg:h-[80vh]">
+                <img
+                  src={product_image?.image_url || ""}
+                  alt="Product"
+                  className={`${selectedSize === "15″×3.75″" ? "w-[80%] aspect-[4/1]" : "w-[50%] aspect-square"} shadow-lg p-3 object-cover border border-[#00000010] m-auto`}
+                />
+              </div>
             )}
           </div>
 

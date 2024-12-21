@@ -659,12 +659,12 @@ class SupabaseWrapper {
     // get product data
 
     const { data: productData, error: productError } = await this.client
-      .from('Products')
-      .select('*')
-      .eq('id', product_id)
+      .from("Products")
+      .select("*")
+      .eq("id", product_id)
       .single();
-    
-    if(productError) {
+
+    if (productError) {
       return {
         result: null,
         error: productError.message,
@@ -672,40 +672,58 @@ class SupabaseWrapper {
     }
     // get variant data
     const { data: variantData, error: variantError } = await this.client
-      .from('Variants')
-      .select('*')
-      .eq('id', variant_id)
+      .from("Variants")
+      .select("*")
+      .eq("id", variant_id)
       .single();
-    
+
     if (variantError) {
       return {
         result: null,
         error: variantError.message,
       };
     }
+
     // get mock data for (product_id, image_id, variant_id)
     const { data: mockData, error: mockError } = await this.client
-      .from('Mocks')
-      .select('*')
-      .eq('product_id', product_id)
-      .eq('image_id', image_id)
-      .eq('variant_id', variant_id)
+      .from("Mocks")
+      .select("*")
+      .eq("product_id", product_id)
+      .eq("image_id", image_id)
+      .eq("variant_id", variant_id)
       .single();
-    
-    if(mockError) {
+
+    if (mockError) {
       return {
         result: null,
         error: mockError.message,
       };
     }
-    
+
+    const { data: imageData, error: imageError } = await this.client
+      .from("Images")
+      .select("*")
+      .eq("id", image_id)
+      .single();
+
+    if (imageError) {
+      return {
+        result: null,
+        error: imageError.message,
+      };
+    }
+
     // combine all data and return (basically manually join)
-    let data = { ...productData, ...variantData, ...mockData };
+    let data = {
+      ...productData,
+      ...variantData,
+      ...mockData,
+      image_url: imageData.image_url,
+    };
     return {
       result: data,
       error: null,
     };
-  
   };
 }
 

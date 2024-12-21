@@ -239,14 +239,14 @@ export default function ImagePage({ user, image }: UserPropType) {
           {
             // Jigsaw Puzzle image
             getProductFromMock(hoveredImage!, products)?.id === 534 && (
-              <div className="w-[90vw] lg:max-w-[30vw] h-[60vh] m-auto">
+              <div className="w-[90vw] lg:max-w-[30vw] h-[60vh] m-auto  flex items-center">
                 <img
                   src="/puzzle.png"
                   style={{
-                    background: `url('${image.image_url || ""}') center/600px 300px no-repeat`,
+                    background: `url('${image.image_url || ""}') center/400px 320px no-repeat`,
                   }}
                   alt="Jigsaw Puzzle"
-                  className="w-[600px] m-auto"
+                  className="w-[400px] m-auto"
                 />
               </div>
             )
@@ -313,7 +313,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                       <img
                         src="/puzzle.png"
                         style={{
-                          background: `url('${image.image_url || ""}') center/150px 75px no-repeat`,
+                          background: `url('${image.image_url || ""}') center/150px 110px no-repeat`,
                         }}
                         alt={product.title}
                         className="w-[150px]"
