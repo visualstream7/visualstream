@@ -233,8 +233,17 @@ export default function Nav({ user, rerender }: NavPropType) {
         setCartCount(items.length);
       }
     };
+    const fetchCartCountForGuest = async () => {
+      const cartItems = localStorage.getItem("cart");
+      if (cartItems) {
+        setCartCount(JSON.parse(cartItems).length);
+      }
+    };
+
     if (user) {
       fetchCartCount();
+    } else {
+      fetchCartCountForGuest();
     }
   }, [user, rerender]);
 

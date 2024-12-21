@@ -17,6 +17,7 @@ interface CartProps {
 const database = new SupabaseWrapper("CLIENT");
 
 export default function Cart({ user }: CartProps) {
+  const [rerenderNav, setRerenderNav] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<
     {
       product_id: number;
@@ -36,14 +37,24 @@ export default function Cart({ user }: CartProps) {
   async function fetchCartData() {
     setLoading(true);
     try {
-      const { result: cartItems, error: cartError } =
-        await database.getCartItems(user!.id);
+      let cartItems;
 
-      if (cartError) {
-        console.error("Error fetching cart items:", cartError);
-        setLoading(false);
-        return;
+      if (user) {
+        const { result: cartData, error: cartError } =
+          await database.getCartItems(user!.id);
+
+        if (cartError) {
+          console.error("Error fetching cart items:", cartError);
+          setLoading(false);
+          return;
+        }
+        cartItems = cartData;
+      } else {
+        cartItems = JSON.parse(localStorage.getItem("cart") || "[]");
+        console.log("cartItems", cartItems);
       }
+
+      console.log("cartItems", cartItems);
 
       if (cartItems) {
         const detailedItems = await Promise.all(
@@ -90,9 +101,7 @@ export default function Cart({ user }: CartProps) {
   }
 
   useEffect(() => {
-    if (user) {
-      fetchCartData();
-    }
+    fetchCartData();
   }, [user]);
 
   const handleIncrement = async (
@@ -107,6 +116,18 @@ export default function Cart({ user }: CartProps) {
           : item,
       ),
     );
+
+    if (!user) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      let updatedCart = cart.map((item: CartItem) => {
+        if (item.product_id === productId && item.variant_id === variantId) {
+          item.quantity += 1;
+        }
+        return item;
+      });
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      return;
+    }
 
     try {
       const { error } = await incrementCartItem(
@@ -125,14 +146,39 @@ export default function Cart({ user }: CartProps) {
     }
   };
 
-  const handleDecrement = async (productId: number, variantId: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product_id === productId && item.variant_id === variantId
-          ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
-          : item,
-      ),
+  const handleDecrement = async (
+    productId: number,
+    variantId: number,
+    quantity: number,
+  ) => {
+    setCartItems(
+      (prevItems) =>
+        prevItems
+          .map((item) =>
+            item.product_id === productId && item.variant_id === variantId
+              ? { ...item, quantity: item.quantity - 1 }
+              : item,
+          )
+          .filter((item) => item.quantity > 0), // Remove items with quantity <= 0
     );
+
+    if (!user) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      let updatedCart = cart.map((item: CartItem) => {
+        if (item.product_id === productId && item.variant_id === variantId) {
+          item.quantity -= 1;
+        }
+        return item;
+      });
+      updatedCart = updatedCart.filter((item: CartItem) => item.quantity > 0);
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      if (quantity === 1) {
+        await removeItemFromCart(productId, variantId);
+        setRerenderNav((prev) => !prev);
+      }
+      return;
+    }
 
     try {
       const { error } = await decrementCartItem(
@@ -159,6 +205,17 @@ export default function Cart({ user }: CartProps) {
       ),
     );
 
+    if (!user) {
+      let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      let updatedCart = cart.filter(
+        (item: CartItem) =>
+          !(item.product_id === productId && item.variant_id === variantId),
+      );
+      localStorage.setItem("cart", JSON.stringify(updatedCart));
+      setRerenderNav((prev) => !prev);
+      return;
+    }
+
     try {
       const { error } = await database.removeCartItem(
         user!.id,
@@ -169,9 +226,12 @@ export default function Cart({ user }: CartProps) {
       if (error) {
         throw new Error(error);
       }
+
+      setRerenderNav((prev) => !prev);
     } catch (error) {
       console.error("Error removing item:", error);
       await fetchCartData();
+      setRerenderNav((prev) => !prev);
     }
   }
 
@@ -184,7 +244,7 @@ export default function Cart({ user }: CartProps) {
 
   return (
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
-      <Nav user={user} />
+      <Nav user={user} rerender={rerenderNav} />
       <div className="flex-1 flex flex-col lg:flex-row p-6">
         <div className="lg:pr-4 flex flex-col flex-1 h-[80vh]">
           <div className="h-full pr-2 flex-1 flex flex-col">
@@ -256,7 +316,11 @@ export default function Cart({ user }: CartProps) {
                           </span>
                           <button
                             onClick={() =>
-                              handleDecrement(item.product_id, item.variant_id)
+                              handleDecrement(
+                                item.product_id,
+                                item.variant_id,
+                                item.quantity,
+                              )
                             }
                             className="h-8 w-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-lg font-bold"
                           >

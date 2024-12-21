@@ -521,7 +521,39 @@ const ProductPage: React.FC<ProductPageProps> = ({
     if (error) throw new Error(error);
   };
 
+  // handle unsigned add to cart
+
+  const unsignedAddToCart = async (): Promise<void> => {
+    let cart = localStorage.getItem("cart") || "[]";
+    let cartItems = JSON.parse(cart);
+
+    const variant = getVariant();
+    if (!variant) return;
+
+    const cartItem = cartItems.find(
+      (item: any) => item.variant_id === variant.id,
+    );
+    if (cartItem) {
+      cartItem.quantity += quantity;
+    } else {
+      cartItems.push({
+        product_id: parseInt(id),
+        variant_id: variant.id,
+        image_id: parseInt(image_id),
+        quantity,
+      });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cartItems));
+    setCartHasItems(true);
+    setRerenderNav((prev) => !prev);
+  };
+
   const addToCart = async (): Promise<void> => {
+    if (!user) {
+      // Handle unsigned user
+      return unsignedAddToCart();
+    }
     const variant = getVariant();
     if (!variant || !user?.id) return;
 
