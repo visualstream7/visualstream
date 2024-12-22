@@ -21,7 +21,7 @@ class ColorAnalyzer {
   constructor(imageUrl?: string, maxColors?: number) {
     if (!imageUrl || !maxColors) {
       this.imageUrl = imageUrl ? imageUrl : "";
-      this.maxColors = 5;
+      this.maxColors = 7;
     } else {
       this.imageUrl = imageUrl;
       this.maxColors = maxColors;
