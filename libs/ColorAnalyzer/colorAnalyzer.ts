@@ -238,7 +238,7 @@ class ColorAnalyzer {
       const arrayOfColorCount = Array.from(colorCountMap).map(
         ([color, percentage]) => ({
           color: color,
-          percentage: percentage.toFixed(2) || 0,
+          percentage: percentage || 0,
         }),
       ) as QuantizedColor[];
 

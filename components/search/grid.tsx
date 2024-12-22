@@ -163,13 +163,54 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                         View Products
                       </p>
                     </Link>
+                    {image.similarity}
+                    {image.color_composition && (
+                      <div>
+                        <h1 className="font-bold text-lg">Color Composition</h1>
+                        <div className="flex items-end gap-2">
+                          {/* @ts-ignore */}
+                          {image.color_composition.map((palette, index) => (
+                            <div
+                              key={index}
+                              className="flex flex-col items-center"
+                            >
+                              {/* Bar representing the color's percentage */}
+                              <div
+                                className="w-10"
+                                style={{
+                                  height: `${palette.percentage * 2}px`, // Scale height for better visualization
+                                  backgroundColor: palette.color,
+                                  borderRadius: "4px",
+                                }}
+                              />
+                              <p className="text-sm mt-1">
+                                {palette.percentage}%
+                              </p>
+                              <div className="w-10 h-10 rounded-full border border-black">
+                                <div
+                                  className="w-full h-full rounded-full"
+                                  style={{ backgroundColor: palette.color }}
+                                />
+                              </div>
+                              {/* Label for percentage */}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <img
                   src={image.image_url!}
                   alt={image.ai_describe!}
-                  className={`w-full h-full object-cover ${image.similarity > 0.4 ? "border-8 border-green-500" : ""}`}
+                  className={`w-full h-full object-cover ${
+                    image.similarity > 0.8
+                      ? "border-4 border-green-500"
+                      : image.similarity > 0.4
+                        ? "border-4 border-yellow-500 opacity-80"
+                        : "border-4 border-red-500 opacity-60"
+                  }`}
                   onClick={() => {
                     if (selectedImage) {
                       setSelectedImage(image);
@@ -179,9 +220,6 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                   }}
                   ref={selectedImage?.id === image.id ? selectedImageRef : null}
                 />
-                <p className="absolute z-40 font-bold bg-[#00000040] text-white bottom-0 text-center">
-                  {image.similarity.toFixed(2)}
-                </p>
               </div>
             </div>
           ))}

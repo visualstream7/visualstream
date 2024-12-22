@@ -286,7 +286,7 @@ const RelatedProductsCarousel = ({
             ref={carouselRef}
             className="flex gap-4 overflow-x-auto no-scrollbar w-full px-2 max-w-[80vw] no-scrollbar"
           >
-            {products
+            {getSortedProducts(products)
               .filter((product) => product.id !== current_product_id)
               .map((product, index) => (
                 <Link
