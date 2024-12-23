@@ -157,7 +157,10 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                         selectedImageRef.current = null;
                       }}
                     />
-                    <img src={image.image_url!} alt={image.ai_describe!} />
+                    <img
+                      src={image.low_resolution_image_url!}
+                      alt={image.ai_describe!}
+                    />
                     <Link href={`/image/${image.id}`}>
                       <p className="text-blue-500 w-full text-center">
                         View Products
