@@ -163,8 +163,8 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                         View Products
                       </p>
                     </Link>
-                    {image.similarity}
-                    {image.color_composition && (
+                    {/* {image.similarity} */}
+                    {false && image.color_composition && (
                       <div>
                         <h1 className="font-bold text-lg">Color Composition</h1>
                         <div className="flex items-end gap-2">
@@ -174,11 +174,10 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                               key={index}
                               className="flex flex-col items-center"
                             >
-                              {/* Bar representing the color's percentage */}
                               <div
                                 className="w-10"
                                 style={{
-                                  height: `${palette.percentage * 2}px`, // Scale height for better visualization
+                                  height: `${palette.percentage * 2}px`,
                                   backgroundColor: palette.color,
                                   borderRadius: "4px",
                                 }}
@@ -192,7 +191,6 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                                   style={{ backgroundColor: palette.color }}
                                 />
                               </div>
-                              {/* Label for percentage */}
                             </div>
                           ))}
                         </div>
@@ -204,13 +202,7 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                 <img
                   src={image.image_url!}
                   alt={image.ai_describe!}
-                  className={`w-full h-full object-cover ${
-                    image.similarity > 0.8
-                      ? "border-4 border-green-500"
-                      : image.similarity > 0.4
-                        ? "border-4 border-yellow-500 opacity-80"
-                        : "border-4 border-red-500 opacity-60"
-                  }`}
+                  className={`w-full h-full object-cover`}
                   onClick={() => {
                     if (selectedImage) {
                       setSelectedImage(image);
@@ -241,7 +233,6 @@ export default function Grid({
   return (
     <div className="flex flex-col w-full h-[100%] flex-[1]">
       {!normalGrid ? (
-        // <BentoGrid images={[...images, ...images, ...images, ...images]} />
         <BentoGrid images={images} />
       ) : (
         <NormalGrid images={images} />

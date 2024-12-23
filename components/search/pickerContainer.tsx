@@ -175,7 +175,9 @@ export default function PickerContainer({
                     }`}
                     onClick={() => deleteColor(index)}
                   ></button>
-
+                  <p className="text-white text-sm">
+                    {color.percentage?.toFixed(0)}%
+                  </p>
                   <button
                     className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all opacity-0 ${
                       hoveringSwatchIndex === index

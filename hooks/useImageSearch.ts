@@ -5,16 +5,16 @@ import ColorAnalyzer, {
 } from "@/libs/ColorAnalyzer/colorAnalyzer";
 import { useEffect, useState } from "react";
 
-const hexToRgb = (hex) => {
+const hexToRgb = (hex: string) => {
   const bigint = parseInt(hex.slice(1), 16);
   return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
 };
 
-const rgbToLab = (r, g, b) => {
+const rgbToLab = (r: number, g: number, b: number) => {
   let X, Y, Z;
   const [xr, yr, zr] = [0.964221, 1.0, 0.825211]; // reference white D50
 
-  const transform = (c) =>
+  const transform = (c: number) =>
     c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
 
   // Convert RGB to linear RGB
@@ -27,7 +27,7 @@ const rgbToLab = (r, g, b) => {
   Y = r * 0.222491598 + g * 0.71688606 + b * 0.060621486;
   Z = r * 0.013929122 + g * 0.097097002 + b * 0.71418547;
 
-  const labTransform = (t) =>
+  const labTransform = (t: number) =>
     t > 216 / 24389 ? Math.pow(t, 1 / 3) : ((24389 / 27) * t + 16) / 116;
 
   // Normalize to Lab
@@ -39,12 +39,12 @@ const rgbToLab = (r, g, b) => {
 };
 
 // function to calculate the color similarity
-function calculateColorSimilarity(color1, color2) {
+function calculateColorSimilarity(color1: string, color2: string) {
   // color1 and color2 are hex strings
   const rgb1 = hexToRgb(color1);
   const rgb2 = hexToRgb(color2);
-  const lab1 = rgbToLab(...rgb1);
-  const lab2 = rgbToLab(...rgb2);
+  const lab1 = rgbToLab(rgb1[0], rgb1[1], rgb1[2]);
+  const lab2 = rgbToLab(rgb2[0], rgb2[1], rgb2[2]);
 
   const deltaE = Math.sqrt(
     Math.pow(lab2[0] - lab1[0], 2) +
@@ -52,9 +52,6 @@ function calculateColorSimilarity(color1, color2) {
       Math.pow(lab2[2] - lab1[2], 2),
   );
 
-  // normalize the similarity
-  // max similarity is 119.84
-  // 0 means the colors are identical
   const MAX_similarity = 119.84;
   let normalizedsimilarity = Math.min(1, deltaE / MAX_similarity);
   normalizedsimilarity = 1 - normalizedsimilarity;
@@ -63,7 +60,10 @@ function calculateColorSimilarity(color1, color2) {
   return normalizedsimilarity;
 }
 
-function calculatePercentageSimilarity(expectedPercentage, currentPercentage) {
+function calculatePercentageSimilarity(
+  expectedPercentage: number,
+  currentPercentage: number,
+) {
   let lowerPercentage =
     expectedPercentage > currentPercentage
       ? currentPercentage
@@ -80,8 +80,8 @@ function calculatePercentageSimilarity(expectedPercentage, currentPercentage) {
 }
 
 function calculateTotalSimilarity(
-  colorSimilarity,
-  percentageSimilarity,
+  colorSimilarity: number,
+  percentageSimilarity: number,
   colorWeight = 0.8,
   percentageWeight = 0.2,
 ) {
@@ -96,7 +96,7 @@ function calculateTotalSimilarity(
   return totalSimilarity;
 }
 
-function overallSimilarity(selectedColors, colorComposition) {
+function overallSimilarity(selectedColors: any, colorComposition: any) {
   let totalSimilarity = 0;
 
   // Iterate over each selected color
@@ -122,7 +122,7 @@ function overallSimilarity(selectedColors, colorComposition) {
 
       const totalSimilarityValue = calculateTotalSimilarity(
         colorSimilarity,
-        percentageSimilarity,
+        parseInt(percentageSimilarity),
       );
 
       // Track the maximum similarity for the current selected color
@@ -182,33 +182,6 @@ export default function useImageSearch({
       selectedColors,
     );
 
-    let maxSimilarity = imagesWithSimilarityScore.reduce(
-      (max, image) => Math.max(max, image.similarity),
-      0,
-    );
-
-    let minSimilarity = imagesWithSimilarityScore.reduce(
-      (min, image) => Math.min(min, image.similarity),
-      100,
-    );
-
-    imagesWithSimilarityScore = imagesWithSimilarityScore.map((image) => {
-      return {
-        ...image,
-        similarity:
-          (image.similarity - minSimilarity) / (maxSimilarity - minSimilarity),
-      };
-    });
-
-    // let imagesWithSimilarityScore = images
-    //   .map((image) => {
-    //     return {
-    //       ...image,
-    //       similarity:
-    //         overallSimilarity(selectedColors, image.color_composition) / 100,
-    //     };
-    //   })
-    //   .sort((a, b) => b.similarity - a.similarity);
     setImages(imagesWithSimilarityScore);
   }, [isResizing, selectedColors]);
 

@@ -109,10 +109,6 @@ function getSortedProducts(products: Product[]): Product[] {
   });
 }
 
-function getProductFromMock(mock: string, products: Product[]): Product | null {
-  return products.find((product) => product.mockup === mock) || null;
-}
-
 function getProductMock(product: Product, mocks: any) {
   const mockData = mocks.find((m: any) => m.product_id === product.id);
   return mockData ? mockData.mock : null;

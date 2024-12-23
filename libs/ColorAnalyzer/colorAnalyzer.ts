@@ -121,8 +121,8 @@ class ColorAnalyzer {
   ): number {
     let score = 0;
     const maxPossibleDistance = 100; // Maximum possible CIEDE2000 distance (range: 0-100)
-    const maxColorDifferenceWeight = 0.7; // Adjust weights if needed
-    const maxPercentageDifferenceWeight = 0.3;
+    const maxColorDifferenceWeight = 0.5; // Adjust weights if needed
+    const maxPercentageDifferenceWeight = 0.5;
     const missingColorPenaltyWeight = 0.02; // Penalty weight for missing colors
 
     // For each user-selected color
@@ -149,22 +149,26 @@ class ColorAnalyzer {
       score +=
         colorSimilarity * maxColorDifferenceWeight +
         percentageSimilarity * maxPercentageDifferenceWeight;
+
+      // score +=
+      //   colorSimilarity * maxColorDifferenceWeight +
+      //   percentageSimilarity * maxPercentageDifferenceWeight;
     });
 
-    // Handle missing colors from the user's input
-    const unmatchedImageColors = colorPercentage.filter(
-      (imageColor) =>
-        !userColors.some((userColor) => {
-          const distance = this.ciede2000(
-            this.hexToLab(userColor.hex),
-            this.hexToLab(imageColor.color),
-          );
-          return distance < maxPossibleDistance * 0.1; // Threshold for a "match"
-        }),
-    );
+    // // Handle missing colors from the user's input
+    // const unmatchedImageColors = colorPercentage.filter(
+    //   (imageColor) =>
+    //     !userColors.some((userColor) => {
+    //       const distance = this.ciede2000(
+    //         this.hexToLab(userColor.hex),
+    //         this.hexToLab(imageColor.color),
+    //       );
+    //       return distance < maxPossibleDistance * 0.1; // Threshold for a "match"
+    //     }),
+    // );
 
-    // Apply a penalty for each unmatched image color
-    score -= unmatchedImageColors.length * missingColorPenaltyWeight;
+    // // Apply a penalty for each unmatched image color
+    // score -= unmatchedImageColors.length * missingColorPenaltyWeight;
 
     // Normalize score to ensure it stays within 0-1 range
     score = Math.max(score / userColors.length, 0);

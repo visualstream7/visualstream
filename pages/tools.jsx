@@ -7,7 +7,7 @@ const hexToRgb = (hex) => {
 
 const rgbToLab = (r, g, b) => {
   let X, Y, Z;
-  const [xr, yr, zr] = [0.964221, 1.0, 0.825211]; // reference white D50
+  const [xr, yr, zr] = [0.964221, 1.0, 0.825211];
 
   const transform = (c) =>
     c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
@@ -47,88 +47,12 @@ function calculateColorSimilarity(color1, color2) {
       Math.pow(lab2[2] - lab1[2], 2),
   );
 
-  // normalize the similarity
-  // max similarity is 119.84
-  // 0 means the colors are identical
   const MAX_similarity = 119.84;
   let normalizedsimilarity = Math.min(1, deltaE / MAX_similarity);
   normalizedsimilarity = 1 - normalizedsimilarity;
   normalizedsimilarity = Math.round(normalizedsimilarity * 100);
 
   return normalizedsimilarity;
-}
-
-function calculatePercentageSimilarity(expectedPercentage, currentPercentage) {
-  let lowerPercentage =
-    expectedPercentage > currentPercentage
-      ? currentPercentage
-      : expectedPercentage;
-
-  let higherPercentage =
-    expectedPercentage > currentPercentage
-      ? expectedPercentage
-      : currentPercentage;
-
-  let percentageSimilarity = (lowerPercentage / higherPercentage) * 100;
-
-  return percentageSimilarity.toFixed(4);
-}
-
-function calculateTotalSimilarity(
-  colorSimilarity,
-  percentageSimilarity,
-  colorWeight = 0.8,
-  percentageWeight = 0.2,
-) {
-  // Ensure weights sum up to 1
-  const totalWeight = colorWeight + percentageWeight;
-  colorWeight /= totalWeight;
-  percentageWeight /= totalWeight;
-
-  // Calculate total similarity
-  const totalSimilarity =
-    colorSimilarity * colorWeight + percentageSimilarity * percentageWeight;
-  return totalSimilarity;
-}
-
-function overallSimilarity(selectedColors, colorComposition) {
-  let totalSimilarity = 0;
-
-  // Iterate over each selected color
-  for (let i = 0; i < selectedColors.length; i++) {
-    const selectedColor = selectedColors[i];
-    let maxSimilarity = 0;
-    let maxPalettePercentage = 0;
-
-    // Iterate over each palette in the color composition
-    for (let j = 0; j < colorComposition.length; j++) {
-      const palette = colorComposition[j];
-
-      // Calculate individual similarity metrics
-      const colorSimilarity = calculateColorSimilarity(
-        palette.color,
-        selectedColor.hex,
-      );
-
-      const percentageSimilarity = calculatePercentageSimilarity(
-        palette.percentage,
-        selectedColor.percentage,
-      );
-
-      const totalSimilarityValue = calculateTotalSimilarity(
-        colorSimilarity,
-        percentageSimilarity,
-      );
-
-      // Track the maximum similarity for the current selected color
-      if (totalSimilarityValue > maxSimilarity) {
-        maxSimilarity = totalSimilarityValue;
-        maxPalettePercentage = palette.percentage;
-      }
-    }
-    totalSimilarity += (maxSimilarity * maxPalettePercentage) / 100;
-  }
-  return totalSimilarity;
 }
 
 const Colorsimilarity = () => {
@@ -218,6 +142,7 @@ function ColorComposition({ colorComposition }) {
               </div>
             ))}
           </div>
+          {JSON.stringify(colorComposition)}
         </div>
       )}
     </>
@@ -296,8 +221,6 @@ function Main() {
   const [selectedColors, setSelectedColors] = useState([]); // [{ hex: string, percentage: number }]
   const [isResizing, setIsResizing] = useState(false);
 
-  let totalSimilarity = overallSimilarity(selectedColors, colorComposition);
-
   const options = {
     image_analyzer: (
       <ImageAnalyzer
@@ -333,11 +256,7 @@ function Main() {
             .sort((a, b) => b.percentage - a.percentage)}
         />
         <div className="mt-6">
-          <h2 className="text-lg font-semibold mb-4">
-            Color Similarity : {totalSimilarity.toFixed(4)}%
-          </h2>
-
-          {/* similarity score will be total percentage x percentage of the selected color */}
+          <h2 className="text-lg font-semibold mb-4">Color Similarity :</h2>
 
           {/* Iterate through selectedColors */}
           <div className="grid grid-cols-1 gap-6">
@@ -364,22 +283,8 @@ function Main() {
                         palette.color,
                         selectedColor.hex,
                       ),
-                      percentage_similarity: calculatePercentageSimilarity(
-                        palette.percentage,
-                        selectedColor.percentage,
-                      ),
-                      similarity: calculateTotalSimilarity(
-                        calculateColorSimilarity(
-                          palette.color,
-                          selectedColor.hex,
-                        ),
-                        calculatePercentageSimilarity(
-                          palette.percentage,
-                          selectedColor.percentage,
-                        ),
-                      ),
                     }))
-                    .sort((a, b) => b.similarity - a.similarity)
+                    .sort((a, b) => b.color_similarity - a.color_similarity)
                     .map((palette, paletteIndex) => (
                       <div
                         key={paletteIndex}
@@ -415,20 +320,6 @@ function Main() {
                           Color Similarity:{" "}
                           {palette.color_similarity.toFixed(4)}%
                         </p>
-                        <p
-                          className={`mt-1 border border-gray-200 p-1 rounded-lg w-full
-                          ${
-                            palette.percentage_similarity < 20
-                              ? "text-red-600"
-                              : palette.percentage_similarity < 50
-                                ? "text-yellow-600"
-                                : "text-green-600"
-                          }`}
-                        >
-                          percentage similarity:{" "}
-                          {/* similarity between the selected color percentage and the image color percentage */}
-                          {palette.percentage_similarity}%
-                        </p>
 
                         <p className="mt-1 border border-gray-200 p-1 rounded-lg">
                           {" "}
@@ -438,18 +329,6 @@ function Main() {
                         <p className="mt-1 border border-gray-200 p-1 rounded-lg">
                           {" "}
                           Percentage in Image: {palette.percentage.toFixed(4)}%
-                        </p>
-                        <p
-                          className={`mt-1 border border-gray-200 p-1 rounded-lg w-full
-                          ${
-                            palette.similarity < 20
-                              ? "text-red-600"
-                              : palette.similarity < 50
-                                ? "text-yellow-600"
-                                : "text-green-600"
-                          }`}
-                        >
-                          Total Similarity: {palette.similarity.toFixed(4)}%
                         </p>
                       </div>
                     ))}
@@ -469,7 +348,6 @@ function Main() {
     <div className="mx-auto mt-10 p-4 border rounded-lg shadow-lg bg-gray-50">
       <h1 className="text-2xl font-bold text-center mb-6">Toolset</h1>
 
-      {/* Dropdown for Tool Selection */}
       <div className="mb-4">
         <label htmlFor="tool-select" className="block text-sm font-medium mb-2">
           Select a Tool:
@@ -482,13 +360,12 @@ function Main() {
         >
           {Object.keys(options).map((key) => (
             <option key={key} value={key}>
-              {key.replace(/_/g, " ")} {/* Replace underscores with spaces */}
+              {key.replace(/_/g, " ")}
             </option>
           ))}
         </select>
       </div>
 
-      {/* Display Selected Tool */}
       <div className="p-4 border rounded-lg shadow bg-white">
         {options[selectedTool]}
       </div>
