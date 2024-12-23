@@ -118,12 +118,50 @@ class ColorAnalyzer {
   private calculateSimilarityScore(
     colorPercentage: QuantizedColor[],
     userColors: { hex: string; percentage: number }[],
-  ): number {
+  ): {
+    similarity: number;
+    bestMatchColor?: string;
+  } {
+    if (userColors.length === 1) {
+      let score = 0;
+
+      const userColor = userColors[0];
+
+      let bestColorSimilarity = 0;
+      let bestMatchColor = null;
+
+      for (let i = 0; i < colorPercentage.length; i++) {
+        let imageColor = colorPercentage[i];
+        let userLab = this.hexToLab(userColor.hex);
+        let imageLab = this.hexToLab(imageColor.color);
+        let distance = this.ciede2000(userLab, imageLab);
+        let colorSimilarity = 1 - distance / 100;
+
+        if (colorSimilarity > bestColorSimilarity) {
+          bestColorSimilarity = colorSimilarity;
+          score = colorSimilarity;
+          bestMatchColor = imageColor;
+        }
+      }
+
+      return {
+        similarity:
+          // bestMatchColor!.percentage < 30 || bestColorSimilarity < 0.6
+          //   ? score * 0.5
+          //   :
+          score,
+        bestMatchColor: bestMatchColor?.color,
+      };
+    }
+
     let score = 0;
     const maxPossibleDistance = 100; // Maximum possible CIEDE2000 distance (range: 0-100)
     const maxColorDifferenceWeight = 0.5; // Adjust weights if needed
     const maxPercentageDifferenceWeight = 0.5;
     const missingColorPenaltyWeight = 0.02; // Penalty weight for missing colors
+
+    let bestMatchColorForSingleUserColor: string | null = null;
+    let bestMatchColorSimilarity: number | null = null;
 
     // For each user-selected color
     userColors.forEach((userColor) => {
@@ -136,6 +174,8 @@ class ColorAnalyzer {
         const imageLab = this.hexToLab(imageColor.color);
         const distance = this.ciede2000(userLab, imageLab);
         if (distance < bestMatchDistance) {
+          bestMatchColorForSingleUserColor = imageColor.color;
+
           bestMatchDistance = distance;
           bestMatchPercentageDiff = Math.abs(
             userColor.percentage - imageColor.percentage,
@@ -144,36 +184,19 @@ class ColorAnalyzer {
       });
 
       const colorSimilarity = 1 - bestMatchDistance / maxPossibleDistance;
+      bestMatchColorSimilarity = colorSimilarity;
       const percentageSimilarity = 1 - bestMatchPercentageDiff / 100;
 
       score +=
         colorSimilarity * maxColorDifferenceWeight +
         percentageSimilarity * maxPercentageDifferenceWeight;
-
-      // score +=
-      //   colorSimilarity * maxColorDifferenceWeight +
-      //   percentageSimilarity * maxPercentageDifferenceWeight;
     });
 
-    // // Handle missing colors from the user's input
-    // const unmatchedImageColors = colorPercentage.filter(
-    //   (imageColor) =>
-    //     !userColors.some((userColor) => {
-    //       const distance = this.ciede2000(
-    //         this.hexToLab(userColor.hex),
-    //         this.hexToLab(imageColor.color),
-    //       );
-    //       return distance < maxPossibleDistance * 0.1; // Threshold for a "match"
-    //     }),
-    // );
-
-    // // Apply a penalty for each unmatched image color
-    // score -= unmatchedImageColors.length * missingColorPenaltyWeight;
-
-    // Normalize score to ensure it stays within 0-1 range
     score = Math.max(score / userColors.length, 0);
 
-    return score;
+    return {
+      similarity: score,
+    };
   }
 
   public getImagesWithSimilarity(
@@ -181,12 +204,16 @@ class ColorAnalyzer {
     userColors: { hex: string; percentage: number }[],
   ): ImageWithSimilarity[] {
     let imagesWithSimilarity = images.map((image) => {
-      let similarity = this.calculateSimilarityScore(
+      let { similarity, bestMatchColor } = this.calculateSimilarityScore(
         // @ts-ignore
         image.color_composition as QuantizedColor[],
         userColors,
       );
-      return { ...image, similarity };
+      return {
+        ...image,
+        similarity,
+        bestMatchColor: bestMatchColor,
+      };
     });
 
     // sort by similarity (high to low)

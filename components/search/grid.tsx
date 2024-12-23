@@ -163,9 +163,20 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                         View Products
                       </p>
                     </Link>
-                    {/* {image.similarity} */}
+                    {false && (
+                      <div
+                        className="w-10 h-10 rounded-full"
+                        style={{
+                          // @ts-ignore
+                          backgroundColor: image.bestMatchColor,
+                        }}
+                      >
+                        {/* @ts-ignore */}
+                      </div>
+                    )}
+                    {false && <p> {image.similarity}</p>}
                     {false && image.color_composition && (
-                      <div>
+                      <div className="flex flex-col gap-4">
                         <h1 className="font-bold text-lg">Color Composition</h1>
                         <div className="flex items-end gap-2">
                           {/* @ts-ignore */}
@@ -183,7 +194,7 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
                                 }}
                               />
                               <p className="text-sm mt-1">
-                                {palette.percentage}%
+                                {parseFloat(palette.percentage).toFixed(2)}%
                               </p>
                               <div className="w-10 h-10 rounded-full border border-black">
                                 <div
