@@ -637,6 +637,12 @@ const ProductPage: React.FC<ProductPageProps> = ({
     group: DistinctVariantGroup,
   ): Promise<void> => {
     setSelectedVariantGroup(group);
+    console.log("Selected variant group", group);
+    console.log("Selected size", selectedSize);
+    console.log(
+      "selected size is available : ",
+      group.available_sizes.includes(selectedSize),
+    );
     if (!group.available_sizes.includes(selectedSize)) {
       setSelectedSize(group.available_sizes[0]);
     }
@@ -839,9 +845,9 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 className="mt-1 p-2 border text-[#414342] rounded-md w-full sm:w-[20vw] lg:w-[5vw] text-sm outline-1 outline-[#6ba5b1] border-[#c2d5d9]"
                 onChange={(e) => setSelectedSize(e.target.value)}
               >
-                {selectedVariantGroup?.available_sizes.map((size, index) => (
-                  <option key={index}>{size}</option>
-                ))}
+                {selectedVariantGroup?.available_sizes
+                  .sort()
+                  .map((size, index) => <option key={size}>{size}</option>)}
               </select>
             </div>
 
