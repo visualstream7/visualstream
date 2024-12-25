@@ -148,8 +148,6 @@ const RelatedProductsCarousel = ({
 
   const [products, setProducts] = useState<Product[]>([]);
 
-  const [hoveredImage, setHoveredImage] = useState<string | null>(null);
-
   if (!product_image) return null;
 
   useEffect(() => {
@@ -385,6 +383,11 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const [cartHasItems, setCartHasItems] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
+  const [hoveredMockup, setHoveredMockup] = useState<string | null>(null);
+  const [isHovering, setIsHovering] = useState<boolean>(false);
+  const [hoveredGroup, setHoveredGroup] = useState<DistinctVariantGroup | null>( // Track hovered group
+    null,
+  );
 
   const { cartItems } = useCart({
     rerender: rerenderNav,
@@ -512,16 +515,29 @@ const ProductPage: React.FC<ProductPageProps> = ({
     variantIds: number[],
     productId: number,
     mock: string,
-  ): Promise<void> => {
+  ): Promise<
+    | { variantIds: number[]; mock: string }
+    | { variantIds: number[]; mock: null }
+  > => {
     const { result, error } = await database.addMockupForVariants(
       imageId,
       variantIds,
       productId,
       mock,
     );
-    if (result)
-      setVariantMocks((prev) => [...prev, { variant_id: variantIds[0], mock }]);
-    if (error) throw new Error(error);
+    if (!result || error) {
+      return {
+        variantIds: variantIds,
+        mock: null,
+      };
+    }
+
+    console.log("Mockup added to database", result);
+
+    return {
+      variantIds: variantIds,
+      mock: result && result[0] ? result[0].mock : null,
+    };
   };
 
   // handle unsigned add to cart
@@ -577,6 +593,46 @@ const ProductPage: React.FC<ProductPageProps> = ({
     setRerenderNav((prev) => !prev);
   };
 
+  const handleHover = async (group: DistinctVariantGroup): Promise<void> => {
+    const mock = variantMocks.find((m) =>
+      group.variant_ids.includes(m.variant_id),
+    );
+
+    if (mock) {
+      setHoveredMockup(mock.mock);
+      setHoveredGroup(group);
+      return;
+    }
+
+    console.log("Hovered mockup not found in database, generating new mockup");
+
+    try {
+      setHoveredGroup(group);
+      const mockup = await getMockupImage(
+        group,
+        image?.image_url!,
+        parseInt(id),
+      );
+      let { mock, variantIds } = await addMockupToDatabase(
+        parseInt(image_id),
+        group.variant_ids,
+        parseInt(id),
+        mockup,
+      );
+
+      if (mock) {
+        setVariantMocks((prev) => [
+          ...prev,
+          { variant_id: variantIds[0], mock: mock },
+        ]);
+      }
+      console.log("Hovered mockup added to database", mock);
+      setHoveredMockup(mock);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleColorChange = async (
     group: DistinctVariantGroup,
   ): Promise<void> => {
@@ -598,12 +654,19 @@ const ProductPage: React.FC<ProductPageProps> = ({
         image?.image_url!,
         parseInt(id),
       );
-      await addMockupToDatabase(
+      let { mock: addedMock, variantIds } = await addMockupToDatabase(
         parseInt(image_id),
         group.variant_ids,
         parseInt(id),
         mockup,
       );
+
+      if (addedMock) {
+        setVariantMocks((prev) => [
+          ...prev,
+          { variant_id: variantIds[0], mock: addedMock },
+        ]);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -628,6 +691,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+
       try {
         const imageResult = await fetchImage();
         const productResult = await fetchProduct();
@@ -691,15 +755,20 @@ const ProductPage: React.FC<ProductPageProps> = ({
             {product.id !== 534 && product.id !== 358 && (
               <img
                 src={
-                  getMockupOfSelectedVariant()?.mock ||
-                  selectedVariantGroup?.image
+                  isHovering
+                    ? hoveredMockup
+                      ? hoveredMockup
+                      : hoveredGroup?.image
+                    : getMockupOfSelectedVariant()?.mock ||
+                      selectedVariantGroup?.image
                 }
                 onLoad={() => {}}
                 alt=""
                 className="max-w-[40%] lg:max-w-[30vw] m-auto flex opacity-90"
               />
             )}
-            {!getMockupOfSelectedVariant()?.mock &&
+            {((isHovering && !hoveredMockup) ||
+              (!isHovering && !getMockupOfSelectedVariant()?.mock)) &&
               product.id !== 534 &&
               product.id !== 358 && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -754,7 +823,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">Price:</span>
-                <p className="text-xl text-[#803d2c]">{getVariant()?.price}</p>
+                <p className="text-xl text-[#803d2c]">${getVariant()?.price}</p>
               </div>
             </div>
 
@@ -799,7 +868,12 @@ const ProductPage: React.FC<ProductPageProps> = ({
                         }`}
                         onClick={() => handleColorChange(variants)}
                         onMouseEnter={() => {
-                          handleColorChange(variants);
+                          setIsHovering(true);
+                          handleHover(variants);
+                        }}
+                        onMouseLeave={() => {
+                          setIsHovering(false);
+                          setHoveredMockup(null);
                         }}
                       />
                     ))}
@@ -815,23 +889,34 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
           {/* Right Section: Price and Actions */}
           <div className="w-full lg:w-[50%] lg:max-w-[240px] border border-gray-500 rounded-md p-4 shadow-md">
-            <p className="text-2xl font-medium text-[#565958]">SAR203.14</p>
-            <p className="text-sm mt-1 text-gray-600">
-              SAR96 delivery 6-9 October
-            </p>
             <button className="text-[#2e616a] font-medium mt-1 text-sm">
               Details
             </button>
-            <p className="mt-2 text-sm text-[#2e616a]">
-              <MapPinCheckIcon className="h-4 w-4 inline mr-1" />
-              Delivery to Riyadh{" "}
-              <button className="text-[#2e616a] font-medium">
-                Update Location
-              </button>
-            </p>
+
+            <h2 className="text-lg font-semibold mt-4 text-[#2e616a]">
+              {product.title}
+            </h2>
+
             <p className="mt-4 text-red-600 font-medium">
-              Usually ships within 4 to 5 days
+              {getVariant()?.price && `$${getVariant()?.price}`}
             </p>
+
+            <p className="text-gray-500 text-sm mt-2">
+              {getVariant()?.size && `Size: ${getVariant()?.size}`}
+            </p>
+            {getVariant()?.color_code && (
+              <div className="flex items-center space-x-2 mt-2">
+                <p className="text-sm text-gray-500">Color:</p>
+                <div
+                  style={{
+                    height: "20px",
+                    width: "20px",
+                    borderRadius: "50%",
+                    backgroundColor: getVariant()?.color_code,
+                  }}
+                ></div>
+              </div>
+            )}
 
             <div className="mt-4">
               <label
