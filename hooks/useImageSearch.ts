@@ -145,6 +145,9 @@ export default function useImageSearch({
 }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [images, setImages] = useState<ImageWithSimilarity[]>([]);
+  const [unorderedImages, setUnorderedImages] = useState<ImageWithSimilarity[]>(
+    [],
+  );
   const client = new SupabaseWrapper("CLIENT");
 
   useEffect(() => {
@@ -158,7 +161,9 @@ export default function useImageSearch({
             similarity: 0,
           };
         });
-        setImages(resultWithSimilarity), setLoading(false);
+        setUnorderedImages(resultWithSimilarity);
+        setImages(resultWithSimilarity);
+        setLoading(false);
       }
     }
 
@@ -185,5 +190,8 @@ export default function useImageSearch({
     setImages(imagesWithSimilarityScore);
   }, [isResizing, selectedColors]);
 
-  return { images: images, isImagesLoading: loading };
+  return {
+    images: selectedColors.length > 0 ? images : unorderedImages,
+    isImagesLoading: loading,
+  };
 }
