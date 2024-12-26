@@ -39,56 +39,17 @@ export default async function handler(req, res) {
       // Save the current context state
       ctx.save();
 
-      const clipPath = [
-        { type: "moveTo", x: 10, y: 10 },
-        {
-          type: "bezierCurveTo",
-          cp1x: 0,
-          cp1y: 50,
-          cp2x: 0,
-          cp2y: 0,
-          x: 10,
-          y: 10,
-        },
-        { type: "lineTo", x: 750, y: 600 },
-        {
-          type: "bezierCurveTo",
-          cp1x: 800,
-          cp1y: 550,
-          cp2x: 600,
-          cp2y: 650,
-          x: 10,
-          y: 10,
-        },
-        { type: "closePath" },
-      ];
-
+      // Define the backpack shape as a clipping path
       ctx.beginPath();
-      clipPath.forEach((point, index) => {
-        switch (point.type) {
-          case "moveTo":
-            ctx.moveTo(point.x, point.y);
-            break;
-          case "lineTo":
-            ctx.lineTo(point.x, point.y);
-            break;
-          case "bezierCurveTo":
-            ctx.bezierCurveTo(
-              point.cp1x, // First control point x
-              point.cp1y, // First control point y
-              point.cp2x, // Second control point x
-              point.cp2y, // Second control point y
-              point.x, // Endpoint x
-              point.y, // Endpoint y
-            );
-            break;
-          case "closePath":
-            ctx.closePath();
-            break;
-          default:
-            console.error(`Unsupported path type: ${point.type}`);
-        }
-      });
+      ctx.moveTo(100, 50); // Top-left corner of the safe print area
+      // Draw the backpack shape
+      ctx.bezierCurveTo(150, 20, 850, 20, 900, 50); // Top curve
+      ctx.lineTo(900, 400); // Straight down the right side
+      ctx.bezierCurveTo(850, 450, 150, 450, 100, 400); // Bottom curve
+      ctx.closePath();
+
+      // Clip the canvas to the defined shape
+      ctx.clip();
 
       ctx.clip(); // Apply the clipping path
 
