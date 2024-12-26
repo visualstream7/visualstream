@@ -63,7 +63,7 @@ const Home = () => {
           <img
             src={baseImageUrl}
             alt="Base"
-            className="w-full h-full absolute"
+            className="w-full h-full absolute border border-black"
           />
         )}
         {overlayImageUrl && (

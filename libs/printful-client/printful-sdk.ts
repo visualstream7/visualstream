@@ -1,5 +1,10 @@
 import { utapi } from "../uploadthing";
-import { configuration } from "./config";
+import {
+  backpackPoints,
+  bottlePoints,
+  configuration,
+  mugPoints,
+} from "./config";
 import { ProductResponseType } from "./types";
 
 class Printful {
@@ -55,6 +60,35 @@ class Printful {
         url: null,
         base64Image: null,
       };
+    }
+
+    if (product_id === 19 || product_id === 382 || product_id === 279) {
+      // mug
+      //
+      // baseImageUrl, overlayImageUrl, points
+      //
+      let points: any[] = [];
+
+      if (product_id === 19) {
+        points = mugPoints;
+      } else if (product_id === 382) {
+        points = bottlePoints;
+      } else if (product_id === 279) {
+        points = backpackPoints;
+      }
+      const response = await fetch("/api/special-overlay-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          baseImageUrl: product_image,
+          overlayImageUrl: overlay_image,
+          points: points,
+        }),
+      });
+
+      const data = await response.json();
+      let url = data.url || null;
+      return url;
     }
 
     let product_id_str = (product_id +

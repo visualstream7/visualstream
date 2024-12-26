@@ -1,4 +1,10 @@
 import { createCanvas, loadImage } from "canvas";
+import { utapi } from "@/libs/uploadthing";
+
+// This function can run for a maximum of 5 seconds
+export const config = {
+  maxDuration: 40,
+};
 
 function calculateHeightWidthFromPoints(points) {
   let minX = points[0].x;
@@ -91,11 +97,35 @@ export default async function handler(req, res) {
     context.drawImage(overlayImage, minX, minY, width, height); // for mug
     // context.drawImage(overlayImage, 0, 0, 700, 1000); // for tshirt
 
-    const outputBuffer = canvas.toBuffer("image/png");
-    res.setHeader("Content-Type", "image/png");
-    res.send(outputBuffer);
+    // Convert the final canvas to a Base64 image
+    const base64Image = canvas.toDataURL();
+
+    // Function to convert Base64 to a File object
+    function base64ToFile(base64, filename) {
+      const arr = base64.split(",");
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); // Decode Base64 string
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      return new File([u8arr], filename, { type: mime });
+    }
+
+    // Convert the Base64 string to a File
+    const imageFile = base64ToFile(base64Image, "mock.png");
+
+    // Upload the file using your existing upload function
+    let highResUpload = await utapi.uploadFiles(imageFile);
+
+    return res.status(200).json({ url: highResUpload?.data?.url || null });
   } catch (error) {
-    console.error("Error processing images", error);
-    res.status(500).json({ message: "Error processing images", error });
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: "An error occurred while processing the images." });
   }
 }
