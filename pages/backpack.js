@@ -85,6 +85,13 @@ const Home = () => {
           ))}
         </svg>
       </div>
+      {
+        <div className="mt-6">
+          <pre className="bg-gray-100 p-4 rounded">
+            {JSON.stringify(points, null, 2)}
+          </pre>
+        </div>
+      }
       <button
         onClick={handleSubmit}
         className="mt-6 p-2 bg-blue-500 text-white rounded"

@@ -41,7 +41,24 @@ export default async function handler(req, res) {
     context.closePath();
     context.clip();
 
-    context.drawImage(overlayImage, 0, 0, 700, 1000);
+    let w = 850;
+    let h = 600;
+
+    const boxAspectRatio = w / h;
+    const overlayAspectRatio = overlayImage.width / overlayImage.height;
+    let drawWidth, drawHeight;
+
+    if (overlayAspectRatio > boxAspectRatio) {
+      drawHeight = h;
+      drawWidth = overlayImage.width * (h / overlayImage.height);
+    } else {
+      drawWidth = w;
+      drawHeight = overlayImage.height * (w / overlayImage.width);
+    }
+
+    context.drawImage(overlayImage, 0, 0, drawWidth, drawHeight);
+
+    // context.drawImage(overlayImage, 0, 0, 600, 850);
 
     const outputBuffer = canvas.toBuffer("image/png");
     res.setHeader("Content-Type", "image/png");
