@@ -654,6 +654,10 @@ const ProductPage: React.FC<ProductPageProps> = ({
       return;
     }
 
+    if (hoveredGroup?.color_code === group.color_code) {
+      return;
+    }
+
     try {
       const mockup = await getMockupImage(
         group,
@@ -725,12 +729,22 @@ const ProductPage: React.FC<ProductPageProps> = ({
           imageResult.image_url!,
           parseInt(id),
         );
-        await addMockupToDatabase(
+        let { mock: dbMock, variantIds } = await addMockupToDatabase(
           parseInt(image_id),
           distinct[0].variant_ids,
           parseInt(id),
           mockup,
         );
+
+        // Add the mockup to the variantMocks state
+        //
+        if (dbMock && variantIds) {
+          setVariantMocks((prev) => [
+            ...prev,
+            { variant_id: variantIds[0], mock: dbMock },
+          ]);
+          console.log("Mockup added to database", dbMock, distinct[0]);
+        }
       } catch (error) {
       } finally {
         setLoading(false);

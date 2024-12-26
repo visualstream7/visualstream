@@ -182,7 +182,7 @@ class SupabaseWrapper {
     error: string | null;
   }> => {
     try {
-      const newMocks = variant_ids.map((variant_id) => {
+      let newMocks = variant_ids.map((variant_id) => {
         return {
           product_id: product_id,
           image_id: image_id,
@@ -190,6 +190,27 @@ class SupabaseWrapper {
           variant_id: variant_id,
         };
       });
+
+      let { data: existingMocks, error: existingMocksError } = await this.client
+        .from("Mocks")
+        .select("*")
+        .match({
+          product_id: product_id,
+          image_id: image_id,
+        });
+
+      if (existingMocksError || !existingMocks) {
+        return {
+          result: null,
+          error: "Error fetching existing mocks",
+        };
+      }
+
+      let existingVariantIds = existingMocks.map((mock) => mock.variant_id);
+
+      newMocks = newMocks.filter(
+        (mock) => !existingVariantIds.includes(mock.variant_id),
+      );
 
       let { data, error } = await this.client
         .from("Mocks")

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useRef } from "react";
 
 const Home = () => {
+  const svgRef = useRef(null);
   const [baseImageUrl, setBaseImageUrl] = useState(
     "https://files.cdn.printful.com/products/279/9063_1534847488.jpg",
   );
@@ -15,6 +17,97 @@ const Home = () => {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setPoints((prevPoints) => [...prevPoints, { x, y }]);
+  };
+
+  const getSVGPoints = (svgElement, interval = 30) => {
+    const points = [];
+
+    // Parse all <line> elements
+    const line1 = svgElement.querySelectorAll("line")[0];
+    const line2 = svgElement.querySelectorAll("line")[1];
+    let path1 = svgElement.querySelectorAll("path")[0];
+    let path2 = svgElement.querySelectorAll("path")[1];
+
+    {
+      let x1 = parseFloat(line1.getAttribute("x1"));
+      let y1 = parseFloat(line1.getAttribute("y1"));
+      let x2 = parseFloat(line1.getAttribute("x2"));
+      let y2 = parseFloat(line1.getAttribute("y2"));
+
+      let dx = x2 - x1;
+      let dy = y2 - y1;
+      let length = Math.sqrt(dx * dx + dy * dy);
+      let steps = Math.ceil(length / interval);
+
+      for (let i = 0; i <= steps; i++) {
+        let t = i / steps;
+        points.push({ x: parseInt(x1 + dx * t), y: parseInt(y1 + dy * t) });
+      }
+    }
+
+    {
+      let pathLength = path2.getTotalLength();
+      let steps = Math.ceil(pathLength / interval);
+
+      for (let i = 0; i <= steps; i++) {
+        const pt = path2.getPointAtLength((i / steps) * pathLength);
+        points.push({ x: pt.x, y: pt.y });
+      }
+    }
+
+    {
+      let x1 = parseFloat(line2.getAttribute("x1"));
+      let y1 = parseFloat(line2.getAttribute("y1"));
+      let x2 = parseFloat(line2.getAttribute("x2"));
+      let y2 = parseFloat(line2.getAttribute("y2"));
+
+      let currentPoints = [];
+
+      let dx = x2 - x1;
+      let dy = y2 - y1;
+      let length = Math.sqrt(dx * dx + dy * dy);
+      let steps = Math.ceil(length / interval);
+
+      for (let i = 0; i <= steps; i++) {
+        let t = i / steps;
+        currentPoints.push({ x: x1 + dx * t, y: y1 + dy * t });
+      }
+
+      for (let i = currentPoints.length - 1; i >= 0; i--) {
+        points.push({
+          x: parseInt(currentPoints[i].x),
+          y: parseInt(currentPoints[i].y),
+        });
+      }
+    }
+
+    {
+      let pathLength = path1.getTotalLength();
+      let steps = Math.ceil(pathLength / interval);
+
+      for (let i = 0; i <= steps; i++) {
+        const pt = path1.getPointAtLength((i / steps) * pathLength);
+        points.push({ x: pt.x, y: pt.y });
+      }
+    }
+
+    // for all points, make sure they are integers
+
+    let newPoints = [];
+    points.forEach((point) => {
+      newPoints.push({
+        x: parseInt(point.x),
+        y: parseInt(point.y),
+      });
+    });
+
+    newPoints = newPoints.filter((point, index, self) => {
+      return (
+        index === self.findIndex((t) => t.x === point.x && t.y === point.y)
+      );
+    });
+
+    return newPoints;
   };
 
   const handleSubmit = async () => {
@@ -73,6 +166,36 @@ const Home = () => {
             className="w-full h-full absolute opacity-50"
           />
         )}
+        <svg className="absolute w-full h-full cursor-pointer" ref={svgRef}>
+          <line
+            x1="233"
+            y1="420"
+            x2="231"
+            y2="864"
+            stroke="red"
+            strokeWidth="1"
+          />
+          <path
+            d="M 233 420 Q 348 440 467 420"
+            fill="none"
+            stroke="red"
+            strokeWidth="1"
+          />
+          <line
+            x1="467"
+            y1="420"
+            x2="467"
+            y2="864"
+            stroke="red"
+            strokeWidth="1"
+          />
+          <path
+            d="M 231 864 Q 348 890 467 864"
+            fill="none"
+            stroke="red"
+            strokeWidth="1"
+          />
+        </svg>
         <svg className="absolute w-full h-full pointer-events-none">
           {points.length > 1 && (
             <polygon
@@ -85,6 +208,21 @@ const Home = () => {
           ))}
         </svg>
       </div>
+
+      <button
+        onClick={handleSubmit}
+        className="mt-6 p-2 bg-blue-500 text-white rounded"
+      >
+        Generate Output
+      </button>
+
+      <button
+        onClick={() => setPoints(getSVGPoints(svgRef.current))}
+        className="mt-6 p-2 bg-red-500 text-white rounded"
+      >
+        Set SVG Points
+      </button>
+
       {
         <div className="mt-6">
           <pre className="bg-gray-100 p-4 rounded">
@@ -92,12 +230,7 @@ const Home = () => {
           </pre>
         </div>
       }
-      <button
-        onClick={handleSubmit}
-        className="mt-6 p-2 bg-blue-500 text-white rounded"
-      >
-        Generate Output
-      </button>
+
       {outputImage && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold">Final Output:</h2>
