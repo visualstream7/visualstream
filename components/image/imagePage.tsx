@@ -292,7 +292,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           </Link>
 
           <div>
-            <h1 className="text-2xl lg:text-3xl text-gray-900">
+            <h1 className="text-2xl lg:text-3xl text-gray-900 line-clamp-2">
               {image.title || "Image Title"}
             </h1>
           </div>
