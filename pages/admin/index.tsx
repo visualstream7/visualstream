@@ -10,9 +10,65 @@ interface DistinctVariantGroup {
   variants: Variant[];
 }
 
-function ProductCard({ product, variantGroups }) {
+function Modal({
+  setIsModalOpen,
+  onSave,
+}: {
+  setIsModalOpen: any;
+  onSave: (margin: number) => void;
+}) {
+  const [margin, setMargin] = useState("");
+
+  const handleSave = () => {
+    const marginValue = parseFloat(margin);
+    if (!isNaN(marginValue)) {
+      onSave(marginValue);
+      setIsModalOpen(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
+      <div className="bg-white p-4 rounded-md shadow-md">
+        <h2 className="text-lg font-bold mb-2">Set Margin Percentage</h2>
+        <input
+          type="number"
+          value={margin}
+          onChange={(e) => setMargin(e.target.value)}
+          className="border p-2 rounded-md w-full mb-4"
+          placeholder="Enter margin percentage"
+        />
+        <button
+          onClick={handleSave}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
+        >
+          Save
+        </button>
+        <button
+          onClick={() => {
+            setIsModalOpen(false);
+            console.log("cancel");
+          }}
+          className="bg-gray-300 text-black px-4 py-2 rounded-md"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ProductCard({
+  product,
+  variantGroups,
+}: {
+  product: Product;
+  variantGroups: DistinctVariantGroup[];
+}) {
   const [selectedSize, setSelectedSize] = useState("");
   const [price, setPrice] = useState<number | null>(null);
+  const [margin, setMargin] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getProductSizes = (product_id: number) => {
     if (!variantGroups) return [];
@@ -29,18 +85,36 @@ function ProductCard({ product, variantGroups }) {
     const price = variantGroups
       .filter((group) => group.product_id === product_id && group.size === size)
       .map((group) => group.variants[0].price);
-    return price[0] || null;
+    return price.length > 0 ? parseFloat(price[0]) : null;
   };
 
-  const handleSizeChange = (e) => {
+  const handleSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const size = e.target.value;
     setSelectedSize(size);
     const price = getProductPrice(product.id, size);
-    setPrice(price);
+    if (price) setPrice(price);
+  };
+
+  const handleCardClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleSaveMargin = (marginValue: number) => {
+    setMargin(marginValue);
+  };
+
+  const calculatePriceWithMargin = () => {
+    if (price !== null && margin !== null) {
+      return price + (price * margin) / 100;
+    }
+    return null;
   };
 
   return (
-    <div className="border rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200">
+    <div
+      className="border rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <img
         src={product.image}
         alt={product.title}
@@ -59,7 +133,7 @@ function ProductCard({ product, variantGroups }) {
         onChange={handleSizeChange}
       >
         <option value="">Select Size</option>
-        {getProductSizes(product.id).map((item) => (
+        {getProductSizes(product.id).map((item: { size: string }) => (
           <option key={item.size} value={item.size}>
             {item.size}
           </option>
@@ -68,14 +142,50 @@ function ProductCard({ product, variantGroups }) {
 
       {selectedSize && (
         <div className="mt-2">
-          <span className="font-medium">Price: </span>${price}
+          <div>
+            <span className="font-medium">Original Price: </span>${price}
+          </div>
+          {margin !== null && (
+            <div>
+              <span className="font-medium">Margin: </span>
+              {margin}%
+            </div>
+          )}
+          {margin !== null && (
+            <div>
+              <span className="font-medium">Price with Margin: </span>$
+              {calculatePriceWithMargin()}
+            </div>
+          )}
         </div>
+      )}
+
+      {isModalOpen && (
+        <>
+          <Modal setIsModalOpen={setIsModalOpen} onSave={handleSaveMargin} />
+          <p
+            className="text-blue-500 text-sm mt-2 absolute z-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+          >
+            Click to set margin{" "}
+            {JSON.stringify({ isModalOpen, margin, price, selectedSize })}
+          </p>
+        </>
       )}
     </div>
   );
 }
 
-function ProductList({ products, variantGroups }) {
+function ProductList({
+  products,
+  variantGroups,
+}: {
+  products: Product[];
+  variantGroups: DistinctVariantGroup[];
+}) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {products.map((product) => (
@@ -107,7 +217,9 @@ export default function Admin() {
 
       const userEmail = user?.emailAddresses[0].emailAddress;
 
-      setIsAdmin(userEmail && list_of_admin_emails.includes(userEmail));
+      setIsAdmin(
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
+      );
     };
     checkAdmin();
   }, [user]);
