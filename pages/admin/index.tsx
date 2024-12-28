@@ -14,7 +14,7 @@ function Modal({
   setIsModalOpen,
   onSave,
 }: {
-  setIsModalOpen: any;
+  setIsModalOpen: (value: boolean) => void;
   onSave: (margin: number) => void;
 }) {
   const [margin, setMargin] = useState("");
@@ -28,9 +28,15 @@ function Modal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40">
-      <div className="bg-white p-4 rounded-md shadow-md">
-        <h2 className="text-lg font-bold mb-2">Set Margin Percentage</h2>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={() => setIsModalOpen(false)} 
+    >
+      <div
+        className="bg-white p-4 rounded-md shadow-md"
+        onClick={(e) => e.stopPropagation()} 
+      >
+        <h2 className="text-lg font-bold mb-4">Set Margin Percentage</h2>
         <input
           type="number"
           value={margin}
@@ -38,21 +44,20 @@ function Modal({
           className="border p-2 rounded-md w-full mb-4"
           placeholder="Enter margin percentage"
         />
-        <button
-          onClick={handleSave}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-        >
-          Save
-        </button>
-        <button
-          onClick={() => {
-            setIsModalOpen(false);
-            console.log("cancel");
-          }}
-          className="bg-gray-300 text-black px-4 py-2 rounded-md"
-        >
-          Cancel
-        </button>
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={handleSave}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="bg-gray-300 text-black px-4 py-2 rounded-md"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -74,10 +79,7 @@ function ProductCard({
     if (!variantGroups) return [];
     return variantGroups
       .filter((group) => group.product_id === product_id)
-      .map((group) => ({
-        size: group.size,
-        product_id: group.product_id,
-      }));
+      .map((group) => group.size);
   };
 
   const getProductPrice = (product_id: number, size: string) => {
@@ -95,10 +97,6 @@ function ProductCard({
     if (price) setPrice(price);
   };
 
-  const handleCardClick = () => {
-    setIsModalOpen(true);
-  };
-
   const handleSaveMargin = (marginValue: number) => {
     setMargin(marginValue);
   };
@@ -111,10 +109,7 @@ function ProductCard({
   };
 
   return (
-    <div
-      className="border rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200 cursor-pointer"
-      onClick={handleCardClick}
-    >
+    <div className="border rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200">
       <img
         src={product.image}
         alt={product.title}
@@ -127,15 +122,13 @@ function ProductCard({
 
       <select
         className="block w-full mt-4 p-2 border border-gray-300 rounded-md"
-        name="size"
-        id="size"
         value={selectedSize}
         onChange={handleSizeChange}
       >
         <option value="">Select Size</option>
-        {getProductSizes(product.id).map((item: { size: string }) => (
-          <option key={item.size} value={item.size}>
-            {item.size}
+        {getProductSizes(product.id).map((size) => (
+          <option key={size} value={size}>
+            {size}
           </option>
         ))}
       </select>
@@ -154,26 +147,21 @@ function ProductCard({
           {margin !== null && (
             <div>
               <span className="font-medium">Price with Margin: </span>$
-              {calculatePriceWithMargin()}
+              {calculatePriceWithMargin()?.toFixed(2)}
             </div>
           )}
         </div>
       )}
 
+      <button
+        onClick={() => setIsModalOpen(true)}
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+      >
+        Set Margin
+      </button>
+
       {isModalOpen && (
-        <>
-          <Modal setIsModalOpen={setIsModalOpen} onSave={handleSaveMargin} />
-          <p
-            className="text-blue-500 text-sm mt-2 absolute z-50"
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsModalOpen(true);
-            }}
-          >
-            Click to set margin{" "}
-            {JSON.stringify({ isModalOpen, margin, price, selectedSize })}
-          </p>
-        </>
+        <Modal setIsModalOpen={setIsModalOpen} onSave={handleSaveMargin} />
       )}
     </div>
   );
@@ -205,7 +193,7 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>(
-    [],
+    []
   );
 
   useEffect(() => {
@@ -218,7 +206,7 @@ export default function Admin() {
       const userEmail = user?.emailAddresses[0].emailAddress;
 
       setIsAdmin(
-        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false
       );
     };
     checkAdmin();
@@ -232,7 +220,7 @@ export default function Admin() {
     const groupedVariants = variants.reduce<DistinctVariantGroup[]>(
       (acc, variant) => {
         const group = acc.find(
-          (g) => g.size === variant.size && g.product_id === variant.product_id,
+          (g) => g.size === variant.size && g.product_id === variant.product_id
         );
         if (group) {
           group.variants.push(variant);
@@ -245,12 +233,32 @@ export default function Admin() {
         }
         return acc;
       },
-      [],
+      []
     );
 
-    setVariantGroups((groups) => [...groups, ...groupedVariants]);
+    // Deduplicate and update variantGroups
+    setVariantGroups((groups) => {
+      const combinedGroups = [...groups, ...groupedVariants];
+
+      const uniqueGroups = combinedGroups.reduce<DistinctVariantGroup[]>(
+        (acc, group) => {
+          const exists = acc.some(
+            (g) => g.product_id === group.product_id && g.size === group.size
+          );
+          if (!exists) {
+            acc.push(group);
+          }
+          return acc;
+        },
+        []
+      );
+
+      return uniqueGroups;
+    });
+
     return [];
   };
+
 
   useEffect(() => {
     if (isAdmin) {
