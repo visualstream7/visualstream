@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SupabaseWrapper } from "@/database/supabase";
+import { SupabaseWrapper, Product as dbProduct } from "@/database/supabase";
 import { Printful } from "@/libs/printful-client/printful-sdk";
 import { UserResource } from "@clerk/types";
 import Nav from "@/components/nav";
@@ -151,14 +151,15 @@ export default function ImagePage({ user, image }: UserPropType) {
         }
 
         // Initialize products with loading state
-        const initialProducts = productsFromDB.map((product: Product) => ({
+        const initialProducts = productsFromDB.map((product: dbProduct) => ({
           ...product,
           isLoadingMockup: true,
-        }));
+          mockup: null,
+        })) as Product[];
         setProducts(initialProducts);
 
         // Fetch mockups for each product individually
-        productsFromDB.forEach(async (product) => {
+        initialProducts.forEach(async (product) => {
           try {
             let productMock = getProductMock(product, mocks);
             if (productMock) {
@@ -272,15 +273,13 @@ export default function ImagePage({ user, image }: UserPropType) {
           }
 
           {hoveredImage && (
-            <h2 className="text-2xl text-gray-900 text-center m-4 lg:w-[30vw] h-[10vh]">
+            <h2 className="text-2xl text-gray-900 text-center m-4 lg:w-[30vw]">
               {extract_type_name(getProductFromMock(hoveredImage, products))}
             </h2>
           )}
-          {!hoveredImage && (
-            <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw] lg:h-[15vh] overflow-y-auto no-scrollbar cursor-pointer">
-              {image.ai_describe || "Description"}
-            </p>
-          )}
+          <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
+            {image.ai_describe || "Description"}
+          </p>
         </div>
 
         <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-[86vh] lg:overflow-y-hidden flex flex-col">
@@ -292,7 +291,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           </Link>
 
           <div>
-            <h1 className="text-2xl lg:text-3xl text-gray-900 line-clamp-2">
+            <h1 className="text-2xl lg:text-3xl text-gray-900">
               {image.title || "Image Title"}
             </h1>
           </div>

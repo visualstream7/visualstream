@@ -32,7 +32,6 @@ export interface Product {
   description: string;
   type_name: string;
   image: string;
-  mockup: string | null;
 }
 
 export interface Variant {
@@ -94,7 +93,7 @@ class SupabaseWrapper {
           description: data[0].description as string,
           type_name: data[0].type_name as string,
           image: data[0].image as string,
-          mockup: data[0].mockup,
+         
         },
         error: null,
       };

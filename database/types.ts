@@ -86,25 +86,22 @@ export type Database = {
       }
       Mocks: {
         Row: {
-          id: number
-          image_id: number | null
-          mock: string | null
-          product_id: number | null
-          variant_id: number | null
+          image_id: number
+          mock: string
+          product_id: number
+          variant_id: number
         }
         Insert: {
-          id?: number
-          image_id?: number | null
-          mock?: string | null
-          product_id?: number | null
-          variant_id?: number | null
+          image_id: number
+          mock: string
+          product_id: number
+          variant_id: number
         }
         Update: {
-          id?: number
-          image_id?: number | null
-          mock?: string | null
-          product_id?: number | null
-          variant_id?: number | null
+          image_id?: number
+          mock?: string
+          product_id?: number
+          variant_id?: number
         }
         Relationships: [
           {
@@ -134,7 +131,7 @@ export type Database = {
           description: string | null
           id: number
           image: string | null
-          mockup: string | null
+          margin: number | null
           title: string | null
           type_name: string | null
         }
@@ -143,7 +140,7 @@ export type Database = {
           description?: string | null
           id: number
           image?: string | null
-          mockup?: string | null
+          margin?: number | null
           title?: string | null
           type_name?: string | null
         }
@@ -152,7 +149,7 @@ export type Database = {
           description?: string | null
           id?: number
           image?: string | null
-          mockup?: string | null
+          margin?: number | null
           title?: string | null
           type_name?: string | null
         }
