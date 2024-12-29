@@ -17,6 +17,7 @@ type UserPropType = {
 };
 
 type NavPropType = {
+  
   user: UserResource | null | undefined;
   cartCount: number;
 };

@@ -32,6 +32,7 @@ export interface Product {
   description: string;
   type_name: string;
   image: string;
+  margin: number;
 }
 
 export interface Variant {
@@ -93,7 +94,7 @@ class SupabaseWrapper {
           description: data[0].description as string,
           type_name: data[0].type_name as string,
           image: data[0].image as string,
-         
+          margin: data[0].margin as number,
         },
         error: null,
       };
@@ -361,6 +362,7 @@ class SupabaseWrapper {
           type_name: product.type_name,
           image: product.image,
           mockup: product.mockup,
+          margin: product.margin,
         })),
         error: null,
       };
@@ -776,6 +778,15 @@ class SupabaseWrapper {
       error: null,
     };
   };
+
+  async updateProductMargin(productId: number, margin: number) {
+    const { error } = await this.client
+      .from("Products")
+      .update({ margin })
+      .eq("id", productId);
+    return { error };
+  }
+
 }
 
 export { SupabaseWrapper };

@@ -5,7 +5,7 @@ import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
 import { Printful } from "@/libs/printful-client/printful-sdk";
-import { SupabaseWrapper, Variant } from "@/database/supabase";
+import { SupabaseWrapper, Variant, Product as dbProduct } from "@/database/supabase";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -170,14 +170,15 @@ const RelatedProductsCarousel = ({
         }
 
         // Initialize products with loading state
-        const initialProducts = productsFromDB.map((product: Product) => ({
+        const initialProducts = productsFromDB.map((product: dbProduct) => ({
           ...product,
           isLoadingMockup: true,
+          mockup: null,
         }));
         setProducts(initialProducts);
 
         // Fetch mockups for each product individually
-        productsFromDB.forEach(async (product) => {
+        initialProducts.forEach(async (product) => {
           try {
             let productMock = getProductMock(product, mocks);
             if (productMock) {
@@ -213,10 +214,10 @@ const RelatedProductsCarousel = ({
               prevProducts.map((p) =>
                 p.id === product.id
                   ? {
-                      ...p,
-                      mockup,
-                      isLoadingMockup: false,
-                    }
+                    ...p,
+                    mockup,
+                    isLoadingMockup: false,
+                  }
                   : p,
               ),
             );
@@ -443,8 +444,8 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const fetchProduct = async (): Promise<Product> => {
     const { result, error } = await database.getProduct(parseInt(id));
     if (error || !result) throw new Error(error || "No product found");
-    setProduct(result);
-    return result;
+    setProduct({ ...result, isLoadingMockup: true, mockup: null });
+    return { ...result, isLoadingMockup: true, mockup: null };
   };
 
   const fetchVariants = async (): Promise<Variant[]> => {
@@ -780,9 +781,9 @@ const ProductPage: React.FC<ProductPageProps> = ({
                       ? hoveredMockup
                       : hoveredGroup?.image
                     : getMockupOfSelectedVariant()?.mock ||
-                      selectedVariantGroup?.image
+                    selectedVariantGroup?.image
                 }
-                onLoad={() => {}}
+                onLoad={() => { }}
                 alt=""
                 className="max-w-[40%] lg:max-w-[30vw] m-auto flex opacity-90"
               />
@@ -880,12 +881,11 @@ const ProductPage: React.FC<ProductPageProps> = ({
                         key={index}
                         src={variants.image || ""}
                         alt="variant mockup"
-                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
-                          selectedVariantGroup?.color_code ===
+                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${selectedVariantGroup?.color_code ===
                           variants.color_code
-                            ? "border-blue-800"
-                            : "border-gray-300"
-                        }`}
+                          ? "border-blue-800"
+                          : "border-gray-300"
+                          }`}
                         onClick={() => handleColorChange(variants)}
                         onMouseEnter={() => {
                           setIsHovering(true);

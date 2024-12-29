@@ -1,6 +1,7 @@
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
+import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -13,28 +14,39 @@ interface DistinctVariantGroup {
 function Modal({
   setIsModalOpen,
   onSave,
+  productId,
 }: {
   setIsModalOpen: (value: boolean) => void;
   onSave: (margin: number) => void;
+  productId: number;
 }) {
   const [margin, setMargin] = useState("");
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const marginValue = parseFloat(margin);
     if (!isNaN(marginValue)) {
-      onSave(marginValue);
-      setIsModalOpen(false);
+      try {
+        const { error } = await database.updateProductMargin(productId, marginValue);
+        if (error) {
+          console.error("Error updating margin:", error);
+          return;
+        }
+        onSave(marginValue);
+        setIsModalOpen(false);
+      } catch (err) {
+        console.error("Unexpected error updating margin:", err);
+      }
     }
   };
 
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={() => setIsModalOpen(false)} 
+      onClick={() => setIsModalOpen(false)}
     >
       <div
         className="bg-white p-4 rounded-md shadow-md"
-        onClick={(e) => e.stopPropagation()} 
+        onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold mb-4">Set Margin Percentage</h2>
         <input
@@ -63,6 +75,7 @@ function Modal({
   );
 }
 
+// ProductCard Component
 function ProductCard({
   product,
   variantGroups,
@@ -72,7 +85,7 @@ function ProductCard({
 }) {
   const [selectedSize, setSelectedSize] = useState("");
   const [price, setPrice] = useState<number | null>(null);
-  const [margin, setMargin] = useState<number | null>(null);
+  const [margin, setMargin] = useState<number | null>(product.margin);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getProductSizes = (product_id: number) => {
@@ -109,16 +122,18 @@ function ProductCard({
   };
 
   return (
-    <div className="border rounded-md p-4 shadow-sm hover:shadow-lg transition-shadow duration-200">
-      <img
-        src={product.image}
-        alt={product.title}
-        className="h-48 w-48 object-cover rounded-md mb-4"
-      />
-      <h2 className="text-lg font-semibold mb-2">{product.title}</h2>
+    <div className="border rounded-md p-4 shadow-md  border-[#ced2d7] mb-10">
       <span className="inline-block bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded-md">
         {product.type_name}
       </span>
+      <div className="flex min-h-[30vh] items-center justify-center mb-4">
+        <img
+          src={product.image}
+          alt={product.title}
+          className="h-full w-40 object-cover rounded-md mb-4"
+        />
+      </div>
+      <h2 className="text-lg font-semibold mb-2">{product.title}</h2>
 
       <select
         className="block w-full mt-4 p-2 border border-gray-300 rounded-md"
@@ -127,7 +142,7 @@ function ProductCard({
       >
         <option value="">Select Size</option>
         {getProductSizes(product.id).map((size) => (
-          <option key={size} value={size}>
+          <option  key={size} value={size}>
             {size}
           </option>
         ))}
@@ -155,13 +170,18 @@ function ProductCard({
 
       <button
         onClick={() => setIsModalOpen(true)}
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-md"
+        className="mt-4 bg-[#3b4a5e] text-white px-6 w-full py-3 rounded-md float-right hover:bg-[#2d3b47] transition duration-300"
       >
         Set Margin
       </button>
 
+
       {isModalOpen && (
-        <Modal setIsModalOpen={setIsModalOpen} onSave={handleSaveMargin} />
+        <Modal
+          setIsModalOpen={setIsModalOpen}
+          onSave={handleSaveMargin}
+          productId={product.id}
+        />
       )}
     </div>
   );
@@ -187,14 +207,69 @@ function ProductList({
   );
 }
 
+// Navbar Component
+function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const handleProfileClick = () => {
+    setIsProfileOpen((prev) => !prev);
+  };
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-[#25384c] text-white sticky top-0 z-10">
+      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+      <div className="relative">
+        {isAdmin && user ? (
+          <div>
+            <img
+              src={user.imageUrl}
+              alt="Profile"
+
+              className="w-10 h-10  rounded-full cursor-pointer"
+              onClick={handleProfileClick}
+            />
+            {isProfileOpen && (
+              <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-30">
+                <ul className="text-dark font-medium text-center">
+                  <li className="px-4 pt-2">
+                    <p className="text-dark font-bold">{user.fullName}</p>
+                  </li>
+                  {user.emailAddresses && user.emailAddresses[0] && (
+                    <li className="px-4 p-2">
+                      <p className="text-dark font-light break-all">
+                        {user.emailAddresses[0].emailAddress}
+                      </p>
+                    </li>
+                  )}
+                  <li className="border-b border-gray-200"></li>
+                
+                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+                    <SignOutButton>
+                      <button className="w-max text-danger font-bold">
+                        Sign Out
+                      </button>
+                    </SignOutButton>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        ) : (
+          <SignInButton mode="modal">
+            <button className="bg-accent text-light p-2 rounded-md">Sign In</button>
+          </SignInButton>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function Admin() {
   const { user, isLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>(
-    []
-  );
+  const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>([]);
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -259,7 +334,6 @@ export default function Admin() {
     return [];
   };
 
-
   useEffect(() => {
     if (isAdmin) {
       const fetchProducts = async () => {
@@ -282,7 +356,7 @@ export default function Admin() {
   }, [isAdmin]);
 
   if (!isLoaded) {
-    return <div>Loading...</div>;
+    return <div><FullPageSpinner/></div>;
   }
 
   if (!user) {
@@ -300,16 +374,20 @@ export default function Admin() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Admin Dashboard</h1>
-      {error && (
-        <div className="text-red-500">Error fetching products: {error}</div>
-      )}
-      {products ? (
-        <ProductList products={products} variantGroups={variantGroups} />
-      ) : (
-        <div>Loading products...</div>
-      )}
-    </div>
+    <>
+      <Navbar isAdmin={isAdmin} user={user} />
+      <div className="container mx-auto p-4 pt-16 overflow-auto">
+        {error && (
+          <div className="text-red-500">Error fetching products: {error}</div>
+        )}
+        <div>
+          {products ? (
+            <ProductList products={products} variantGroups={variantGroups} />
+          ) : (
+            <div className="flex justify-center items-center">Loading products...</div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
