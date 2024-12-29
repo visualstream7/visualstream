@@ -142,7 +142,7 @@ function ProductCard({
       >
         <option value="">Select Size</option>
         {getProductSizes(product.id).map((size) => (
-          <option  key={size} value={size}>
+          <option key={size} value={size}>
             {size}
           </option>
         ))}
@@ -187,6 +187,48 @@ function ProductCard({
   );
 }
 
+function getSortedProducts(products: Product[]): Product[] {
+  // Define the desired sort order based on product IDs
+  const sortOrder: number[] = [
+    206, // Hat
+    380, // Hoodie
+    71, // T-Shirt
+    279, // All-Over Print Backpack
+    474, // Spiral Notebook
+    19, // Mug
+    181, // iPhone Case
+    382, // Stainless Steel Water Bottle
+    84, // All-Over Print Tote Bag
+    1, // Enhanced Matte Paper Poster (in)
+    588, // Glossy Metal Print
+    3, // Canvas
+    358, // Kiss Cut Stickers (in)
+    534, // Jigsaw Puzzle
+    394, // Laptop Sleeve
+  ];
+
+  // Create a map for quick lookup of the sort order position based on ID
+  const orderMap: { [key: number]: number } = {};
+  sortOrder.forEach((id, index) => {
+    orderMap[id] = index;
+  });
+
+  // Sort the products based on the orderMap (which is based on their ID)
+  return products.sort((a, b) => {
+    const aOrder = orderMap[a.id];
+    const bOrder = orderMap[b.id];
+
+    // If both products are found in the order map, compare them by their order
+    if (aOrder !== undefined && bOrder !== undefined) {
+      return aOrder - bOrder;
+    }
+
+    // If any of the products is not in the orderMap, put it at the end
+    return aOrder === undefined ? 1 : -1;
+  });
+}
+
+
 function ProductList({
   products,
   variantGroups,
@@ -196,7 +238,7 @@ function ProductList({
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {products.map((product) => (
+      {getSortedProducts(products)?.map((product) => (
         <ProductCard
           key={product.id}
           product={product}
@@ -242,7 +284,7 @@ function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
                     </li>
                   )}
                   <li className="border-b border-gray-200"></li>
-                
+
                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                     <SignOutButton>
                       <button className="w-max text-danger font-bold">
@@ -356,7 +398,7 @@ export default function Admin() {
   }, [isAdmin]);
 
   if (!isLoaded) {
-    return <div><FullPageSpinner/></div>;
+    return <div><FullPageSpinner /></div>;
   }
 
   if (!user) {
