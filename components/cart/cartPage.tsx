@@ -10,7 +10,6 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Nav from "../nav";
 import Link from "next/link";
 import useCart from "../nav/useCart";
-import getStripe from "@/libs/Stripe";
 
 // pages/checkout.js
 import { loadStripe } from "@stripe/stripe-js";
