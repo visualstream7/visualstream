@@ -11,6 +11,91 @@ interface DistinctVariantGroup {
   variants: Variant[];
 }
 
+function ShippingVATModal({
+  setIsModalOpen,
+  onSave,
+  shippingCost,
+  vatPercentage,
+}: {
+  setIsModalOpen: (value: boolean) => void;
+  onSave: (shippingCost: number, vatPercentage: number) => void;
+  shippingCost: number;
+  vatPercentage: number;
+}) {
+  const [newShippingCost, setNewShippingCost] = useState(shippingCost);
+  const [newVatPercentage, setNewVatPercentage] = useState(vatPercentage);
+
+  const handleSave = async () => {
+    if (!isNaN(newShippingCost) && !isNaN(newVatPercentage)) {
+      try {
+        const { error } = await database.updateProductCharges(newShippingCost, newVatPercentage);
+        if (error) {
+          console.error("Error updating charges:", error);
+          return;
+        }
+        onSave(newShippingCost, newVatPercentage);
+        setIsModalOpen(false);
+      } catch (err) {
+        console.error("Unexpected error:", err);
+      }
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      onClick={() => setIsModalOpen(false)}
+    >
+      <div
+        className="bg-white p-4 rounded-md shadow-md"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-lg font-bold mb-4">Set Shipping Charges & VAT</h2>
+        <div className="mb-6">
+          <label htmlFor="shippingCost" className="block text-sm font-medium mb-2">Shipping Cost</label>
+          <input
+            id="shippingCost"
+            type="number"
+            value={newShippingCost}
+            onChange={(e) => setNewShippingCost(parseFloat(e.target.value))}
+            className="border p-2 rounded-md w-full"
+            placeholder="Enter shipping cost"
+          />
+        </div>
+
+        <div className="mb-6">
+          <label htmlFor="vatPercentage" className="block text-sm font-medium mb-2">VAT Percentage</label>
+          <input
+            id="vatPercentage"
+            type="number"
+            value={newVatPercentage}
+            onChange={(e) => setNewVatPercentage(parseFloat(e.target.value))}
+            className="border p-2 rounded-md w-full"
+            placeholder="Enter VAT percentage"
+          />
+        </div>
+
+        <div className="flex justify-end space-x-2">
+          <button
+            onClick={handleSave}
+            className="bg-[#3b4a5e] text-white px-4 py-2 rounded-md"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setIsModalOpen(false)}
+            className="bg-gray-300 text-black px-4 py-2 rounded-md"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 function Modal({
   setIsModalOpen,
   onSave,
@@ -59,7 +144,7 @@ function Modal({
         <div className="flex justify-end space-x-2">
           <button
             onClick={handleSave}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md"
+            className="bg-[#3b4a5e] text-white px-4 py-2 rounded-md"
           >
             Save
           </button>
@@ -312,6 +397,9 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>([]);
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [vatPercentage, setVatPercentage] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -328,6 +416,23 @@ export default function Admin() {
     };
     checkAdmin();
   }, [user]);
+
+
+  useEffect(() => {
+    const fetchCharges = async () => {
+      const { result, error } = await database.getProductCharges();
+      if (error) {
+        console.error("Error fetching product charges:", error);
+        return;
+      }
+      if (result) {
+        setShippingCost(result.shipping_cost);
+        setVatPercentage(result.vat_percentage);
+      }
+    };
+    fetchCharges();
+  }, []);
+
 
   const fetchVariants = async (id: number): Promise<Variant[]> => {
     const { result, error } = await database.getProductVariants(id);
@@ -423,11 +528,53 @@ export default function Admin() {
           <div className="text-red-500">Error fetching products: {error}</div>
         )}
         <div>
-          {products ? (
-            <ProductList products={products} variantGroups={variantGroups} />
-          ) : (
-            <div className="flex justify-center items-center">Loading products...</div>
+          {isAdmin && (
+            <>
+              <div className="bg-white p-4 rounded-md shadow-md border border-[#ced2d7] mb-8">
+                <h3 className="text-xl font-semibold">Shipping Charges & VAT</h3>
+                {shippingCost !== null && vatPercentage !== null ? (
+                  <div className="mt-4">
+                    <div>
+                      <span className="font-medium">Shipping Cost: </span>$
+                      {shippingCost}
+                    </div>
+                    <div>
+                      <span className="font-medium">VAT Percentage: </span>
+                      {vatPercentage}%
+                    </div>
+                    <button
+                      onClick={() => setIsModalOpen(true)}
+                      className="mt-4 bg-[#3b4a5e] text-white px-6 py-3 rounded-md"
+                    >
+                      Edit Charges & VAT
+                    </button>
+                  </div>
+                ) : (
+                  <div>Loading charges...</div>
+                )}
+              </div>
+            </>
           )}
+
+          {isModalOpen && shippingCost !== null && vatPercentage !== null && (
+            <ShippingVATModal
+              setIsModalOpen={setIsModalOpen}
+              onSave={(newShippingCost, newVatPercentage) => {
+                setShippingCost(newShippingCost);
+                setVatPercentage(newVatPercentage);
+              }}
+              shippingCost={shippingCost}
+              vatPercentage={vatPercentage}
+            />
+          )}
+
+          <div>
+            {products ? (
+              <ProductList products={products} variantGroups={variantGroups} />
+            ) : (
+              <div className="flex justify-center items-center">Loading products...</div>
+            )}
+          </div>
         </div>
       </div>
     </>

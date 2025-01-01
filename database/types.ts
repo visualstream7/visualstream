@@ -125,6 +125,24 @@ export type Database = {
         }
         Relationships: []
       }
+      ProductCharges: {
+        Row: {
+          id: number
+          shipping_cost: number
+          vat_percentage: number | null
+        }
+        Insert: {
+          id?: number
+          shipping_cost?: number
+          vat_percentage?: number | null
+        }
+        Update: {
+          id?: number
+          shipping_cost?: number
+          vat_percentage?: number | null
+        }
+        Relationships: []
+      }
       Products: {
         Row: {
           created_at: string | null

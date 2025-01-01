@@ -787,6 +787,38 @@ class SupabaseWrapper {
     return { error };
   }
 
+
+  async getProductCharges() {
+    const { data, error } = await this.client
+      .from("ProductCharges")
+      .select("*")
+      .eq("id", 1)
+      .single();
+    
+    
+    if (error) {
+      console.error("Error fetching product charges", error);
+    }
+    else {
+      console.log("Product charges fetched", data);
+    }
+
+    return { result: data, error };
+  }
+
+  async updateProductCharges(shippingCost: number, vatPercentage: number) {
+    const { data, error } = await this.client
+      .from("ProductCharges")
+      .update({
+        shipping_cost: shippingCost,
+        vat_percentage: vatPercentage,
+      })
+      .eq("id", 1); 
+
+    return { result: data, error };
+  }
+
+
 }
 
 export { SupabaseWrapper };
