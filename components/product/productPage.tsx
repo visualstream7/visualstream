@@ -5,7 +5,11 @@ import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import Link from "next/link";
 import { IoArrowBack } from "react-icons/io5";
 import { Printful } from "@/libs/printful-client/printful-sdk";
-import { SupabaseWrapper, Variant, Product as dbProduct } from "@/database/supabase";
+import {
+  SupabaseWrapper,
+  Variant,
+  Product as dbProduct,
+} from "@/database/supabase";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -29,6 +33,7 @@ interface Product {
   description: string;
   type_name: string;
   image: string;
+  margin: number;
   mockup: string | null;
   isLoadingMockup?: boolean; // Track loading state
 }
@@ -214,10 +219,10 @@ const RelatedProductsCarousel = ({
               prevProducts.map((p) =>
                 p.id === product.id
                   ? {
-                    ...p,
-                    mockup,
-                    isLoadingMockup: false,
-                  }
+                      ...p,
+                      mockup,
+                      isLoadingMockup: false,
+                    }
                   : p,
               ),
             );
@@ -433,6 +438,19 @@ const ProductPage: React.FC<ProductPageProps> = ({
     }
   };
 
+  function getPrice() {
+    let price = 0;
+    let variant = getVariant();
+    let margin = product?.margin || 0;
+
+    if (variant) {
+      price =
+        parseFloat(variant.price) + parseFloat(variant.price) * margin * 0.01;
+    }
+
+    return price.toFixed(2);
+  }
+
   const fetchImage = async (): Promise<Image> => {
     const image_id_number = parseInt(image_id);
     const { result, error } = await database.getImage(image_id_number);
@@ -444,6 +462,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const fetchProduct = async (): Promise<Product> => {
     const { result, error } = await database.getProduct(parseInt(id));
     if (error || !result) throw new Error(error || "No product found");
+    console.log("Product fetched", result);
     setProduct({ ...result, isLoadingMockup: true, mockup: null });
     return { ...result, isLoadingMockup: true, mockup: null };
   };
@@ -781,9 +800,9 @@ const ProductPage: React.FC<ProductPageProps> = ({
                       ? hoveredMockup
                       : hoveredGroup?.image
                     : getMockupOfSelectedVariant()?.mock ||
-                    selectedVariantGroup?.image
+                      selectedVariantGroup?.image
                 }
-                onLoad={() => { }}
+                onLoad={() => {}}
                 alt=""
                 className="max-w-[40%] lg:max-w-[30vw] m-auto flex opacity-90"
               />
@@ -844,7 +863,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">Price:</span>
-                <p className="text-xl text-[#803d2c]">${getVariant()?.price}</p>
+                <p className="text-xl text-[#803d2c]">${getPrice()}</p>
               </div>
             </div>
 
@@ -881,11 +900,12 @@ const ProductPage: React.FC<ProductPageProps> = ({
                         key={index}
                         src={variants.image || ""}
                         alt="variant mockup"
-                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${selectedVariantGroup?.color_code ===
+                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
+                          selectedVariantGroup?.color_code ===
                           variants.color_code
-                          ? "border-blue-800"
-                          : "border-gray-300"
-                          }`}
+                            ? "border-blue-800"
+                            : "border-gray-300"
+                        }`}
                         onClick={() => handleColorChange(variants)}
                         onMouseEnter={() => {
                           setIsHovering(true);
@@ -917,9 +937,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
               {product.title}
             </h2>
 
-            <p className="mt-4 text-red-600 font-medium">
-              {getVariant()?.price && `$${getVariant()?.price}`}
-            </p>
+            <p className="mt-4 text-red-600 font-medium">${getPrice()}</p>
 
             <p className="text-gray-500 text-sm mt-2">
               {getVariant()?.size && `Size: ${getVariant()?.size}`}

@@ -15,10 +15,14 @@ export default function useCart({
   user: UserResource | null | undefined;
 }) {
   const [cartCount, setCartCount] = useState(0);
+
+  let [shipping, setShipping] = useState<number>(0);
+  let [tax, setTax] = useState<number>(0);
   const [cartItems, setCartItems] = useState<
     {
       product_id: number;
       variant_id: number;
+      margin: number;
       quantity: number;
       image_id: number;
       size: string;
@@ -62,6 +66,7 @@ export default function useCart({
                   color: result.color_code,
                   price: result.price,
                   image: result.image_url,
+                  margin: result.margin,
                 };
               }
             } catch (err) {
@@ -223,6 +228,23 @@ export default function useCart({
   }
 
   useEffect(() => {
+    async function fetchCharges() {
+      const { result, error } = await database.getProductCharges();
+
+      if (error) {
+        console.error("Error fetching charges:", error);
+        return;
+      }
+
+      console.log("Charges:", result);
+      setShipping(result?.shipping_cost || 0);
+      setTax(result?.vat_percentage || 0);
+    }
+
+    fetchCharges();
+  }, []);
+
+  useEffect(() => {
     const syncCartData = async (user_id: string) => {
       const { result: databaseCartItems, error: cartError } =
         await database.getCartItems(user!.id);
@@ -289,5 +311,7 @@ export default function useCart({
     handleDecrement,
     removeItemFromCart,
     loading,
+    shipping,
+    tax,
   };
 }

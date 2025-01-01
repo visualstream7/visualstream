@@ -22,6 +22,8 @@ export default function Cart({ user }: CartProps) {
   const {
     cartItems,
     count,
+    shipping,
+    tax,
     loading,
     handleIncrement,
     handleDecrement,
@@ -29,11 +31,25 @@ export default function Cart({ user }: CartProps) {
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
 
   const subtotal = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
+    (acc, item) => acc + parseFloat(getPrice(item)) * item.quantity,
     0,
   );
-  const shipping = 0;
-  const tax = subtotal * 0.08;
+
+  function getPrice(item: (typeof cartItems)[0]) {
+    let price = 0;
+    let margin = item.margin || 0;
+    margin = margin / 100;
+
+    console.log(item.price);
+    console.log(item.margin);
+
+    if (item.price) {
+      let numPrice = Number(item.price);
+      price = numPrice + numPrice * margin;
+    }
+
+    return price.toFixed(2);
+  }
 
   return (
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
@@ -105,7 +121,7 @@ export default function Cart({ user }: CartProps) {
                         </p>
                         <div className="flex items-center space-x-4 mt-2">
                           <span className="text-sm text-gray-700">
-                            ${item.price}
+                            ${getPrice(item)}
                           </span>
                           <button
                             onClick={() =>
@@ -165,10 +181,23 @@ export default function Cart({ user }: CartProps) {
                 <span className="text-gray-700">Subtotal</span>
                 <span className="text-gray-700">${subtotal.toFixed(2)}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-700">Shipping</span>
+                <span className="text-gray-700">${shipping.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-700">Tax</span>
+                <span className="text-gray-700">
+                  {" "}
+                  ${subtotal * (tax / 100)}
+                </span>
+              </div>
               <div className="border-t mt-4 pt-4">
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total</span>
-                  <span>${(subtotal + shipping + tax).toFixed(2)}</span>
+                  <span>
+                    ${(subtotal + shipping + subtotal * (tax / 100)).toFixed(2)}
+                  </span>
                 </div>
               </div>
             </div>

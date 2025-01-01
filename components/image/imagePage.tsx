@@ -7,7 +7,6 @@ import { IoArrowBack } from "react-icons/io5";
 import Link from "next/link";
 import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { CircleDashed } from "lucide-react";
-import { setPriority } from "os";
 import useCart from "../nav/useCart";
 
 type UserPropType = {
