@@ -234,7 +234,7 @@ export default function ImagePage({ user, image }: UserPropType) {
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex flex-col justify-center items-center">
           <Link href="/">
-            <button className="flex lg:hidden items-center space-x-2 text-gray-800 hover:text-gray-800 my-4 w-[90vw]">
+            <button className="flex lg:hidden items-center  text-gray-800 hover:text-gray-800 my-4 w-[90vw]">
               <IoArrowBack />
               <span>Back</span>
             </button>
