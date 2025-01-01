@@ -10,6 +10,14 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import Nav from "../nav";
 import Link from "next/link";
 import useCart from "../nav/useCart";
+import getStripe from "@/libs/Stripe";
+
+// pages/checkout.js
+import { loadStripe } from "@stripe/stripe-js";
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
 
 interface CartProps {
   user: UserResource | null | undefined;
@@ -29,6 +37,30 @@ export default function Cart({ user }: CartProps) {
     handleDecrement,
     removeItemFromCart,
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
+
+  async function handleCheckout() {
+    const stripe = await stripePromise;
+    if (!stripe) return;
+    const response = await fetch("/api/checkout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        cartItems: cartItems.map((item) => ({
+          name: item.title,
+          image: item.mock,
+          price: Number(item.price) + Number(item.price) * (item.margin / 100),
+          quantity: item.quantity,
+        })),
+        shippingAmount: shipping,
+        taxAmount: (subtotal * (tax / 100)).toFixed(2),
+        returnUrl: window.location.origin,
+      }),
+    });
+    const session = await response.json();
+    await stripe.redirectToCheckout({ sessionId: session.id });
+  }
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + parseFloat(getPrice(item)) * item.quantity,
@@ -189,7 +221,7 @@ export default function Cart({ user }: CartProps) {
                 <span className="text-gray-700">Tax</span>
                 <span className="text-gray-700">
                   {" "}
-                  ${subtotal * (tax / 100)}
+                  ${(subtotal * (tax / 100)).toFixed(2)}
                 </span>
               </div>
               <div className="border-t mt-4 pt-4">
@@ -204,7 +236,7 @@ export default function Cart({ user }: CartProps) {
 
             <button
               className="w-full mt-6 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
-              onClick={() => alert("Proceed to checkout")}
+              onClick={() => handleCheckout()}
             >
               Proceed to Checkout
             </button>
