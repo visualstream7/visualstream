@@ -115,13 +115,40 @@ export type Database = {
       }
       Orders: {
         Row: {
+          address: Json | null
+          cart_items: Json | null
+          created_at: string | null
+          email: string | null
           order_id: number
+          shipping_ammount: number | null
+          status: string | null
+          tax_ammount: number | null
+          total_amount: number | null
+          user_id: string | null
         }
         Insert: {
+          address?: Json | null
+          cart_items?: Json | null
+          created_at?: string | null
+          email?: string | null
           order_id?: number
+          shipping_ammount?: number | null
+          status?: string | null
+          tax_ammount?: number | null
+          total_amount?: number | null
+          user_id?: string | null
         }
         Update: {
+          address?: Json | null
+          cart_items?: Json | null
+          created_at?: string | null
+          email?: string | null
           order_id?: number
+          shipping_ammount?: number | null
+          status?: string | null
+          tax_ammount?: number | null
+          total_amount?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
