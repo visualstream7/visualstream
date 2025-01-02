@@ -35,11 +35,40 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   switch (event.type) {
     case "payment_intent.succeeded": {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
-      console.log("PaymentIntent was successful!");
-      // Then define and call a method to handle the successful payment intent.
-      // handlePaymentIntentSucceeded(paymentIntent);
+      // console.log("PaymentIntent was successful!", event.data);
       break;
     }
+
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+      console.log("Checkout session completed!", session);
+      let payment_status = session.payment_status;
+      let customerDetails = session.customer_details;
+
+      if (payment_status !== "paid" || !customerDetails) {
+        break;
+      }
+
+      let paymentIntent = await stripe.paymentIntents.retrieve(
+        session.payment_intent as string,
+      );
+      let metadata = paymentIntent.metadata;
+
+      let orderDetails = {
+        status: "paid",
+        email: customerDetails.email,
+        address: customerDetails.address,
+        userID: metadata.userID,
+        cartItems: metadata.cartItems,
+        shippingAmount: metadata.shippingAmount,
+        taxAmount: metadata.taxAmount,
+        totalAmount: paymentIntent.amount_received / 100,
+      };
+      console.log("metadata", metadata);
+
+      break;
+    }
+
     // ... handle other event types
     default: {
       break;

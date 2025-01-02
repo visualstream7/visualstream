@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate_db_types": "npx supabase gen types typescript --project-id xkwhbcurrwiqrioskcgh > ./database/types.ts"
+    "generate_db_types": "npx supabase gen types typescript --project-id xkwhbcurrwiqrioskcgh > ./database/types.ts",
+    "stripe": " stripe listen --forward-to localhost:3000/api/webhook"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.3.4",
