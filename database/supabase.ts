@@ -47,7 +47,7 @@ export interface Variant {
   discontinued: boolean;
 }
 
-export interface Order {}
+export interface Order { }
 
 // Define overload signatures for the constructor
 class SupabaseWrapper {
@@ -940,6 +940,40 @@ class SupabaseWrapper {
 
     return { result: data, error };
   }
+
+  updateVariantStatus = async (
+    variantId: number,
+    discontinued: boolean
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      const { data, error } = await this.client
+        .from("Variants")
+        .update({ discontinued: discontinued })
+        .eq("id", variantId)
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
 }
 
 export { SupabaseWrapper };

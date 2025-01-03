@@ -254,6 +254,19 @@ function ProductCard({
     return null;
   };
 
+  const updateVariantDiscontinuedStatus = async (variantId: number, status: boolean) => {
+    const { result, error } = await database.updateVariantStatus(variantId, status);
+
+    if (error) {
+      console.error("Error updating variant status:", error);
+      return;
+    }
+    console.log("Variant status updated:", result);
+
+  };
+
+  
+
   return (
     <div className="border rounded-md p-4 shadow-md  border-[#ced2d7] mb-10">
       <span className="inline-block bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded-md">
@@ -268,27 +281,66 @@ function ProductCard({
       </div>
       <h2 className="text-lg font-semibold mb-2">{product.title}</h2>
 
-      <div className="flex items-center space-x-2 mb-4">
-        {getVariantsOfGroup(product.id, selectedSize).map((variant) => (
-          <div
-            className={`flex items-center space-x-2 ${variant.variant_id === selectedVariantId ? "border border-blue-600 p-4" : ""}`}
-            onClick={() => setSelectedVariantId(variant.variant_id)}
-          >
+      <div className="space-y-8">
+        {/* Variant Selector */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {getVariantsOfGroup(product.id, selectedSize).map((variant) => (
             <div
-              className="w-4 h-4 rounded-full"
-              style={{ backgroundColor: variant.color }}
-            />
-            {/* <span>{variant.variant_id}</span> */}
-            {/* <span>{variant.discontinued ? "Discontinued" : ""}</span> */}
+              key={variant.variant_id}
+              className={`relative p-2 rounded-lg border cursor-pointer shadow-sm 
+          ${variant.variant_id === selectedVariantId
+                  ? "border-blue-500 bg-blue-50"
+                  : "border-gray-200 bg-white"
+                } hover:shadow-md transition`}
+              onClick={() => setSelectedVariantId(variant.variant_id)}
+            >
+              {/* Color Circle */}
+              <div
+                className={`w-8 h-8 rounded-full mx-auto border ${variant.variant_id === selectedVariantId
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                  }`}
+                style={{ backgroundColor: variant.color }}
+              ></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Selected Variant Actions */}
+        {selectedVariantId && (
+          <div className="p-4 rounded-lg bg-gray-100 border shadow">
+            <h3 className="text-lg font-medium text-gray-800">
+              Selected Variant: {selectedVariantId}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Status:{" "}
+              <span
+                className={`font-semibold ${isVariantDiscontinued(selectedVariantId)
+                    ? "text-red-500"
+                    : "text-green-600"
+                  }`}
+              >
+                {isVariantDiscontinued(selectedVariantId)
+                  ? "Discontinued"
+                  : "Available"}
+              </span>
+            </p>
+
+            {/* Mark as Discontinued Button */}
+            {!isVariantDiscontinued(selectedVariantId) && (
+              <button
+                className="mt-4 px-6 py-2 rounded-md bg-red-500 text-white font-medium transition hover:bg-red-600 shadow"
+                onClick={() =>
+                  updateVariantDiscontinuedStatus(selectedVariantId, true)
+                }
+              >
+                Mark as Discontinued
+              </button>
+            )}
           </div>
-        ))}
+        )}
       </div>
 
-      <p>
-        is variant discontinued:{" "}
-        {selectedVariantId &&
-          isVariantDiscontinued(selectedVariantId)?.toString()}
-      </p>
 
       <select
         className="block w-full mt-4 p-2 border border-gray-300 rounded-md"
