@@ -178,9 +178,11 @@ function Modal({
 function ProductCard({
   product,
   variantGroups,
+  setVariantGroups,
 }: {
   product: Product;
   variantGroups: DistinctVariantGroup[];
+  setVariantGroups: any;
 }) {
   const [selectedSize, setSelectedSize] = useState("");
   const [price, setPrice] = useState<number | null>(null);
@@ -221,11 +223,13 @@ function ProductCard({
 
   function isVariantDiscontinued(variant_id: number) {
     if (!variantGroups) return false;
-    return variantGroups
-      .filter((group) => group.product_id === product.id)
-      .map((group) => group.variants)
-      .flat()
-      .find((variant) => variant.id === variant_id)?.discontinued;
+    return (
+      variantGroups
+        .filter((group) => group.product_id === product.id)
+        .map((group) => group.variants)
+        .flat()
+        .find((variant) => variant.id === variant_id)?.discontinued || false
+    );
   }
 
   const getProductPrice = (product_id: number, size: string) => {
@@ -254,18 +258,36 @@ function ProductCard({
     return null;
   };
 
-  const updateVariantDiscontinuedStatus = async (variantId: number, status: boolean) => {
-    const { result, error } = await database.updateVariantStatus(variantId, status);
+  const updateVariantDiscontinuedStatus = async (
+    variantId: number,
+    status: boolean,
+  ) => {
+    // optimistic update in the variantGroups state
+
+    setVariantGroups((groups: DistinctVariantGroup[]) => {
+      const updatedGroups = groups.map((group) => {
+        const updatedVariants = group.variants.map((variant) => {
+          if (variant.id === variantId) {
+            return { ...variant, discontinued: status };
+          }
+          return variant;
+        });
+        return { ...group, variants: updatedVariants };
+      });
+      return updatedGroups;
+    });
+
+    const { result, error } = await database.updateVariantStatus(
+      variantId,
+      status,
+    );
 
     if (error) {
       console.error("Error updating variant status:", error);
       return;
     }
     console.log("Variant status updated:", result);
-
   };
-
-  
 
   return (
     <div className="border rounded-md p-4 shadow-md  border-[#ced2d7] mb-10">
@@ -287,19 +309,21 @@ function ProductCard({
           {getVariantsOfGroup(product.id, selectedSize).map((variant) => (
             <div
               key={variant.variant_id}
-              className={`relative p-2 rounded-lg border cursor-pointer shadow-sm 
-          ${variant.variant_id === selectedVariantId
-                  ? "border-blue-500 bg-blue-50"
-                  : "border-gray-200 bg-white"
-                } hover:shadow-md transition`}
+              className={`relative p-2 rounded-lg border cursor-pointer shadow-sm
+          ${
+            variant.variant_id === selectedVariantId
+              ? "border-blue-500 bg-blue-50"
+              : "border-gray-200 bg-white"
+          } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
               {/* Color Circle */}
               <div
-                className={`w-8 h-8 rounded-full mx-auto border ${variant.variant_id === selectedVariantId
+                className={`w-8 h-8 rounded-full mx-auto border ${
+                  variant.variant_id === selectedVariantId
                     ? "border-blue-500"
                     : "border-gray-300"
-                  }`}
+                }`}
                 style={{ backgroundColor: variant.color }}
               ></div>
             </div>
@@ -315,10 +339,11 @@ function ProductCard({
             <p className="text-sm text-gray-600 mt-1">
               Status:{" "}
               <span
-                className={`font-semibold ${isVariantDiscontinued(selectedVariantId)
+                className={`font-semibold ${
+                  isVariantDiscontinued(selectedVariantId)
                     ? "text-red-500"
                     : "text-green-600"
-                  }`}
+                }`}
               >
                 {isVariantDiscontinued(selectedVariantId)
                   ? "Discontinued"
@@ -327,20 +352,22 @@ function ProductCard({
             </p>
 
             {/* Mark as Discontinued Button */}
-            {!isVariantDiscontinued(selectedVariantId) && (
-              <button
-                className="mt-4 px-6 py-2 rounded-md bg-red-500 text-white font-medium transition hover:bg-red-600 shadow"
-                onClick={() =>
-                  updateVariantDiscontinuedStatus(selectedVariantId, true)
-                }
-              >
-                Mark as Discontinued
-              </button>
-            )}
+            <button
+              className="mt-4 px-6 py-2 rounded-md bg-red-500 text-white font-medium transition hover:bg-red-600 shadow"
+              onClick={() =>
+                updateVariantDiscontinuedStatus(
+                  selectedVariantId,
+                  !isVariantDiscontinued(selectedVariantId),
+                )
+              }
+            >
+              {isVariantDiscontinued(selectedVariantId)
+                ? "Mark as Available"
+                : "Mark as Discontinued"}
+            </button>
           </div>
         )}
       </div>
-
 
       <select
         className="block w-full mt-4 p-2 border border-gray-300 rounded-md"
@@ -437,9 +464,11 @@ function getSortedProducts(products: Product[]): Product[] {
 function ProductList({
   products,
   variantGroups,
+  setVariantGroups,
 }: {
   products: Product[];
   variantGroups: DistinctVariantGroup[];
+  setVariantGroups: (groups: DistinctVariantGroup[]) => void;
 }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -448,6 +477,7 @@ function ProductList({
           key={product.id}
           product={product}
           variantGroups={variantGroups}
+          setVariantGroups={setVariantGroups}
         />
       ))}
     </div>
@@ -697,7 +727,11 @@ export default function Admin() {
 
           <div>
             {products ? (
-              <ProductList products={products} variantGroups={variantGroups} />
+              <ProductList
+                products={products}
+                variantGroups={variantGroups}
+                setVariantGroups={setVariantGroups}
+              />
             ) : (
               <div className="flex justify-center items-center">
                 Loading products...
