@@ -44,6 +44,7 @@ export interface Variant {
   availability: Json;
   in_stock: boolean;
   image: string;
+  discontinued: boolean;
 }
 
 export interface Order {}
@@ -73,6 +74,68 @@ class SupabaseWrapper {
       this.client = uiClient();
     }
   }
+
+  saveMetadata = async (
+    id: string,
+    metadata: any,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client.from("metadatas").insert({
+        id: id,
+        metadata: metadata,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error saving metadata", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getMetadata = async (
+    id: string,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("metadatas")
+        .select("*")
+        .eq("id", id)
+        .single();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error fetching metadata", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
 
   addOrderToDatabase = async (
     order: any,
@@ -556,6 +619,7 @@ class SupabaseWrapper {
           availability: variant.availability,
           in_stock: variant.in_stock,
           image: variant.image,
+          discontinued: variant.discontinued,
         })),
         error: null,
       };

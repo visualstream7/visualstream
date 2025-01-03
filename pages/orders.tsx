@@ -116,10 +116,10 @@ const Orders = () => {
   if (!isLoaded) return <FullPageSpinner />;
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="max-h-dvh h-dvh bg-gray-100 overflow-hidden flex flex-col">
       <Nav user={user} cartCount={count} />
       {/* Content */}
-      <main className="max-w-5xl mx-auto px-4 py-8">
+      <main className="min-w-[60vw] mx-auto px-4 py-8 flex-1 overflow-hidden">
         {/* Navbar */}
 
         {/* Back Arrow & Text */}
@@ -135,89 +135,93 @@ const Orders = () => {
           My Orders
         </h1>
 
-        {/* Orders */}
-        {orders.map((order) => {
-          const grandTotal = order.total + order.tax + order.shippingCharge;
+        <div className="flex flex-col flex-1 overflow-auto h-[70dvh] no-scrollbar">
+          {/* Orders */}
+          {orders.map((order) => {
+            const grandTotal = order.total + order.tax + order.shippingCharge;
 
-          return (
-            <div
-              key={order.id}
-              className="bg-white rounded-lg shadow-lg mb-6 border border-gray-300 overflow-hidden"
-            >
-              {/* Order Header */}
-              <div className="bg-gray-100 px-6 py-4 flex justify-between items-center">
-                <div>
-                  <p className="text-sm text-gray-600">
-                    <span className="font-semibold">Order ID:</span>{" "}
-                    <span className="text-blue-600 font-bold">{order.id}</span>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Placed on: {order.date}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      order.status === "In-Transit"
-                        ? "bg-orange-100 text-orange-600"
-                        : "bg-gray-100 text-gray-600"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
-                </div>
-              </div>
-
-              {/* Products */}
-              <div className="px-6 py-4 space-y-4">
-                {order.products.map((product, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-6 border-b border-gray-200 pb-4 last:border-b-0"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-16 h-18 rounded-md object-cover"
-                    />
-                    <div className="flex-grow">
-                      <h2 className="text-lg font-medium text-gray-800">
-                        {product.name}
-                      </h2>
-                      <p className="text-sm text-gray-500">
-                        Size: {product.size} | Qty: {product.qty}
-                      </p>
-                    </div>
-                    <p className="text-lg font-bold text-gray-800">
-                      {product.price}
+            return (
+              <div
+                key={order.id}
+                className="bg-white rounded-lg shadow-lg mb-6 border border-gray-300"
+              >
+                {/* Order Header */}
+                <div className="bg-gray-100 px-6 py-4 flex justify-between items-center">
+                  <div>
+                    <p className="text-sm text-gray-600">
+                      <span className="font-semibold">Order ID:</span>{" "}
+                      <span className="text-blue-600 font-bold">
+                        {order.id}
+                      </span>
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Placed on: {order.date}
                     </p>
                   </div>
-                ))}
-              </div>
-
-              {/* Order Footer */}
-              <div className="bg-gray-50 px-6 py-4 flex justify-between items-center text-sm text-gray-600">
-                <div>
-                  <p>
-                    <span className="font-semibold">Tax:</span> ${order.tax}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Shipping:</span> $
-                    {order.shippingCharge}
-                  </p>
-                </div>
-                <div>
-                  <p className="font-semibold">
-                    Total:{" "}
-                    <span className="text-lg text-blue-600">
-                      ${grandTotal.toFixed(2)}
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        order.status === "In-Transit"
+                          ? "bg-orange-100 text-orange-600"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {order.status}
                     </span>
-                  </p>
+                  </div>
+                </div>
+
+                {/* Products */}
+                <div className="px-6 py-4 space-y-4">
+                  {order.products.map((product, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-6 border-b border-gray-200 pb-4 last:border-b-0"
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-16 h-18 rounded-md object-cover"
+                      />
+                      <div className="flex-grow">
+                        <h2 className="text-lg font-medium text-gray-800">
+                          {product.name}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                          Size: {product.size} | Qty: {product.qty}
+                        </p>
+                      </div>
+                      <p className="text-lg font-bold text-gray-800">
+                        {product.price}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Order Footer */}
+                <div className="bg-gray-50 px-6 py-4 flex justify-between items-center text-sm text-gray-600">
+                  <div>
+                    <p>
+                      <span className="font-semibold">Tax:</span> ${order.tax}
+                    </p>
+                    <p>
+                      <span className="font-semibold">Shipping:</span> $
+                      {order.shippingCharge}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      Total:{" "}
+                      <span className="text-lg text-blue-600">
+                        ${grandTotal.toFixed(2)}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </main>
     </div>
   );

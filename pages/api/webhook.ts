@@ -50,7 +50,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log("Checkout session completed!", session);
       let payment_status = session.payment_status;
       let customerDetails = session.customer_details;
 
@@ -58,24 +57,35 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         break;
       }
 
+      const database = new SupabaseWrapper("SERVER", req, res);
+
       let paymentIntent = await stripe.paymentIntents.retrieve(
         session.payment_intent as string,
       );
-      let metadata = paymentIntent.metadata;
+
+      let { result: metadataResult, error: metadataError } =
+        await database.getMetadata(session.id);
+
+      let metadata = metadataResult.metadata;
+
+      if (metadataError) {
+        break;
+      }
+
+      console.log("metadata", metadata);
 
       let orderDetails = {
         status: "paid",
         email: customerDetails.email,
         address: customerDetails.address,
         user_id: metadata.userId,
-        cart_items: JSON.parse(metadata.cartItems),
+        cart_items: metadata.cartItems,
         shipping_amount: metadata.shippingAmount,
         tax_amount: metadata.taxAmount,
         total_amount: paymentIntent.amount_received / 100,
       };
       console.log("metadata", metadata);
 
-      const database = new SupabaseWrapper("SERVER", req, res);
       const { result, error } = await database.addOrderToDatabase(orderDetails);
 
       if (error) {

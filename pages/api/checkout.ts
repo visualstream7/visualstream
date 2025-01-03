@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
+import { SupabaseWrapper } from "@/database/supabase";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -57,16 +58,19 @@ export default async function handler(
       shipping_address_collection: {
         allowed_countries: ["US", "CA", "BD"],
       },
-      payment_intent_data: {
-        metadata: {
-          cartItems: JSON.stringify(cartItems),
-          shippingAmount: shippingAmount,
-          taxAmount: taxAmount,
-          userId: userId,
-        },
-      },
+      payment_intent_data: {},
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${returnUrl}`,
+    });
+
+    let database = new SupabaseWrapper("SERVER", req, res);
+
+    // Save the session id to the database
+    await database.saveMetadata(session.id, {
+      cartItems: cartItems,
+      shippingAmount: shippingAmount,
+      taxAmount: taxAmount,
+      userId: userId,
     });
 
     res.status(200).json({ id: session.id });

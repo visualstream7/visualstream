@@ -84,6 +84,21 @@ export type Database = {
         }
         Relationships: []
       }
+      metadatas: {
+        Row: {
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          id: string
+          metadata: Json
+        }
+        Update: {
+          id?: string
+          metadata?: Json
+        }
+        Relationships: []
+      }
       Mocks: {
         Row: {
           image_id: number
@@ -243,6 +258,7 @@ export type Database = {
         Row: {
           availability: Json | null
           color_code: string | null
+          discontinued: boolean | null
           id: number
           image: string | null
           in_stock: boolean | null
@@ -253,6 +269,7 @@ export type Database = {
         Insert: {
           availability?: Json | null
           color_code?: string | null
+          discontinued?: boolean | null
           id: number
           image?: string | null
           in_stock?: boolean | null
@@ -263,6 +280,7 @@ export type Database = {
         Update: {
           availability?: Json | null
           color_code?: string | null
+          discontinued?: boolean | null
           id?: number
           image?: string | null
           in_stock?: boolean | null

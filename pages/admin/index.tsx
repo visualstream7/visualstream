@@ -28,7 +28,10 @@ function ShippingVATModal({
   const handleSave = async () => {
     if (!isNaN(newShippingCost) && !isNaN(newVatPercentage)) {
       try {
-        const { error } = await database.updateProductCharges(newShippingCost, newVatPercentage);
+        const { error } = await database.updateProductCharges(
+          newShippingCost,
+          newVatPercentage,
+        );
         if (error) {
           console.error("Error updating charges:", error);
           return;
@@ -52,7 +55,12 @@ function ShippingVATModal({
       >
         <h2 className="text-lg font-bold mb-4">Set Shipping Charges & VAT</h2>
         <div className="mb-6">
-          <label htmlFor="shippingCost" className="block text-sm font-medium mb-2">Shipping Cost</label>
+          <label
+            htmlFor="shippingCost"
+            className="block text-sm font-medium mb-2"
+          >
+            Shipping Cost
+          </label>
           <input
             id="shippingCost"
             type="number"
@@ -64,7 +72,12 @@ function ShippingVATModal({
         </div>
 
         <div className="mb-6">
-          <label htmlFor="vatPercentage" className="block text-sm font-medium mb-2">VAT Percentage</label>
+          <label
+            htmlFor="vatPercentage"
+            className="block text-sm font-medium mb-2"
+          >
+            VAT Percentage
+          </label>
           <input
             id="vatPercentage"
             type="number"
@@ -94,8 +107,6 @@ function ShippingVATModal({
   );
 }
 
-
-
 function Modal({
   setIsModalOpen,
   onSave,
@@ -111,7 +122,10 @@ function Modal({
     const marginValue = parseFloat(margin);
     if (!isNaN(marginValue)) {
       try {
-        const { error } = await database.updateProductMargin(productId, marginValue);
+        const { error } = await database.updateProductMargin(
+          productId,
+          marginValue,
+        );
         if (error) {
           console.error("Error updating margin:", error);
           return;
@@ -173,12 +187,46 @@ function ProductCard({
   const [margin, setMargin] = useState<number | null>(product.margin);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
+    null,
+  );
+
   const getProductSizes = (product_id: number) => {
     if (!variantGroups) return [];
     return variantGroups
       .filter((group) => group.product_id === product_id)
       .map((group) => group.size);
   };
+
+  const getVariantsOfGroup = (product_id: number, size: string) => {
+    if (!variantGroups) return [];
+    let variants = variantGroups
+      .filter((group) => group.product_id === product_id && group.size === size)
+      .map((group) => group.variants);
+
+    let variant = variants[0];
+
+    if (!variant) return [];
+
+    // map the variants to create an array of { color, variant_id }
+
+    return variant.map((v) => {
+      return {
+        color: v.color_code,
+        variant_id: v.id,
+        discontinued: v.discontinued,
+      };
+    });
+  };
+
+  function isVariantDiscontinued(variant_id: number) {
+    if (!variantGroups) return false;
+    return variantGroups
+      .filter((group) => group.product_id === product.id)
+      .map((group) => group.variants)
+      .flat()
+      .find((variant) => variant.id === variant_id)?.discontinued;
+  }
 
   const getProductPrice = (product_id: number, size: string) => {
     if (!variantGroups) return null;
@@ -220,6 +268,28 @@ function ProductCard({
       </div>
       <h2 className="text-lg font-semibold mb-2">{product.title}</h2>
 
+      <div className="flex items-center space-x-2 mb-4">
+        {getVariantsOfGroup(product.id, selectedSize).map((variant) => (
+          <div
+            className={`flex items-center space-x-2 ${variant.variant_id === selectedVariantId ? "border border-blue-600 p-4" : ""}`}
+            onClick={() => setSelectedVariantId(variant.variant_id)}
+          >
+            <div
+              className="w-4 h-4 rounded-full"
+              style={{ backgroundColor: variant.color }}
+            />
+            {/* <span>{variant.variant_id}</span> */}
+            {/* <span>{variant.discontinued ? "Discontinued" : ""}</span> */}
+          </div>
+        ))}
+      </div>
+
+      <p>
+        is variant discontinued:{" "}
+        {selectedVariantId &&
+          isVariantDiscontinued(selectedVariantId)?.toString()}
+      </p>
+
       <select
         className="block w-full mt-4 p-2 border border-gray-300 rounded-md"
         value={selectedSize}
@@ -259,7 +329,6 @@ function ProductCard({
       >
         Set Margin
       </button>
-
 
       {isModalOpen && (
         <Modal
@@ -313,7 +382,6 @@ function getSortedProducts(products: Product[]): Product[] {
   });
 }
 
-
 function ProductList({
   products,
   variantGroups,
@@ -351,7 +419,6 @@ function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
             <img
               src={user.imageUrl}
               alt="Profile"
-
               className="w-10 h-10  rounded-full cursor-pointer"
               onClick={handleProfileClick}
             />
@@ -383,7 +450,9 @@ function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
           </div>
         ) : (
           <SignInButton mode="modal">
-            <button className="bg-accent text-light p-2 rounded-md">Sign In</button>
+            <button className="bg-accent text-light p-2 rounded-md">
+              Sign In
+            </button>
           </SignInButton>
         )}
       </div>
@@ -396,7 +465,9 @@ export default function Admin() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>([]);
+  const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>(
+    [],
+  );
   const [shippingCost, setShippingCost] = useState<number | null>(null);
   const [vatPercentage, setVatPercentage] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -411,12 +482,11 @@ export default function Admin() {
       const userEmail = user?.emailAddresses[0].emailAddress;
 
       setIsAdmin(
-        userEmail && list_of_admin_emails.includes(userEmail) ? true : false
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
       );
     };
     checkAdmin();
   }, [user]);
-
 
   useEffect(() => {
     const fetchCharges = async () => {
@@ -433,7 +503,6 @@ export default function Admin() {
     fetchCharges();
   }, []);
 
-
   const fetchVariants = async (id: number): Promise<Variant[]> => {
     const { result, error } = await database.getProductVariants(id);
     if (error || !result) throw new Error(error || "No variants found");
@@ -442,7 +511,7 @@ export default function Admin() {
     const groupedVariants = variants.reduce<DistinctVariantGroup[]>(
       (acc, variant) => {
         const group = acc.find(
-          (g) => g.size === variant.size && g.product_id === variant.product_id
+          (g) => g.size === variant.size && g.product_id === variant.product_id,
         );
         if (group) {
           group.variants.push(variant);
@@ -455,7 +524,7 @@ export default function Admin() {
         }
         return acc;
       },
-      []
+      [],
     );
 
     // Deduplicate and update variantGroups
@@ -465,14 +534,14 @@ export default function Admin() {
       const uniqueGroups = combinedGroups.reduce<DistinctVariantGroup[]>(
         (acc, group) => {
           const exists = acc.some(
-            (g) => g.product_id === group.product_id && g.size === group.size
+            (g) => g.product_id === group.product_id && g.size === group.size,
           );
           if (!exists) {
             acc.push(group);
           }
           return acc;
         },
-        []
+        [],
       );
 
       return uniqueGroups;
@@ -503,7 +572,11 @@ export default function Admin() {
   }, [isAdmin]);
 
   if (!isLoaded) {
-    return <div><FullPageSpinner /></div>;
+    return (
+      <div>
+        <FullPageSpinner />
+      </div>
+    );
   }
 
   if (!user) {
@@ -531,7 +604,9 @@ export default function Admin() {
           {isAdmin && (
             <>
               <div className="bg-white p-4 rounded-md shadow-md border border-[#ced2d7] mb-8">
-                <h3 className="text-xl font-semibold">Shipping Charges & VAT</h3>
+                <h3 className="text-xl font-semibold">
+                  Shipping Charges & VAT
+                </h3>
                 {shippingCost !== null && vatPercentage !== null ? (
                   <div className="mt-4">
                     <div>
@@ -572,7 +647,9 @@ export default function Admin() {
             {products ? (
               <ProductList products={products} variantGroups={variantGroups} />
             ) : (
-              <div className="flex justify-center items-center">Loading products...</div>
+              <div className="flex justify-center items-center">
+                Loading products...
+              </div>
             )}
           </div>
         </div>

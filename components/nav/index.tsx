@@ -181,12 +181,9 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
           {/* Orders and Cart */}
           <div className="cursor-pointer flex items-center gap-1">
             <Link href="/orders" className="flex items-center">
-              <span className=" text-light opacity-[0.5g]">
-                Returns <br />& Orders
-              </span>
+              <span className=" text-light opacity-[0.5g]">Orders</span>
             </Link>
             {returnOrders}
-            <MdArrowDropDown size={20} />
           </div>
 
           <div className="cursor-pointer relative">
