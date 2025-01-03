@@ -57,6 +57,7 @@ export default function Cart({ user }: CartProps) {
           size: item.size,
           color: item.color,
         })),
+        userId: user?.id || null,
         shippingAmount: shipping,
         taxAmount: (subtotal * (tax / 100)).toFixed(2),
         returnUrl: window.location.origin,

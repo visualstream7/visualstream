@@ -17,7 +17,6 @@ type UserPropType = {
 };
 
 type NavPropType = {
-
   user: UserResource | null | undefined;
   cartCount: number;
 };
@@ -181,9 +180,11 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
 
           {/* Orders and Cart */}
           <div className="cursor-pointer flex items-center gap-1">
-            <span className=" text-light opacity-[0.5g]">
-              Returns <br />& Orders
-            </span>
+            <Link href="/orders" className="flex items-center">
+              <span className=" text-light opacity-[0.5g]">
+                Returns <br />& Orders
+              </span>
+            </Link>
             {returnOrders}
             <MdArrowDropDown size={20} />
           </div>

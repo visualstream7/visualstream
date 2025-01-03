@@ -10,7 +10,8 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const { cartItems, returnUrl, taxAmount, shippingAmount } = req.body;
+    const { cartItems, returnUrl, taxAmount, shippingAmount, userId } =
+      req.body;
 
     // Map cart items to the Stripe line_items format
     const line_items = cartItems.map((item: any) => {
@@ -58,9 +59,10 @@ export default async function handler(
       },
       payment_intent_data: {
         metadata: {
-          items: JSON.stringify(cartItems),
-          shipping: shippingAmount,
-          tax: taxAmount,
+          cartItems: JSON.stringify(cartItems),
+          shippingAmount: shippingAmount,
+          taxAmount: taxAmount,
+          userId: userId,
         },
       },
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,

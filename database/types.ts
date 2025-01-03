@@ -120,9 +120,9 @@ export type Database = {
           created_at: string | null
           email: string | null
           order_id: number
-          shipping_ammount: number | null
+          shipping_amount: number | null
           status: string | null
-          tax_ammount: number | null
+          tax_amount: number | null
           total_amount: number | null
           user_id: string | null
         }
@@ -132,9 +132,9 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           order_id?: number
-          shipping_ammount?: number | null
+          shipping_amount?: number | null
           status?: string | null
-          tax_ammount?: number | null
+          tax_amount?: number | null
           total_amount?: number | null
           user_id?: string | null
         }
@@ -144,9 +144,9 @@ export type Database = {
           created_at?: string | null
           email?: string | null
           order_id?: number
-          shipping_ammount?: number | null
+          shipping_amount?: number | null
           status?: string | null
-          tax_ammount?: number | null
+          tax_amount?: number | null
           total_amount?: number | null
           user_id?: string | null
         }

@@ -46,6 +46,8 @@ export interface Variant {
   image: string;
 }
 
+export interface Order {}
+
 // Define overload signatures for the constructor
 class SupabaseWrapper {
   client: SupabaseClient<Database>;
@@ -71,6 +73,66 @@ class SupabaseWrapper {
       this.client = uiClient();
     }
   }
+
+  addOrderToDatabase = async (
+    order: any,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Orders")
+        .insert([order])
+        .select();
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error adding order to database", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  //this function gets the orders of a user , takes in user id and email as parameters , if the user id is empty or null it fetches the orders with the email, otherwise it fetches the orders with the user id
+
+  getOrders = async (
+    userId: string,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let query = this.client.from("Orders").select("*").eq("user_id", userId);
+      let { data, error } = await query;
+
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error fetching orders", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
 
   getProduct = async (
     id: number,
@@ -787,19 +849,16 @@ class SupabaseWrapper {
     return { error };
   }
 
-
   async getProductCharges() {
     const { data, error } = await this.client
       .from("ProductCharges")
       .select("*")
       .eq("id", 1)
       .single();
-    
-    
+
     if (error) {
       console.error("Error fetching product charges", error);
-    }
-    else {
+    } else {
       console.log("Product charges fetched", data);
     }
 
@@ -813,12 +872,10 @@ class SupabaseWrapper {
         shipping_cost: shippingCost,
         vat_percentage: vatPercentage,
       })
-      .eq("id", 1); 
+      .eq("id", 1);
 
     return { result: data, error };
   }
-
-
 }
 
 export { SupabaseWrapper };
