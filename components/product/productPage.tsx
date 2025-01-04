@@ -713,6 +713,15 @@ const ProductPage: React.FC<ProductPageProps> = ({
     );
   };
 
+  const getVariantFromColorCode = (colorCode: string): Variant | null => {
+    return (
+      variants.find(
+        (variant) =>
+          variant.color_code === colorCode && variant.size === selectedSize,
+      ) || null
+    );
+  };
+
   useEffect(() => {
     cacheImageSourceArray();
   }, [variantMocks]);
@@ -880,7 +889,23 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 onChange={(e) => setSelectedSize(e.target.value)}
               >
                 {selectedVariantGroup?.available_sizes
-                  .sort()
+                  .sort((a, b) => {
+                    if (a === "S") return -1;
+                    if (b === "S") return 1;
+                    if (a === "M") return -1;
+                    if (b === "M") return 1;
+                    if (a === "L") return -1;
+                    if (b === "L") return 1;
+                    if (a === "XL") return -1;
+                    if (b === "XL") return 1;
+                    if (a === "2XL") return -1;
+                    if (b === "2XL") return 1;
+                    if (a === "3XL") return -1;
+                    if (b === "3XL") return 1;
+                    if (a === "4XL") return -1;
+                    if (b === "4XL") return 1;
+                    return 0;
+                  })
                   .map((size, index) => <option key={size}>{size}</option>)}
               </select>
             </div>
@@ -896,26 +921,48 @@ const ProductPage: React.FC<ProductPageProps> = ({
                 <div className="flex gap-2 mt-2 flex-wrap">
                   {distinctVariants?.length > 1 &&
                     distinctVariants?.map((variants, index) => (
-                      <img
-                        key={index}
-                        src={variants.image || ""}
-                        alt="variant mockup"
-                        className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
-                          selectedVariantGroup?.color_code ===
-                          variants.color_code
-                            ? "border-blue-800"
-                            : "border-gray-300"
-                        }`}
-                        onClick={() => handleColorChange(variants)}
-                        onMouseEnter={() => {
-                          setIsHovering(true);
-                          handleHover(variants);
-                        }}
-                        onMouseLeave={() => {
-                          setIsHovering(false);
-                          setHoveredMockup(null);
-                        }}
-                      />
+                      <div className="relative" key={index}>
+                        <img
+                          key={variants.color_code}
+                          src={variants.image || ""}
+                          alt="variant mockup"
+                          className={`w-10 h-10 border-2 rounded-md cursor-pointer ${
+                            selectedVariantGroup?.color_code ===
+                            variants.color_code
+                              ? "border-blue-800"
+                              : "border-gray-300"
+                          }
+                          ${
+                            getVariantFromColorCode(variants.color_code)
+                              ?.discontinued
+                              ? "cursor-not-allowed border-red-500"
+                              : ""
+                          }
+                        `}
+                          onClick={() => {
+                            if (
+                              getVariantFromColorCode(variants.color_code)
+                                ?.discontinued
+                            )
+                              return;
+                            handleColorChange(variants);
+                          }}
+                          onMouseEnter={() => {
+                            setIsHovering(true);
+                            handleHover(variants);
+                          }}
+                          onMouseLeave={() => {
+                            setIsHovering(false);
+                            setHoveredMockup(null);
+                          }}
+                        />
+                        {getVariantFromColorCode(variants.color_code)
+                          ?.discontinued && (
+                          <div className="absolute top-0 left-0 h-[50px] bg-red-500 w-[2px] rotate-45 translate-x-[20px] -translate-y-[5px]">
+                            {" "}
+                          </div>
+                        )}
+                      </div>
                     ))}
                 </div>
               </div>

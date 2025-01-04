@@ -305,27 +305,34 @@ function ProductCard({
 
       <div className="space-y-8">
         {/* Variant Selector */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-2">
           {getVariantsOfGroup(product.id, selectedSize).map((variant) => (
             <div
               key={variant.variant_id}
-              className={`relative p-2 rounded-lg border cursor-pointer shadow-sm
+              className={`relative h-10 w-10 flex items-center justify-center rounded-md border cursor-pointer shadow-sm
           ${
             variant.variant_id === selectedVariantId
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-200 bg-white"
+              ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
+              : isVariantDiscontinued(variant.variant_id)
+                ? "border-red-500 bg-red-50"
+                : "border-green-500 bg-green-50"
           } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
               {/* Color Circle */}
               <div
-                className={`w-8 h-8 rounded-full mx-auto border ${
+                className={`w-6 h-6 rounded-full mx-auto border ${
                   variant.variant_id === selectedVariantId
                     ? "border-blue-500"
                     : "border-gray-300"
                 }`}
                 style={{ backgroundColor: variant.color }}
               ></div>
+              {isVariantDiscontinued(variant.variant_id) && (
+                <div className="absolute top-0 left-0 h-[50px] bg-red-500 w-[2px] rotate-45 translate-x-[20px] -translate-y-[5px]">
+                  {" "}
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -375,11 +382,29 @@ function ProductCard({
         onChange={handleSizeChange}
       >
         <option value="">Select Size</option>
-        {getProductSizes(product.id).map((size) => (
-          <option key={size} value={size}>
-            {size}
-          </option>
-        ))}
+        {getProductSizes(product.id)
+          .sort((a, b) => {
+            if (a === "S") return -1;
+            if (b === "S") return 1;
+            if (a === "M") return -1;
+            if (b === "M") return 1;
+            if (a === "L") return -1;
+            if (b === "L") return 1;
+            if (a === "XL") return -1;
+            if (b === "XL") return 1;
+            if (a === "2XL") return -1;
+            if (b === "2XL") return 1;
+            if (a === "3XL") return -1;
+            if (b === "3XL") return 1;
+            if (a === "4XL") return -1;
+            if (b === "4XL") return 1;
+            return 0;
+          })
+          .map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
       </select>
 
       {selectedSize && (
