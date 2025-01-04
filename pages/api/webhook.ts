@@ -4,6 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import Stripe from "stripe";
 
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
+import { Printful } from "@/libs/printful-client/printful-sdk";
 
 const mailersend = new MailerSend({
   apiKey:
@@ -92,6 +93,10 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         break;
       }
 
+      const printful = new Printful(process.env.PRINTFUL_API_KEY!);
+      const { result: orderResult, error: orderError } =
+        await printful.makeOrder(orderDetails);
+
       console.log("Order details", orderDetails);
       console.log("Order added to database", result, error);
 
@@ -178,6 +183,8 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const mailData = await mailersend.email.send(emailParams);
       console.log(mailData.body, mailData.statusCode, mailData.headers);
+
+      await database.updateCartItems(metadata.userId, []);
 
       break;
     }

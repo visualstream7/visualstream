@@ -55,6 +55,7 @@ export default function Cart({ user }: CartProps) {
           variant_id: item.variant_id,
           image_id: item.image_id,
           size: item.size,
+          original_image: item.image,
           color: item.color,
         })),
         userId: user?.id || null,
@@ -208,45 +209,50 @@ export default function Cart({ user }: CartProps) {
           </div>
         </div>
 
-        <div className="w-full lg:w-1/4 pl-4 sticky top-6">
-          <div className="bg-white p-6 shadow-md rounded-lg">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
-              Price Summary
-            </h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-700">Subtotal</span>
-                <span className="text-gray-700">${subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-700">Shipping</span>
-                <span className="text-gray-700">${shipping.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-700">Tax</span>
-                <span className="text-gray-700">
-                  {" "}
-                  ${(subtotal * (tax / 100)).toFixed(2)}
-                </span>
-              </div>
-              <div className="border-t mt-4 pt-4">
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total</span>
-                  <span>
-                    ${(subtotal + shipping + subtotal * (tax / 100)).toFixed(2)}
+        {cartItems && cartItems.length > 0 && (
+          <div className="w-full lg:w-1/4 pl-4 sticky top-6">
+            <div className="bg-white p-6 shadow-md rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Price Summary
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Subtotal</span>
+                  <span className="text-gray-700">${subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Shipping</span>
+                  <span className="text-gray-700">${shipping.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">Tax</span>
+                  <span className="text-gray-700">
+                    {" "}
+                    ${(subtotal * (tax / 100)).toFixed(2)}
                   </span>
                 </div>
+                <div className="border-t mt-4 pt-4">
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total</span>
+                    <span>
+                      $
+                      {(subtotal + shipping + subtotal * (tax / 100)).toFixed(
+                        2,
+                      )}
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <button
-              className="w-full mt-6 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
-              onClick={() => handleCheckout()}
-            >
-              Proceed to Checkout
-            </button>
+              <button
+                className="w-full mt-6 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
+                onClick={() => handleCheckout()}
+              >
+                Proceed to Checkout
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

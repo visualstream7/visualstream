@@ -21,6 +21,8 @@ class Printful {
     this.apiKey = apiKey;
   }
 
+  makeOrder = async (order: any) => {};
+
   getProductsFromIds = async (product_ids: number[]) => {
     console.log("product_ids", product_ids);
     const query = fetch(`${this.baseUrl}/api/get-products-from-ids`, {

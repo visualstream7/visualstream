@@ -1,10 +1,19 @@
 // pages/success.js
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 export default function Success() {
   const router = useRouter();
   const { session_id } = router.query;
+  const { user, isLoaded } = useUser();
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      localStorage.setItem("cart", JSON.stringify([]));
+    }
+  }, [isLoaded, user]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -34,9 +43,12 @@ export default function Success() {
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-4">Payment Successful!</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-4">
+            Payment Successful!
+          </h1>
           <p className="text-gray-600 mb-6">
-            Thank you for your purchase. Your payment has been successfully processed.
+            Thank you for your purchase. Your payment has been successfully
+            processed. You will receive an email confirmation shortly.
           </p>
           <div className="flex justify-center gap-4">
             <Link
@@ -45,18 +57,17 @@ export default function Success() {
             >
               Go to Home
             </Link>
-            <Link
-              href="/orders"
-              className="px-6 py-3 bg-gray-100 text-gray-800 rounded-md shadow-lg hover:bg-gray-200 border border-gray-300 transition"
-            >
-              View My Orders
-            </Link>
+            {user && (
+              <Link
+                href="/orders"
+                className="px-6 py-3 bg-gray-100 text-gray-800 rounded-md shadow-lg hover:bg-gray-200 border border-gray-300 transition"
+              >
+                View My Orders
+              </Link>
+            )}
           </div>
         </div>
       </main>
-
-
-
     </div>
   );
 }
