@@ -93,9 +93,52 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         break;
       }
 
-      const printful = new Printful(process.env.PRINTFUL_API_KEY!);
-      const { result: orderResult, error: orderError } =
-        await printful.makeOrder(orderDetails);
+      const printful = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
+
+      try {
+        // Validate customer details
+        if (!customerDetails?.address?.line1 || !metadata.cartItems?.length) {
+          throw new Error("Invalid customer details or cart items.");
+        }
+
+        const orderPayload = {
+          recipient: {
+            name: customerDetails?.name,
+            address1: customerDetails.address?.line1,
+            city: customerDetails.address?.city,
+            state_code: customerDetails.address?.state,
+            country_code: customerDetails.address?.country,
+            zip: customerDetails.address?.postal_code,
+          },
+          items: metadata.cartItems.map((item: any) => ({
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            image: item.original_image,
+          })),
+        };
+
+
+
+
+        try {
+          const { result, error } = await printful.makeOrder(orderPayload);
+          if (error) {
+            console.error("Printful order creation failed:", error);
+            return res.status(500).json({ error: error });
+          }
+
+          console.log("Order successfully created in Printful:", result);
+          res.status(200).json({ message: "Order created successfully", result });
+        } catch (error) {
+          console.error("Webhook error:", error);
+          res.status(500).json({ error: (error as any).message });
+        }
+      }
+      catch (error) {
+        console.error("Webhook error:", error);
+        res.status(500).json({ error: (error as any).message });
+      }
+
 
       console.log("Order details", orderDetails);
       console.log("Order added to database", result, error);

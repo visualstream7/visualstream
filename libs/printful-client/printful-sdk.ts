@@ -1,4 +1,5 @@
 import { utapi } from "../uploadthing";
+import * as https from "https";
 import {
   backpackPoints,
   bottlePoints,
@@ -6,6 +7,38 @@ import {
   mugPoints,
 } from "./config";
 import { ProductResponseType } from "./types";
+import { loadImage } from "canvas";
+
+
+interface ImageDimensions {
+  width: number;
+  height: number;
+}
+
+async function getImageDimensions(url: string): Promise<ImageDimensions> {
+  return new Promise((resolve, reject) => {
+    https.get(url, (response) => {
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to fetch image: ${response.statusCode}`));
+          return;
+        }
+
+        const chunks: Buffer[] = [];
+        response.on("data", (chunk) => chunks.push(chunk));
+
+        response.on("end", async () => {
+          try {
+            const buffer = Buffer.concat(chunks);
+            const img = await loadImage(buffer);
+            resolve({ width: img.width, height: img.height });
+          } catch (error) {
+            reject(error);
+          }
+        });
+      })
+      .on("error", (error) => reject(error));
+  });
+}
 
 class Printful {
   private apiKey: string;
@@ -21,7 +54,100 @@ class Printful {
     this.apiKey = apiKey;
   }
 
-  makeOrder = async (order: any) => {};
+  makeOrder = async (orderDetails: any) => {
+    const token = this.apiKey; // Use the API key from the class
+    const { recipient, items } = orderDetails;
+    const imageUrl = orderDetails.imageUrl; // Get the image URL from the order details
+
+    console.log("orderDetails for the printfull", orderDetails);
+
+    // Ensure `recipient` and `items` are properly structured
+    if (!recipient || !items || !Array.isArray(items)) {
+      throw new Error("Invalid order details. Recipient and items are required.");
+    }
+
+    // Calculate the image dimensions and position
+    const dimensions = await getImageDimensions(imageUrl);
+    let aspectRatio = dimensions.width / dimensions.height;
+    let area_width = 750; // Customize based on product area
+    let area_height = 1000; // Customize based on product area
+    let image_width = area_width;
+    let image_height = image_width / aspectRatio;
+
+    let height_left = area_height - image_height;
+    let top = height_left / 2;
+
+    // Prepare order data with image positioning
+    const data = JSON.stringify({
+      store_id: 14818720,
+      recipient: {
+        name: recipient.name,
+        address1: recipient.address1,
+        city: recipient.city,
+        state_code: recipient.state_code,
+        country_code: recipient.country_code,
+        zip: recipient.zip,
+      },
+      items: items.map((item: any) => ({
+        variant_id: item.variant_id,
+        quantity: item.quantity,
+        type: "front",
+        files: item.original_image.map((file: any) => ({
+          url: file.original_image,
+          position: {
+            area_width: area_width,
+            area_height: area_height,
+            width: image_width,
+            height: image_height,
+            top: top,
+            left: 0, // Adjust left if needed
+          },
+        })),
+      })),
+    });
+
+    const options = {
+      hostname: "api.printful.com",
+      path: "/orders",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        "Content-Length": data.length,
+      },
+    };
+
+    try {
+      const response = await new Promise<any>((resolve, reject) => {
+        const req = https.request(options, (res) => {
+          let responseData = "";
+
+          res.on("data", (chunk) => {
+            responseData += chunk;
+          });
+
+          res.on("end", () => {
+            try {
+              console.log("Response Data:", responseData);  // Log the full response
+
+              resolve(JSON.parse(responseData));
+            } catch (err) {
+              reject(err);
+            }
+          });
+        });
+
+        req.on("error", (err) => reject(err));
+        req.write(data);
+        req.end();
+      });
+
+      return { result: response, error: null };
+    } catch (error) {
+      return { result: null, error: (error as any).message };
+    }
+  };
+
 
   getProductsFromIds = async (product_ids: number[]) => {
     console.log("product_ids", product_ids);
