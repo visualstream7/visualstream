@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { NextApiRequest, NextApiResponse } from "next";
 import { SupabaseWrapper } from "@/database/supabase";
+import { Printful } from "@/libs/printful-client/printful-sdk";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
@@ -11,8 +12,7 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const { cartItems, returnUrl, taxAmount, shippingAmount, userId } =
-      req.body;
+    const { cartItems, returnUrl, taxAmount, userId } = req.body;
 
     // Map cart items to the Stripe line_items format
     const line_items = cartItems.map((item: any) => {
@@ -29,27 +29,20 @@ export default async function handler(
       };
     });
 
-    line_items.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "Shipping",
-        },
-        unit_amount: Math.round(shippingAmount * 100),
-      },
-      quantity: 1,
-    });
+    // const printful = new Printful(process.env.PRINTFUL_API_KEY!);
 
-    line_items.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "Tax",
-        },
-        unit_amount: Math.round(taxAmount * 100),
-      },
-      quantity: 1,
-    });
+    // let shippingAmount = 0;
+
+    // line_items.push({
+    //   price_data: {
+    //     currency: "usd",
+    //     product_data: {
+    //       name: "Shipping",
+    //     },
+    //     unit_amount: Math.round(shippingAmount * 100),
+    //   },
+    //   quantity: 1,
+    // });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -57,6 +50,10 @@ export default async function handler(
       mode: "payment",
       shipping_address_collection: {
         allowed_countries: ["US", "CA", "BD"],
+      },
+
+      metadata: {
+        recipient: "recipient",
       },
       payment_intent_data: {},
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -68,7 +65,7 @@ export default async function handler(
     // Save the session id to the database
     await database.saveMetadata(session.id, {
       cartItems: cartItems,
-      shippingAmount: shippingAmount,
+      shippingAmount: 0,
       taxAmount: taxAmount,
       userId: userId,
     });

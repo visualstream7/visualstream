@@ -9,35 +9,17 @@ import {
 import { ProductResponseType } from "./types";
 import { loadImage } from "canvas";
 
-
 interface ImageDimensions {
   width: number;
   height: number;
 }
 
 async function getImageDimensions(url: string): Promise<ImageDimensions> {
-  return new Promise((resolve, reject) => {
-    https.get(url, (response) => {
-        if (response.statusCode !== 200) {
-          reject(new Error(`Failed to fetch image: ${response.statusCode}`));
-          return;
-        }
-
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk) => chunks.push(chunk));
-
-        response.on("end", async () => {
-          try {
-            const buffer = Buffer.concat(chunks);
-            const img = await loadImage(buffer);
-            resolve({ width: img.width, height: img.height });
-          } catch (error) {
-            reject(error);
-          }
-        });
-      })
-      .on("error", (error) => reject(error));
-  });
+  console.log("url", url);
+  const response = await fetch(url);
+  const buffer = await response.arrayBuffer();
+  const img = await loadImage(Buffer.from(buffer));
+  return { width: img.width, height: img.height };
 }
 
 class Printful {
@@ -57,25 +39,66 @@ class Printful {
   makeOrder = async (orderDetails: any) => {
     const token = this.apiKey; // Use the API key from the class
     const { recipient, items } = orderDetails;
-    const imageUrl = orderDetails.imageUrl; // Get the image URL from the order details
-
-    console.log("orderDetails for the printfull", orderDetails);
 
     // Ensure `recipient` and `items` are properly structured
     if (!recipient || !items || !Array.isArray(items)) {
-      throw new Error("Invalid order details. Recipient and items are required.");
+      return {
+        result: null,
+        error: "Invalid order details",
+      };
     }
 
-    // Calculate the image dimensions and position
-    const dimensions = await getImageDimensions(imageUrl);
-    let aspectRatio = dimensions.width / dimensions.height;
-    let area_width = 750; // Customize based on product area
-    let area_height = 1000; // Customize based on product area
-    let image_width = area_width;
-    let image_height = image_width / aspectRatio;
+    // so, each item in items, there is an image property, now, we need to get the image dimensions for each item's image
+    // use promise.all to get all the image dimensions
 
-    let height_left = area_height - image_height;
-    let top = height_left / 2;
+    // // Calculate the image dimensions and position
+    // const dimensions = await getImageDimensions(imageUrl);
+    // let aspectRatio = dimensions.width / dimensions.height;
+    // let area_width = 750; // Customize based on product area
+    // let area_height = 1000; // Customize based on product area
+    // let image_width = area_width;
+    // let image_height = image_width / aspectRatio;
+
+    // let height_left = area_height - image_height;
+    // let top = height_left / 2;
+
+    const processItems = async (items: any[]) => {
+      const itemsWithPositions = await Promise.all(
+        items.map(async (item: any) => {
+          const dimensions = await getImageDimensions(item.image); // Wait for dimensions
+          const aspectRatio = dimensions.width / dimensions.height;
+          const area_width = 750; // Customize based on product area
+          const area_height = 1000; // Customize based on product area
+          const image_width = area_width;
+          const image_height = image_width / aspectRatio;
+          const height_left = area_height - image_height;
+          const top = height_left / 2;
+
+          return {
+            variant_id: item.variant_id,
+            quantity: item.quantity,
+            type: "front",
+            files: [
+              {
+                url: item.image,
+                position: {
+                  area_width: area_width,
+                  area_height: area_height,
+                  width: image_width,
+                  height: image_height,
+                  top: top,
+                  left: 0,
+                },
+              },
+            ],
+          };
+        }),
+      );
+
+      return itemsWithPositions;
+    };
+
+    const processedItems = await processItems(items);
 
     // Prepare order data with image positioning
     const data = JSON.stringify({
@@ -88,66 +111,26 @@ class Printful {
         country_code: recipient.country_code,
         zip: recipient.zip,
       },
-      items: items.map((item: any) => ({
-        variant_id: item.variant_id,
-        quantity: item.quantity,
-        type: "front",
-        files: item.original_image.map((file: any) => ({
-          url: file.original_image,
-          position: {
-            area_width: area_width,
-            area_height: area_height,
-            width: image_width,
-            height: image_height,
-            top: top,
-            left: 0, // Adjust left if needed
-          },
-        })),
-      })),
+      items: processedItems,
     });
 
-    const options = {
-      hostname: "api.printful.com",
-      path: "/orders",
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        "Content-Length": data.length,
-      },
-    };
-
     try {
-      const response = await new Promise<any>((resolve, reject) => {
-        const req = https.request(options, (res) => {
-          let responseData = "";
-
-          res.on("data", (chunk) => {
-            responseData += chunk;
-          });
-
-          res.on("end", () => {
-            try {
-              console.log("Response Data:", responseData);  // Log the full response
-
-              resolve(JSON.parse(responseData));
-            } catch (err) {
-              reject(err);
-            }
-          });
-        });
-
-        req.on("error", (err) => reject(err));
-        req.write(data);
-        req.end();
+      const response = await fetch("https://api.printful.com/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: data,
       });
 
-      return { result: response, error: null };
+      let rData = await response.json();
+      return { result: rData, error: null };
     } catch (error) {
+      console.error("Error during fetch:", error);
       return { result: null, error: (error as any).message };
     }
   };
-
 
   getProductsFromIds = async (product_ids: number[]) => {
     console.log("product_ids", product_ids);
@@ -191,10 +174,6 @@ class Printful {
     }
 
     if (product_id === 19 || product_id === 382 || product_id === 279) {
-      // mug
-      //
-      // baseImageUrl, overlayImageUrl, points
-      //
       let points: any[] = [];
 
       if (product_id === 19) {
@@ -256,6 +235,42 @@ class Printful {
     if (isInternal) return data.base64Image;
     let url = data.url || null;
     return url;
+  };
+
+  calculateShipping = async (
+    recipient: {
+      address1: string;
+      city: string;
+      country_code: string;
+    },
+    items: {
+      variant_id: number;
+      quantity: number;
+    }[],
+  ) => {
+    try {
+      const token = this.apiKey;
+
+      let data = JSON.stringify({
+        recipient: recipient,
+        items: items,
+      });
+
+      const response = await fetch("https://api.printful.com/shipping/rates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: data,
+      });
+
+      let rData = await response.json();
+      return { result: rData, error: null };
+    } catch (error) {
+      console.error("Error during fetch:", error);
+      return { result: null, error: (error as any).message };
+    }
   };
 }
 
