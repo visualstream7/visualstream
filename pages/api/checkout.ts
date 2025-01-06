@@ -14,6 +14,8 @@ export default async function handler(
   if (req.method === "POST") {
     const { cartItems, returnUrl, taxAmount, userId } = req.body;
 
+    console.log("cartItems", cartItems);
+
     // Map cart items to the Stripe line_items format
     const line_items = cartItems.map((item: any) => {
       return {
@@ -29,7 +31,7 @@ export default async function handler(
       };
     });
 
-    // const printful = new Printful(process.env.PRINTFUL_API_KEY!);
+    const printful = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
 
     // let shippingAmount = 0;
 

@@ -13,6 +13,7 @@ import useCart from "../nav/useCart";
 
 // pages/checkout.js
 import { loadStripe } from "@stripe/stripe-js";
+import { useRouter } from "next/router";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
@@ -26,6 +27,7 @@ const database = new SupabaseWrapper("CLIENT");
 
 export default function Cart({ user }: CartProps) {
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
+  const router = useRouter();
   const {
     cartItems,
     count,
@@ -38,34 +40,7 @@ export default function Cart({ user }: CartProps) {
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
 
   async function handleCheckout() {
-    const stripe = await stripePromise;
-    if (!stripe) return;
-    const response = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        cartItems: cartItems.map((item) => ({
-          name: item.title,
-          image: item.mock,
-          price: Number(item.price) + Number(item.price) * (item.margin / 100),
-          quantity: item.quantity,
-          product_id: item.product_id,
-          variant_id: item.variant_id,
-          image_id: item.image_id,
-          size: item.size,
-          original_image: item.image,
-          color: item.color,
-        })),
-        userId: user?.id || null,
-        shippingAmount: shipping,
-        taxAmount: (subtotal * (tax / 100)).toFixed(2),
-        returnUrl: window.location.origin,
-      }),
-    });
-    const session = await response.json();
-    await stripe.redirectToCheckout({ sessionId: session.id });
+    router.push("/receipentAddress");
   }
 
   const subtotal = cartItems.reduce(
