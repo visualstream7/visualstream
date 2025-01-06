@@ -97,6 +97,7 @@ export default function Checkout() {
       address1: addressLine1,
       city: city,
       country_code: country,
+      state: state || null,
     };
 
     const shippingResponse = await fetch("/api/get-shipping-rate", {

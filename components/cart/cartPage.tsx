@@ -192,21 +192,26 @@ export default function Cart({ user }: CartProps) {
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-700">Subtotal</span>
+                  <span className="text-gray-700">Total *</span>
                   <span className="text-gray-700">${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div>
+                  <span className="text-gray-400">
+                    * Shipping and taxes not included
+                  </span>
+                </div>
+                {/* <div className="flex justify-between">
                   <span className="text-gray-700">Shipping</span>
                   <span className="text-gray-700">${shipping.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
+                </div> */}
+                {/* <div className="flex justify-between">
                   <span className="text-gray-700">Tax</span>
                   <span className="text-gray-700">
                     {" "}
                     ${(subtotal * (tax / 100)).toFixed(2)}
                   </span>
-                </div>
-                <div className="border-t mt-4 pt-4">
+                </div> */}
+                {/* <div className="border-t mt-4 pt-4">
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total</span>
                     <span>
@@ -216,7 +221,7 @@ export default function Cart({ user }: CartProps) {
                       )}
                     </span>
                   </div>
-                </div>
+                </div> */}
               </div>
 
               <button

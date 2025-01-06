@@ -242,6 +242,7 @@ class Printful {
       address1: string;
       city: string;
       country_code: string;
+      state_code: string | null;
     },
     items: {
       variant_id: number;

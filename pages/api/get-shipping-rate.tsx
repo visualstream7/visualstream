@@ -26,6 +26,7 @@ export default async function handler(
       address1: recipient.address1,
       city: recipient.city,
       country_code: recipient.country_code,
+      state_code: recipient.state,
     },
     items,
   );
