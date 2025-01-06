@@ -254,6 +254,7 @@ class Printful {
       let data = JSON.stringify({
         recipient: recipient,
         items: items,
+        store_id: 14818720,
       });
 
       const response = await fetch("https://api.printful.com/shipping/rates", {
@@ -266,7 +267,32 @@ class Printful {
       });
 
       let rData = await response.json();
-      return { result: rData, error: null };
+
+      let shippings = rData.result;
+
+      if (!shippings) {
+        return { result: null, error: rData?.error?.message };
+      }
+
+      let standard = shippings.filter(
+        (shipping: any) => shipping.id === "STANDARD",
+      );
+
+      console.log("standard", standard);
+
+      if (!standard) {
+        return { result: null, error: "No standard shipping available" };
+      }
+
+      if (standard.length === 0) {
+        return { result: null, error: "No standard shipping available" };
+      }
+
+      standard = standard[0];
+
+      let rate = parseFloat(standard.rate);
+
+      return { result: rate, error: null };
     } catch (error) {
       console.error("Error during fetch:", error);
       return { result: null, error: (error as any).message };

@@ -12,7 +12,8 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const { cartItems, returnUrl, taxAmount, userId } = req.body;
+    const { cartItems, returnUrl, userId, shippingAmount, recipient } =
+      req.body;
 
     console.log("cartItems", cartItems);
 
@@ -31,32 +32,21 @@ export default async function handler(
       };
     });
 
-    const printful = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
-
-    // let shippingAmount = 0;
-
-    // line_items.push({
-    //   price_data: {
-    //     currency: "usd",
-    //     product_data: {
-    //       name: "Shipping",
-    //     },
-    //     unit_amount: Math.round(shippingAmount * 100),
-    //   },
-    //   quantity: 1,
-    // });
+    line_items.push({
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: "Shipping",
+        },
+        unit_amount: Math.round(shippingAmount * 100),
+      },
+      quantity: 1,
+    });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      shipping_address_collection: {
-        allowed_countries: ["US", "CA", "BD"],
-      },
-
-      metadata: {
-        recipient: "recipient",
-      },
       payment_intent_data: {},
       success_url: `${req.headers.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${returnUrl}`,
@@ -68,8 +58,8 @@ export default async function handler(
     await database.saveMetadata(session.id, {
       cartItems: cartItems,
       shippingAmount: 0,
-      taxAmount: taxAmount,
       userId: userId,
+      recipient,
     });
 
     res.status(200).json({ id: session.id });

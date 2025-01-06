@@ -40,7 +40,7 @@ export default function Cart({ user }: CartProps) {
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
 
   async function handleCheckout() {
-    router.push("/receipentAddress");
+    router.push("/shipping");
   }
 
   const subtotal = cartItems.reduce(

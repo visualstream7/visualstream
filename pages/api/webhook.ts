@@ -62,15 +62,16 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         await database.getMetadata(session.id);
 
       let metadata = metadataResult.metadata;
+      let recipient = metadata?.recipient;
 
-      if (metadataError) {
+      if (metadataError || !metadata || !metadata.recipient) {
         break;
       }
 
       let orderDetails = {
         status: "paid",
         email: customerDetails.email,
-        address: customerDetails.address,
+        address: recipient.address1,
         user_id: metadata.userId,
         cart_items: metadata.cartItems,
         shipping_amount: metadata.shippingAmount,
@@ -88,21 +89,13 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const printful = new Printful(process.env.NEXT_PUBLIC_PRINTFUL_TOKEN!);
 
-      if (!customerDetails?.address?.line1 || !metadata.cartItems?.length) {
+      if (!metadata.cartItems?.length) {
         console.error("Missing customer details or cart items");
         break;
       }
 
       const orderPayload = {
-        recipient: {
-          name: customerDetails?.name,
-          address1:
-            customerDetails.address?.line1 || customerDetails.address?.line2,
-          city: customerDetails.address?.city,
-          state_code: customerDetails.address?.state,
-          country_code: customerDetails.address?.country,
-          zip: customerDetails.address?.postal_code,
-        },
+        recipient: recipient,
         items: metadata.cartItems.map((item: any) => ({
           variant_id: item.variant_id,
           quantity: item.quantity,
@@ -135,7 +128,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           <html>
             <body>
               <h1>Thank you for your purchase!</h1>
-              <p>Hi ${customerDetails.name || "Customer"},</p>
+              <p>Hi ${recipient.name || "Customer"},</p>
               <p>We are excited to confirm your order. Here are the details:</p>
               <table style="border-collapse: collapse; width: 100%;">
                 <thead>
@@ -163,7 +156,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     .join("")}
                 </tbody>
               </table>
-              <p><strong>Shipping Address:</strong> ${customerDetails?.address?.line1}, ${customerDetails?.address?.city}, ${customerDetails?.address?.country}</p>
+              <p><strong>Shipping Address:</strong> ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}</p>
               <p><strong>Shipping Amount:</strong> $${orderDetails.shipping_amount}</p>
               <p><strong>Tax:</strong> $${orderDetails.tax_amount}</p>
               <p><strong>Total Amount Paid:</strong> $${orderDetails.total_amount}</p>
@@ -184,11 +177,11 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
                     "Greetings from the team, you got this message through MailerSend.",
                   );
 
-          Hi ${customerDetails.name || "Customer"},
+          Hi ${recipient.name || "Customer"},
 
           We are excited to confirm your order. Here are the details:
 
-          Shipping Address: ${customerDetails?.address?.line1}, ${customerDetails?.address?.city}, ${customerDetails?.address?.country}
+          Shipping Address: ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}
           Shipping Amount: $${orderDetails.shipping_amount}
           Tax: $${orderDetails.tax_amount}
           Total Amount Paid: $${orderDetails.total_amount}
