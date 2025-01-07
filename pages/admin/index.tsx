@@ -327,7 +327,8 @@ function ProductCard({
                     : "border-gray-300"
                 }`}
                 style={{ backgroundColor: variant.color }}
-              ></div>
+              >
+              </div>
               {isVariantDiscontinued(variant.variant_id) && (
                 <div className="absolute top-0 left-0 h-[50px] bg-red-500 w-[2px] rotate-45 translate-x-[20px] -translate-y-[5px]">
                   {" "}
@@ -343,6 +344,12 @@ function ProductCard({
             <h3 className="text-lg font-medium text-gray-800">
               Selected Variant: {selectedVariantId}
             </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Color:{" "}
+              {getVariantsOfGroup(product.id, selectedSize).find(
+                (v) => v.variant_id === selectedVariantId,
+              )?.color}
+            </p>
             <p className="text-sm text-gray-600 mt-1">
               Status:{" "}
               <span
@@ -410,7 +417,7 @@ function ProductCard({
       {selectedSize && (
         <div className="mt-2">
           <div>
-            <span className="font-medium">Original Price: </span>${price}
+            <span className="font-medium">Original Price: </span>${price?.toFixed(2)}
           </div>
           {margin !== null && (
             <div>
