@@ -11,101 +11,6 @@ interface DistinctVariantGroup {
   variants: Variant[];
 }
 
-function ShippingVATModal({
-  setIsModalOpen,
-  onSave,
-  shippingCost,
-  vatPercentage,
-}: {
-  setIsModalOpen: (value: boolean) => void;
-  onSave: (shippingCost: number, vatPercentage: number) => void;
-  shippingCost: number;
-  vatPercentage: number;
-}) {
-  const [newShippingCost, setNewShippingCost] = useState(shippingCost);
-  const [newVatPercentage, setNewVatPercentage] = useState(vatPercentage);
-
-  const handleSave = async () => {
-    if (!isNaN(newShippingCost) && !isNaN(newVatPercentage)) {
-      try {
-        const { error } = await database.updateProductCharges(
-          newShippingCost,
-          newVatPercentage,
-        );
-        if (error) {
-          console.error("Error updating charges:", error);
-          return;
-        }
-        onSave(newShippingCost, newVatPercentage);
-        setIsModalOpen(false);
-      } catch (err) {
-        console.error("Unexpected error:", err);
-      }
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-      onClick={() => setIsModalOpen(false)}
-    >
-      <div
-        className="bg-white p-4 rounded-md shadow-md"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-lg font-bold mb-4">Set Shipping Charges & VAT</h2>
-        <div className="mb-6">
-          <label
-            htmlFor="shippingCost"
-            className="block text-sm font-medium mb-2"
-          >
-            Shipping Cost
-          </label>
-          <input
-            id="shippingCost"
-            type="number"
-            value={newShippingCost}
-            onChange={(e) => setNewShippingCost(parseFloat(e.target.value))}
-            className="border p-2 rounded-md w-full"
-            placeholder="Enter shipping cost"
-          />
-        </div>
-
-        <div className="mb-6">
-          <label
-            htmlFor="vatPercentage"
-            className="block text-sm font-medium mb-2"
-          >
-            VAT Percentage
-          </label>
-          <input
-            id="vatPercentage"
-            type="number"
-            value={newVatPercentage}
-            onChange={(e) => setNewVatPercentage(parseFloat(e.target.value))}
-            className="border p-2 rounded-md w-full"
-            placeholder="Enter VAT percentage"
-          />
-        </div>
-
-        <div className="flex justify-end space-x-2">
-          <button
-            onClick={handleSave}
-            className="bg-[#3b4a5e] text-white px-4 py-2 rounded-md"
-          >
-            Save
-          </button>
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="bg-gray-300 text-black px-4 py-2 rounded-md"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Modal({
   setIsModalOpen,
@@ -718,44 +623,29 @@ export default function Admin() {
           {isAdmin && (
             <>
               <div className="bg-white p-4 rounded-md shadow-md border border-[#ced2d7] mb-8">
-                <h3 className="text-xl font-semibold">
-                  Shipping Charges & VAT
-                </h3>
-                {shippingCost !== null && vatPercentage !== null ? (
-                  <div className="mt-4">
-                    <div>
-                      <span className="font-medium">Shipping Cost: </span>$
-                      {shippingCost}
-                    </div>
-                    <div>
-                      <span className="font-medium">VAT Percentage: </span>
-                      {vatPercentage}%
-                    </div>
-                    <button
-                      onClick={() => setIsModalOpen(true)}
-                      className="mt-4 bg-[#3b4a5e] text-white px-6 py-3 rounded-md"
-                    >
-                      Edit Charges & VAT
-                    </button>
-                  </div>
-                ) : (
-                  <div>Loading charges...</div>
-                )}
+                <div className="flex justify-center space-x-4 my-4">
+                  <a
+                    href="https://dashboard.stripe.com/dashboard"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-[#3b4a5e] text-white rounded-md shadow-md hover:bg-[#2d3b47] transition"
+                  >
+                    Stripe Dashboard
+                  </a>
+                  <a
+                    href="https://dashboard.stripe.com/test/balance/all-activity"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 bg-[#556cd6] text-white rounded-md shadow-md hover:bg-[#445bb3] transition"
+                  >
+                    All Balance Activity
+                  </a>
+                </div>
               </div>
             </>
           )}
 
-          {isModalOpen && shippingCost !== null && vatPercentage !== null && (
-            <ShippingVATModal
-              setIsModalOpen={setIsModalOpen}
-              onSave={(newShippingCost, newVatPercentage) => {
-                setShippingCost(newShippingCost);
-                setVatPercentage(newVatPercentage);
-              }}
-              shippingCost={shippingCost}
-              vatPercentage={vatPercentage}
-            />
-          )}
+          
 
           <div>
             {products ? (
