@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { SupabaseWrapper } from "@/database/supabase";
 import { UserResource } from "@clerk/types";
 import {
@@ -11,9 +11,9 @@ import Nav from "../nav";
 import Link from "next/link";
 import useCart from "../nav/useCart";
 
-// pages/checkout.js
+// Import the Shipping component
+import Shipping from "../Shipping"; // Adjust the path as necessary
 import { loadStripe } from "@stripe/stripe-js";
-import { useRouter } from "next/router";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
@@ -27,7 +27,7 @@ const database = new SupabaseWrapper("CLIENT");
 
 export default function Cart({ user }: CartProps) {
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
-  const router = useRouter();
+  const [showShipping, setShowShipping] = useState<boolean>(false); // State to control the shipping form visibility
   const {
     cartItems,
     count,
@@ -40,7 +40,7 @@ export default function Cart({ user }: CartProps) {
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
 
   async function handleCheckout() {
-    router.push("/shipping");
+    setShowShipping(true); // Show the shipping form when "Proceed to Checkout" is clicked
   }
 
   const subtotal = cartItems.reduce(
@@ -52,9 +52,6 @@ export default function Cart({ user }: CartProps) {
     let price = 0;
     let margin = item.margin || 0;
     margin = margin / 100;
-
-    console.log(item.price);
-    console.log(item.margin);
 
     if (item.price) {
       let numPrice = Number(item.price);
@@ -93,7 +90,6 @@ export default function Cart({ user }: CartProps) {
                         )}
 
                       {item.product_id === 534 && (
-                        // 534 is the product_id for the puzzle
                         <img
                           src={"/puzzle.png"}
                           alt="Product"
@@ -105,7 +101,6 @@ export default function Cart({ user }: CartProps) {
                       )}
 
                       {item.product_id === 358 && (
-                        // 358 is the product_id for the sticker
                         <img
                           src={item.image}
                           alt={item.title}
@@ -185,51 +180,35 @@ export default function Cart({ user }: CartProps) {
         </div>
 
         {cartItems && cartItems.length > 0 && (
-          <div className="w-full lg:w-1/4 pl-4 sticky top-6">
+          <div className="w-full lg:w-1/4 pl-4  top-6">
             <div className="bg-white p-6 shadow-md rounded-lg">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                Price Summary
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-700">Total *</span>
-                  <span className="text-gray-700">${subtotal.toFixed(2)}</span>
-                </div>
-                <div>
-                  <span className="text-gray-400">
-                    * Shipping and taxes not included
-                  </span>
-                </div>
-                {/* <div className="flex justify-between">
-                  <span className="text-gray-700">Shipping</span>
-                  <span className="text-gray-700">${shipping.toFixed(2)}</span>
-                </div> */}
-                {/* <div className="flex justify-between">
-                  <span className="text-gray-700">Tax</span>
-                  <span className="text-gray-700">
-                    {" "}
-                    ${(subtotal * (tax / 100)).toFixed(2)}
-                  </span>
-                </div> */}
-                {/* <div className="border-t mt-4 pt-4">
-                  <div className="flex justify-between font-semibold text-lg">
-                    <span>Total</span>
-                    <span>
-                      $
-                      {(subtotal + shipping + subtotal * (tax / 100)).toFixed(
-                        2,
-                      )}
-                    </span>
+              {!showShipping ? (
+                <>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                    Price Summary
+                  </h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-700">Total *</span>
+                      <span className="text-gray-700">${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400">
+                        * Shipping and taxes not included
+                      </span>
+                    </div>
                   </div>
-                </div> */}
-              </div>
 
-              <button
-                className="w-full mt-6 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
-                onClick={() => handleCheckout()}
-              >
-                Proceed to Checkout
-              </button>
+                  <button
+                    className="w-full mt-6 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
+                    onClick={() => handleCheckout()}
+                  >
+                    Proceed to Checkout
+                  </button>
+                </>
+              ) : (
+                <Shipping rerenderNav={rerenderNav} setRerenderNav={setRerenderNav} /> // Render the Shipping component when showShipping is true
+              )}
             </div>
           </div>
         )}
