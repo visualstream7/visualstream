@@ -195,7 +195,7 @@ function ProductCard({
   };
 
   return (
-    <div className="border rounded-md p-4 shadow-md  border-[#ced2d7] mb-10">
+    <div className="border rounded-md p-4 shadow-md border-[#ced2d7] mb-10">
       <span className="inline-block bg-gray-200 text-gray-800 text-xs font-medium px-2 py-1 rounded-md">
         {product.type_name}
       </span>
@@ -215,22 +215,20 @@ function ProductCard({
             <div
               key={variant.variant_id}
               className={`relative h-10 w-10 flex items-center justify-center rounded-md border cursor-pointer shadow-sm
-          ${
-            variant.variant_id === selectedVariantId
-              ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
-              : isVariantDiscontinued(variant.variant_id)
-                ? "border-red-500 bg-red-50"
-                : "border-green-500 bg-green-50"
-          } hover:shadow-md transition`}
+          ${variant.variant_id === selectedVariantId
+                  ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
+                  : isVariantDiscontinued(variant.variant_id)
+                    ? "border-red-500 bg-red-50"
+                    : "border-green-500 bg-green-50"
+                } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
               {/* Color Circle */}
               <div
-                className={`w-6 h-6 rounded-full mx-auto border ${
-                  variant.variant_id === selectedVariantId
-                    ? "border-blue-500"
-                    : "border-gray-300"
-                }`}
+                className={`w-6 h-6 rounded-full mx-auto border ${variant.variant_id === selectedVariantId
+                  ? "border-blue-500"
+                  : "border-gray-300"
+                  }`}
                 style={{ backgroundColor: variant.color }}
               >
               </div>
@@ -258,11 +256,10 @@ function ProductCard({
             <p className="text-sm text-gray-600 mt-1">
               Status:{" "}
               <span
-                className={`font-semibold ${
-                  isVariantDiscontinued(selectedVariantId)
-                    ? "text-red-500"
-                    : "text-green-600"
-                }`}
+                className={`font-semibold ${isVariantDiscontinued(selectedVariantId)
+                  ? "text-red-500"
+                  : "text-green-600"
+                  }`}
               >
                 {isVariantDiscontinued(selectedVariantId)
                   ? "Discontinued"
@@ -422,62 +419,62 @@ function ProductList({
 }
 
 // Navbar Component
-function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
+// function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
+//   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  const handleProfileClick = () => {
-    setIsProfileOpen((prev) => !prev);
-  };
+//   const handleProfileClick = () => {
+//     setIsProfileOpen((prev) => !prev);
+//   };
 
-  return (
-    <div className="flex items-center justify-between p-4 bg-[#25384c] text-white sticky top-0 z-10">
-      <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-      <div className="relative">
-        {isAdmin && user ? (
-          <div>
-            <img
-              src={user.imageUrl}
-              alt="Profile"
-              className="w-10 h-10  rounded-full cursor-pointer"
-              onClick={handleProfileClick}
-            />
-            {isProfileOpen && (
-              <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-30">
-                <ul className="text-dark font-medium text-center">
-                  <li className="px-4 pt-2">
-                    <p className="text-dark font-bold">{user.fullName}</p>
-                  </li>
-                  {user.emailAddresses && user.emailAddresses[0] && (
-                    <li className="px-4 p-2">
-                      <p className="text-dark font-light break-all">
-                        {user.emailAddresses[0].emailAddress}
-                      </p>
-                    </li>
-                  )}
-                  <li className="border-b border-gray-200"></li>
+//   return (
+//     <div className="flex items-center justify-between p-4 bg-[#25384c] text-white sticky top-0 z-10">
+//       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+//       <div className="relative">
+//         {isAdmin && user ? (
+//           <div>
+//             <img
+//               src={user.imageUrl}
+//               alt="Profile"
+//               className="w-10 h-10  rounded-full cursor-pointer"
+//               onClick={handleProfileClick}
+//             />
+//             {isProfileOpen && (
+//               <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-30">
+//                 <ul className="text-dark font-medium text-center">
+//                   <li className="px-4 pt-2">
+//                     <p className="text-dark font-bold">{user.fullName}</p>
+//                   </li>
+//                   {user.emailAddresses && user.emailAddresses[0] && (
+//                     <li className="px-4 p-2">
+//                       <p className="text-dark font-light break-all">
+//                         {user.emailAddresses[0].emailAddress}
+//                       </p>
+//                     </li>
+//                   )}
+//                   <li className="border-b border-gray-200"></li>
 
-                  <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                    <SignOutButton>
-                      <button className="w-max text-danger font-bold">
-                        Sign Out
-                      </button>
-                    </SignOutButton>
-                  </li>
-                </ul>
-              </div>
-            )}
-          </div>
-        ) : (
-          <SignInButton mode="modal">
-            <button className="bg-accent text-light p-2 rounded-md">
-              Sign In
-            </button>
-          </SignInButton>
-        )}
-      </div>
-    </div>
-  );
-}
+//                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
+//                     <SignOutButton>
+//                       <button className="w-max text-danger font-bold">
+//                         Sign Out
+//                       </button>
+//                     </SignOutButton>
+//                   </li>
+//                 </ul>
+//               </div>
+//             )}
+//           </div>
+//         ) : (
+//           <SignInButton mode="modal">
+//             <button className="bg-accent text-light p-2 rounded-md">
+//               Sign In
+//             </button>
+//           </SignInButton>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 
 export default function Admin() {
   const { user, isLoaded } = useUser();
@@ -487,9 +484,9 @@ export default function Admin() {
   const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>(
     [],
   );
-  const [shippingCost, setShippingCost] = useState<number | null>(null);
-  const [vatPercentage, setVatPercentage] = useState<number | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("Products");
+
+
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -507,20 +504,10 @@ export default function Admin() {
     checkAdmin();
   }, [user]);
 
-  useEffect(() => {
-    const fetchCharges = async () => {
-      const { result, error } = await database.getProductCharges();
-      if (error) {
-        console.error("Error fetching product charges:", error);
-        return;
-      }
-      if (result) {
-        setShippingCost(result.shipping_cost);
-        setVatPercentage(result.vat_percentage);
-      }
-    };
-    fetchCharges();
-  }, []);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+  };
 
   const fetchVariants = async (id: number): Promise<Variant[]> => {
     const { result, error } = await database.getProductVariants(id);
@@ -613,55 +600,139 @@ export default function Admin() {
   }
 
   return (
-    <>
-      <Navbar isAdmin={isAdmin} user={user} />
-      <div className="container mx-auto p-4 pt-16 overflow-auto">
-        {error && (
-          <div className="text-red-500">Error fetching products: {error}</div>
-        )}
-        <div>
-          {isAdmin && (
-            <>
-              <div className="bg-white p-4 rounded-md shadow-md border border-[#ced2d7] mb-8">
-                <div className="flex justify-center space-x-4 my-4">
-                  <a
-                    href="https://dashboard.stripe.com/dashboard"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-[#3b4a5e] text-white rounded-md shadow-md hover:bg-[#2d3b47] transition"
-                  >
-                    Stripe Dashboard
-                  </a>
-                  <a
-                    href="https://dashboard.stripe.com/test/balance/all-activity"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 bg-[#556cd6] text-white rounded-md shadow-md hover:bg-[#445bb3] transition"
-                  >
-                    All Balance Activity
-                  </a>
-                </div>
-              </div>
-            </>
-          )}
+    <div className="flex h-screen bg-gray-100">
+      {/* Left Sidebar */}
+      <div className="w-1/6 bg-[#25384c] text-white flex flex-col">
+        <div className="flex justify-center  items-center p-4 mb-2">
+          <h1 className="text-2xl font-bold">VisualStream</h1>
+        </div>
+        
 
-          
+        {/* Tabs */}
+        <div className="flex flex-col">
+          <button
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Products" ? "bg-gray-600" : ""}`}
+            onClick={() => handleTabChange("Products")}
+          >
+            Products
+          </button>
+          <button
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Stripe Details" ? "bg-gray-600" : ""}`}
+            onClick={() => handleTabChange("Stripe Details")}
+          >
+            Quick Links
+          </button>
+          {/* <button
+    className={`text-white p-2 mb-2 rounded-md ${activeTab === "Analytics" ? "bg-gray-600" : ""}`}
+    onClick={() => handleTabChange("Analytics")}
+  >
+    Analytics
+  </button> */}
+        </div>
 
+
+        {isAdmin && user && (
+          <div className="flex flex-col items-center mt-auto p-4">
+            <img
+              src={user.imageUrl}
+              alt="Profile"
+              className="w-14 h-14 rounded-full mb-1 cursor-pointer"
+            />
+            <p className="text-lg font-medium">{user.fullName}</p>
+            <p className="text-sm text-gray-300">{user.emailAddresses[0]?.emailAddress}</p>
+            <SignOutButton>
+              <button className="bg-red-800 mb-4 text-white mt-4 px-5 py-2 rounded-md">
+                Sign Out
+              </button>
+            </SignOutButton>
+          </div>
+        )
+        }
+      </div>
+
+      {/* Right Content Area */}
+      <div className="w-5/6 p-6 flex justify-center  overflow-y-auto">
+        {activeTab === "Products" && (
           <div>
-            {products ? (
+            <h2 className="text-2xl font-bold text-gray-800 ">Products</h2>
+            <p className="text-gray-600 mb-4">Here are all your products for management and updates. </p>
+
+            {products && (
               <ProductList
                 products={products}
                 variantGroups={variantGroups}
                 setVariantGroups={setVariantGroups}
               />
-            ) : (
-              <div className="flex justify-center items-center">
-                Loading products...
-              </div>
             )}
           </div>
-        </div>
+        )}
+
+        {activeTab === "Stripe Details" && (
+          <div className="p-4">
+            <h2 className="text-2xl font-bold text-gray-800">Quick Links</h2>
+            <p className="text-gray-600">
+              Quickly access and manage essential resources and actions through the links below.
+            </p>
+
+            <div className="grid grid-cols-1 mt-5 sm:grid-cols-3 gap-6">
+              <div
+                onClick={() => window.open("https://dashboard.stripe.com/dashboard", "_blank")}
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img src="/dashboard.png" alt="" className="w-20 h-20" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Stripe Dashboard</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Monitor your transactions, payouts, and overall account status.
+                </p>
+              </div>
+
+              <div
+                onClick={() => window.open("https://dashboard.stripe.com/test/payments", "_blank")}
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img src="/transaction.png" alt="" className="w-20 h-20" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Transactions</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  View all transactions and balance activities in detail.
+                </p>
+              </div>
+
+              <div
+                onClick={() => window.open("https://dashboard.stripe.com/test/customers", "_blank")}
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img src="/customers.png" alt="" className="w-20 h-20" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Customers</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  View all customers and their details.
+                </p>
+              </div>
+            </div>
+
+
+          </div>
+        )}
+
+
+        {/* Analytics Tab
+        {activeTab === "Analytics" && (
+          <div>
+            <h2 className="text-xl font-bold mb-4">Analytics</h2>
+            <button
+              onClick={() => window.location.href = '/admin/analytics'}
+              className="bg-gray-600 text-white px-6 py-3 rounded-md"
+            >
+              Go to Analytics Page
+            </button>
+          </div>
+        )} */}
       </div>
-    </>
+    </div>
   );
 }

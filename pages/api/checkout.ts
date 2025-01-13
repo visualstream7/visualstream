@@ -12,7 +12,7 @@ export default async function handler(
   res: NextApiResponse,
 ) {
   if (req.method === "POST") {
-    const { cartItems, returnUrl, userId, shippingAmount, recipient } =
+    const { cartItems, returnUrl, userId, shippingAmount, recipient, taxRate } =
       req.body;
 
     console.log("cartItems", cartItems);
@@ -42,6 +42,21 @@ export default async function handler(
       },
       quantity: 1,
     });
+
+    const taxAmount = Math.round(taxRate * 100);
+
+    if (taxAmount > 0) {
+      line_items.push({
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: "Tax",
+          },
+          unit_amount: taxAmount, 
+        },
+        quantity: 1,
+      });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],

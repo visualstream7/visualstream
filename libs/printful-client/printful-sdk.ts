@@ -107,7 +107,7 @@ class Printful {
         name: recipient.name,
         address1: recipient.address1,
         city: recipient.city,
-        state_code: recipient.state_code,
+        state_code: recipient.state,
         country_code: recipient.country_code,
         zip: recipient.zip,
       },
@@ -252,11 +252,12 @@ class Printful {
     try {
       const token = this.apiKey;
 
-      let data = JSON.stringify({
-        recipient: recipient,
-        items: items,
+      const data = JSON.stringify({
+        recipient,
+        items,
         store_id: 14818720,
       });
+
 
       const response = await fetch("https://api.printful.com/shipping/rates", {
         method: "POST",
@@ -267,38 +268,64 @@ class Printful {
         body: data,
       });
 
-      let rData = await response.json();
+      const rData = await response.json();
 
-      let shippings = rData.result;
-
-      if (!shippings) {
-        return { result: null, error: rData?.error?.message };
+      if (response.status !== 200 || !rData.result) {
+        return { result: null, error: rData.error?.message || "Failed to fetch shipping rates." };
       }
 
-      let standard = shippings.filter(
-        (shipping: any) => shipping.id === "STANDARD",
-      );
+      const shippings = rData.result;
 
-      console.log("standard", standard);
+      if (!Array.isArray(shippings)) {
+        console.error("Unexpected API response:", rData);
+        return { result: null, error: "Invalid shipping rates response." };
+      }
+
+      const standard = shippings.find((shipping: any) => shipping.id === "STANDARD");
 
       if (!standard) {
-        return { result: null, error: "No standard shipping available" };
+        return { result: null, error: "No standard shipping available." };
       }
 
-      if (standard.length === 0) {
-        return { result: null, error: "No standard shipping available" };
-      }
-
-      standard = standard[0];
-
-      let rate = parseFloat(standard.rate);
+      const rate = parseFloat(standard.rate);
 
       return { result: rate, error: null };
     } catch (error) {
       console.error("Error during fetch:", error);
-      return { result: null, error: (error as any).message };
+      return { result: null, error: (error as any).message || "Unexpected error occurred." };
+    }
+  };
+
+  calculateTax = async (recipient: {
+    country_code: string;
+    state_code: string;
+    city: string;
+    zip: string;
+  }) => {
+    try {
+      const response = await fetch("https://api.printful.com/tax/rates", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({ recipient }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error?.message || "Failed to fetch tax rates");
+      }
+
+      return { result: data.result, error: null };
+    } catch (error) {
+      return { result: null, error: (error as Error).message };
     }
   };
 }
+
+
+
 
 export { Printful };

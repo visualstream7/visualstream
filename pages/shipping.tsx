@@ -4,13 +4,9 @@ import {
   CanadaStates,
   UnitedStatesStates,
 } from "@/data/states";
-import { Printful } from "@/libs/printful-client/printful-sdk";
 import { useUser } from "@clerk/nextjs";
 import { loadStripe } from "@stripe/stripe-js";
 import { useEffect, useState } from "react";
-import { BiLeftArrow, BiSolidLeftArrow } from "react-icons/bi";
-import { FaArrowRightArrowLeft, FaGreaterThan } from "react-icons/fa6";
-import { HiArrowRight } from "react-icons/hi";
 
 let countries = {
   BD: {
@@ -32,11 +28,10 @@ let countries = {
 };
 
 const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 );
 
 export default function Checkout() {
-  // const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState(countries.BD.code);
   const [addressLine1, setAddressLine1] = useState("");
@@ -45,6 +40,11 @@ export default function Checkout() {
   const [postalCode, setPostalCode] = useState("");
   let [state, setState] = useState<string | null>(null);
   const [rerenderNav, setRerenderNav] = useState<boolean>(false);
+  const [taxRate, setTaxRate] = useState<number | null>(null);
+  const [taxError, setTaxError] = useState<string | null>(null);
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  const [showProceedButton, setShowProceedButton] = useState(false);
 
   const { user } = useUser();
 
@@ -59,11 +59,83 @@ export default function Checkout() {
 
   useEffect(() => {
     setState(null);
+    setShowProceedButton(false); // Reset on country change
   }, [country]);
+
+  const calculateShippingAndTax = async () => {
+
+    if (!fullName || !addressLine1 || !city || !postalCode) {
+      alert("Please fill all the fields");
+      return;
+    }
+
+    const recipient = {
+      address1: addressLine1,
+      city: city,
+      country_code: country,
+      state_code: state,
+      zip: postalCode,
+    };
+
+    console.log("recipient", recipient);
+
+    const items = cartItems.map((item) => ({
+      variant_id: item.variant_id,
+      quantity: item.quantity,
+    }));
+
+    try {
+      // Calculate tax
+      const taxResponse = await fetch("/api/get-tax-rate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ recipient }),
+      });
+      const taxData = await taxResponse.json();
+
+      if (!taxData.result || taxData.error) {
+        setTaxError(taxData.error || "Failed to calculate tax rate.");
+        setTaxRate(null);
+      } else {
+        setTaxRate(taxData.result.rate);
+        setTaxError(null);
+      }
+
+      // Calculate shipping
+      const shippingResponse = await fetch("/api/get-shipping-rate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ recipient, items }),
+      });
+      const shippingData = await shippingResponse.json();
+
+      if (!shippingData.result || shippingData.error) {
+        setShippingError(shippingData.error || "Failed to calculate shipping cost.");
+        setShippingCost(null);
+      } else {
+        setShippingCost(shippingData.result);
+        setShippingError(null);
+      }
+
+      // Show Proceed button if both calculations succeed
+      if (taxData.result && shippingData.result) {
+        setShowProceedButton(true);
+      }
+    } catch (error) {
+      console.error("Error calculating tax or shipping:", error);
+      setTaxError("Unexpected error occurred while calculating tax.");
+      setShippingError("Unexpected error occurred while calculating shipping.");
+    }
+  };
 
   const handleProceed = async () => {
     if (!fullName || !addressLine1 || !city || !postalCode) {
       alert("Please fill all the fields");
+      return;
     }
 
     const checkoutData = {
@@ -88,35 +160,6 @@ export default function Checkout() {
       color: item.color,
     }));
 
-    let shippingItems = items.map((item) => ({
-      variant_id: item.variant_id,
-      quantity: item.quantity,
-    }));
-
-    let recipient = {
-      address1: addressLine1,
-      city: city,
-      country_code: country,
-      state: state || null,
-    };
-
-    const shippingResponse = await fetch("/api/get-shipping-rate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        recipient,
-        items: shippingItems,
-      }),
-    });
-
-    const shippingData = await shippingResponse.json();
-    if (!shippingData.result || shippingData.error) {
-      alert("Failed to calculate shipping rate.");
-      return;
-    }
-
     const stripe = await stripePromise;
 
     if (!stripe) {
@@ -131,11 +174,12 @@ export default function Checkout() {
       body: JSON.stringify({
         cartItems: items,
         userId: user?.id || null,
-        shippingAmount: shippingData.result,
+        shippingAmount: shippingCost || 0,
+        taxRate: taxRate || 0,
         recipient: {
           name: fullName,
           address1: addressLine1 || addressLine2,
-          city: city,
+          city,
           state: state || null,
           country_code: country,
           zip: postalCode,
@@ -155,23 +199,9 @@ export default function Checkout() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="w-full max-w-lg bg-white p-6 rounded-md shadow">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">
-          Shipping information
+          Shipping and Tax Information
         </h2>
-        {/* {JSON.stringify(UnitedStatesStates)}
-        {JSON.stringify(AustraliaStates)}
-        {JSON.stringify(CanadaStates)} */}
         <form className="space-y-4">
-          {/* <div>
-            <label className="block text-sm text-gray-700">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full mt-1 border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
-          </div> */}
-
           <div>
             <label className="block text-sm text-gray-700">
               Shipping address
@@ -200,32 +230,36 @@ export default function Checkout() {
             {(country === countries.US.code ||
               country === countries.CA.code ||
               country === countries.AU.code) && (
-              <select
-                value={state || ""}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full mt-2 border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                required
-              >
-                {country === countries.US.code &&
-                  UnitedStatesStates.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                {country === countries.CA.code &&
-                  CanadaStates.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-                {country === countries.AU.code &&
-                  AustraliaStates.map((state) => (
-                    <option key={state.code} value={state.code}>
-                      {state.name}
-                    </option>
-                  ))}
-              </select>
-            )}
+                <select
+                  value={state || ""}
+                  onChange={(e) => setState(e.target.value)}
+                  className="w-full mt-2 border border-gray-300 rounded-md px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
+                  required
+                >
+                  <option value="" disabled>
+                    Select a state
+                  </option>
+                  {country === countries.US.code &&
+                    UnitedStatesStates.map((state) => (
+                      <option key={state.code} value={state.code}>
+                        {state.name}
+                      </option>
+                    ))}
+                  {country === countries.CA.code &&
+                    CanadaStates.map((state) => (
+                      <option key={state.code} value={state.code}>
+                        {state.name}
+                      </option>
+                    ))}
+                  {country === countries.AU.code &&
+                    AustraliaStates.map((state) => (
+                      <option key={state.code} value={state.code}>
+                        {state.name}
+                      </option>
+                    ))}
+                </select>
+
+              )}
 
             <input
               type="text"
@@ -261,13 +295,41 @@ export default function Checkout() {
               />
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleProceed}
-            className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Proceed to Checkout
-          </button>
+          {shippingCost !== null && taxRate !== null && (
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600">
+                Shipping Cost: ${shippingCost.toFixed(2)}
+              </p>
+              <p className="text-sm text-gray-600">Tax Rate: {taxRate}%</p>
+            </div>
+
+          )}
+          {shippingError && (
+            <p className="text-sm text-red-600">{shippingError}</p>
+          )}
+          {taxError && <p className="text-sm text-red-600">{taxError}</p>}
+
+          {/* Calculate Shipping and Tax Button */}
+          {!showProceedButton && (
+            <button
+              type="button"
+              onClick={calculateShippingAndTax}
+              className="w-full mt-4 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700"
+            >
+              Calculate Shipping
+            </button>
+          )}
+
+          {/* Proceed to Checkout Button */}
+          {showProceedButton && (
+            <button
+              type="button"
+              onClick={handleProceed}
+              className="w-full mt-4 py-2 bg-yellow-600 text-white font-bold rounded-md hover:bg-yellow-700"
+            >
+              Proceed to Checkout
+            </button>
+          )}
         </form>
       </div>
     </div>
