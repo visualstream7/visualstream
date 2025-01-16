@@ -47,7 +47,7 @@ export interface Variant {
   discontinued: boolean;
 }
 
-export interface Order { }
+export interface Order {}
 
 // Define overload signatures for the constructor
 class SupabaseWrapper {
@@ -508,6 +508,8 @@ class SupabaseWrapper {
     ai_describe: string,
     article_link: string,
     category: string,
+    ai_tags: string,
+    ai_article_describe: string,
   ): Promise<{
     result: any;
     error: string | null;
@@ -519,6 +521,8 @@ class SupabaseWrapper {
         ai_describe,
         article_link,
         category,
+        ai_tags,
+        ai_article_describe,
         this.client,
       );
       return {
@@ -943,7 +947,7 @@ class SupabaseWrapper {
 
   updateVariantStatus = async (
     variantId: number,
-    discontinued: boolean
+    discontinued: boolean,
   ): Promise<{
     result: any;
     error: string | null;
@@ -973,7 +977,6 @@ class SupabaseWrapper {
       };
     }
   };
-
 }
 
 export { SupabaseWrapper };

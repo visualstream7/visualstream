@@ -44,7 +44,9 @@ export type Database = {
       }
       Images: {
         Row: {
+          ai_article_describe: string | null
           ai_describe: string | null
+          ai_tags: string | null
           article_link: string | null
           caption: string | null
           category: string | null
@@ -57,7 +59,9 @@ export type Database = {
           title: string | null
         }
         Insert: {
+          ai_article_describe?: string | null
           ai_describe?: string | null
+          ai_tags?: string | null
           article_link?: string | null
           caption?: string | null
           category?: string | null
@@ -70,7 +74,9 @@ export type Database = {
           title?: string | null
         }
         Update: {
+          ai_article_describe?: string | null
           ai_describe?: string | null
+          ai_tags?: string | null
           article_link?: string | null
           caption?: string | null
           category?: string | null

@@ -13,6 +13,8 @@ async function addImageToDatabase(
   ai_describe: string,
   articleUrl: string,
   category: string,
+  ai_tags: string,
+  ai_article_describe: string,
   supabase: SupabaseClient<Database>,
 ) {
   const { data, error } = await supabase
@@ -24,6 +26,8 @@ async function addImageToDatabase(
         ai_describe: ai_describe,
         article_link: articleUrl,
         category: category,
+        ai_tags: ai_tags,
+        ai_article_describe: ai_article_describe,
       },
     ])
     .select("*");

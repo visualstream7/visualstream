@@ -10,7 +10,15 @@ export default async function handler(
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
   }
 
-  const { caption, title, ai_describe, article_link, category } = req.body;
+  const {
+    caption,
+    title,
+    ai_describe,
+    article_link,
+    category,
+    ai_tags,
+    ai_article_describe,
+  } = req.body;
 
   if (!title) {
     return res.status(200).json({ result: null, error: "Title is required" });
@@ -32,6 +40,16 @@ export default async function handler(
       .json({ result: null, error: "Description is required" });
   }
 
+  if (!ai_tags) {
+    return res.status(200).json({ result: null, error: "Tags is required" });
+  }
+
+  if (!ai_article_describe) {
+    return res
+      .status(200)
+      .json({ result: null, error: "Article Description is required" });
+  }
+
   if (!article_link) {
     return res
       .status(200)
@@ -47,6 +65,8 @@ export default async function handler(
       ai_describe,
       article_link,
       category,
+      ai_tags,
+      ai_article_describe,
     );
 
   if (imageDataSaveError) {

@@ -11,7 +11,6 @@ interface DistinctVariantGroup {
   variants: Variant[];
 }
 
-
 function Modal({
   setIsModalOpen,
   onSave,
@@ -215,23 +214,24 @@ function ProductCard({
             <div
               key={variant.variant_id}
               className={`relative h-10 w-10 flex items-center justify-center rounded-md border cursor-pointer shadow-sm
-          ${variant.variant_id === selectedVariantId
-                  ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
-                  : isVariantDiscontinued(variant.variant_id)
-                    ? "border-red-500 bg-red-50"
-                    : "border-green-500 bg-green-50"
-                } hover:shadow-md transition`}
+          ${
+            variant.variant_id === selectedVariantId
+              ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
+              : isVariantDiscontinued(variant.variant_id)
+                ? "border-red-500 bg-red-50"
+                : "border-green-500 bg-green-50"
+          } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
               {/* Color Circle */}
               <div
-                className={`w-6 h-6 rounded-full mx-auto border ${variant.variant_id === selectedVariantId
-                  ? "border-blue-500"
-                  : "border-gray-300"
-                  }`}
+                className={`w-6 h-6 rounded-full mx-auto border ${
+                  variant.variant_id === selectedVariantId
+                    ? "border-blue-500"
+                    : "border-gray-300"
+                }`}
                 style={{ backgroundColor: variant.color }}
-              >
-              </div>
+              ></div>
               {isVariantDiscontinued(variant.variant_id) && (
                 <div className="absolute top-0 left-0 h-[50px] bg-red-500 w-[2px] rotate-45 translate-x-[20px] -translate-y-[5px]">
                   {" "}
@@ -249,17 +249,20 @@ function ProductCard({
             </h3>
             <p className="text-sm text-gray-600 mt-1">
               Color:{" "}
-              {getVariantsOfGroup(product.id, selectedSize).find(
-                (v) => v.variant_id === selectedVariantId,
-              )?.color}
+              {
+                getVariantsOfGroup(product.id, selectedSize).find(
+                  (v) => v.variant_id === selectedVariantId,
+                )?.color
+              }
             </p>
             <p className="text-sm text-gray-600 mt-1">
               Status:{" "}
               <span
-                className={`font-semibold ${isVariantDiscontinued(selectedVariantId)
-                  ? "text-red-500"
-                  : "text-green-600"
-                  }`}
+                className={`font-semibold ${
+                  isVariantDiscontinued(selectedVariantId)
+                    ? "text-red-500"
+                    : "text-green-600"
+                }`}
               >
                 {isVariantDiscontinued(selectedVariantId)
                   ? "Discontinued"
@@ -319,7 +322,8 @@ function ProductCard({
       {selectedSize && (
         <div className="mt-2">
           <div>
-            <span className="font-medium">Original Price: </span>${price?.toFixed(2)}
+            <span className="font-medium">Original Price: </span>$
+            {price?.toFixed(2)}
           </div>
           {margin !== null && (
             <div>
@@ -486,13 +490,12 @@ export default function Admin() {
   );
   const [activeTab, setActiveTab] = useState<string>("Products");
 
-
-
   useEffect(() => {
     const checkAdmin = () => {
       const list_of_admin_emails = [
         "mdmarufbinsalim@gmail.com",
         "waliurrahman957@gmail.com",
+        "visualstream709@gmail.com",
       ];
 
       const userEmail = user?.emailAddresses[0].emailAddress;
@@ -503,7 +506,6 @@ export default function Admin() {
     };
     checkAdmin();
   }, [user]);
-
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -606,7 +608,6 @@ export default function Admin() {
         <div className="flex justify-center  items-center p-4 mb-2">
           <h1 className="text-2xl font-bold">VisualStream</h1>
         </div>
-        
 
         {/* Tabs */}
         <div className="flex flex-col">
@@ -630,7 +631,6 @@ export default function Admin() {
   </button> */}
         </div>
 
-
         {isAdmin && user && (
           <div className="flex flex-col items-center mt-auto p-4">
             <img
@@ -639,15 +639,16 @@ export default function Admin() {
               className="w-14 h-14 rounded-full mb-1 cursor-pointer"
             />
             <p className="text-lg font-medium">{user.fullName}</p>
-            <p className="text-sm text-gray-300">{user.emailAddresses[0]?.emailAddress}</p>
+            <p className="text-sm text-gray-300">
+              {user.emailAddresses[0]?.emailAddress}
+            </p>
             <SignOutButton>
               <button className="bg-red-800 mb-4 text-white mt-4 px-5 py-2 rounded-md">
                 Sign Out
               </button>
             </SignOutButton>
           </div>
-        )
-        }
+        )}
       </div>
 
       {/* Right Content Area */}
@@ -655,7 +656,9 @@ export default function Admin() {
         {activeTab === "Products" && (
           <div>
             <h2 className="text-2xl font-bold text-gray-800 ">Products</h2>
-            <p className="text-gray-600 mb-4">Here are all your products for management and updates. </p>
+            <p className="text-gray-600 mb-4">
+              Here are all your products for management and updates.{" "}
+            </p>
 
             {products && (
               <ProductList
@@ -671,54 +674,74 @@ export default function Admin() {
           <div className="p-4">
             <h2 className="text-2xl font-bold text-gray-800">Quick Links</h2>
             <p className="text-gray-600">
-              Quickly access and manage essential resources and actions through the links below.
+              Quickly access and manage essential resources and actions through
+              the links below.
             </p>
 
             <div className="grid grid-cols-1 mt-5 sm:grid-cols-3 gap-6">
               <div
-                onClick={() => window.open("https://dashboard.stripe.com/dashboard", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://dashboard.stripe.com/dashboard",
+                    "_blank",
+                  )
+                }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
               >
                 <div className="flex justify-center mb-4">
                   <img src="/dashboard.png" alt="" className="w-20 h-20" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Stripe Dashboard</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Stripe Dashboard
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Monitor your transactions, payouts, and overall account status.
+                  Monitor your transactions, payouts, and overall account
+                  status.
                 </p>
               </div>
 
               <div
-                onClick={() => window.open("https://dashboard.stripe.com/test/payments", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://dashboard.stripe.com/test/payments",
+                    "_blank",
+                  )
+                }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
               >
                 <div className="flex justify-center mb-4">
                   <img src="/transaction.png" alt="" className="w-20 h-20" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Transactions</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Transactions
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   View all transactions and balance activities in detail.
                 </p>
               </div>
 
               <div
-                onClick={() => window.open("https://dashboard.stripe.com/test/customers", "_blank")}
+                onClick={() =>
+                  window.open(
+                    "https://dashboard.stripe.com/test/customers",
+                    "_blank",
+                  )
+                }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
               >
                 <div className="flex justify-center mb-4">
                   <img src="/customers.png" alt="" className="w-20 h-20" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Customers</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Customers
+                </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   View all customers and their details.
                 </p>
               </div>
             </div>
-
-
           </div>
         )}
-
 
         {/* Analytics Tab
         {activeTab === "Analytics" && (
