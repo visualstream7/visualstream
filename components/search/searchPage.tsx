@@ -17,8 +17,15 @@ export default function SearchPage({ user }: UserPropType) {
   const [isResizing, setIsResizing] = useState<number | null>(null);
   const [isNormalGrid, setIsNormalGrid] = useState<boolean>(true);
 
+  const [gridType, setGridType] = useState<"normal" | "color" | "tag">(
+    "normal",
+  );
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchTags, setSearchTags] = useState<string[]>([]);
+
   const { images, isImagesLoading } = useImageSearch({
     selectedColors: selectedColors,
+    searchTags: searchTags,
     isResizing: isResizing,
   });
 
@@ -39,12 +46,21 @@ export default function SearchPage({ user }: UserPropType) {
 
   return (
     <div className="flex flex-col h-dvh font-primary">
-      <Nav user={user} cartCount={cartItems.length} />
+      <Nav
+        searchTags={searchTags}
+        setSearchTags={setSearchTags}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        user={user}
+        cartCount={cartItems.length}
+      />
       <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
         <Grid
           images={images}
           isImagesLoading={isImagesLoading}
           normalGrid={isNormalGrid}
+          searchTags={searchTags}
+          setSearchTags={setSearchTags}
         />
         <PickerContainer
           selectedColors={selectedColors}

@@ -138,13 +138,18 @@ function overallSimilarity(selectedColors: any, colorComposition: any) {
 
 export default function useImageSearch({
   selectedColors,
+  searchTags,
   isResizing,
 }: {
   selectedColors: { hex: string; percentage: number }[];
+  searchTags: string[];
   isResizing: number | null;
 }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [images, setImages] = useState<ImageWithSimilarity[]>([]);
+  const [searchTagImages, setSearchTagImages] = useState<ImageWithSimilarity[]>(
+    [],
+  );
   const [unorderedImages, setUnorderedImages] = useState<ImageWithSimilarity[]>(
     [],
   );
@@ -190,8 +195,75 @@ export default function useImageSearch({
     setImages(imagesWithSimilarityScore);
   }, [isResizing, selectedColors]);
 
+  useEffect(() => {
+    if (
+      !images ||
+      images.length === 0 ||
+      !searchTags ||
+      searchTags.length === 0
+    ) {
+      return;
+    }
+    console.log("Search tags changed", searchTags);
+
+    let imagesWithCountScore = images.map((image) => {
+      let countScore = 0;
+
+      if (!image.ai_tags) {
+        return {
+          ...image,
+          countScore,
+        };
+      }
+
+      let AI_DESCRIBE = image.ai_describe?.toLowerCase() || "";
+      let AI_ARTICLE_DESCRIBE = image.ai_article_describe?.toLowerCase() || "";
+      let AI_TAGS = image.ai_tags?.toLowerCase() || "";
+
+      let SEARCH_SPACE =
+        AI_DESCRIBE + " " + AI_ARTICLE_DESCRIBE + " " + AI_TAGS;
+      SEARCH_SPACE = SEARCH_SPACE.toLowerCase();
+
+      for (let i = 0; i < searchTags.length; i++) {
+        let tag = searchTags[i].toLowerCase();
+
+        let ARRAY_OF_SEARCH_SPACE = SEARCH_SPACE.split(" ");
+        let count = 0;
+        for (let j = 0; j < ARRAY_OF_SEARCH_SPACE.length; j++) {
+          if (ARRAY_OF_SEARCH_SPACE[j].includes(tag)) {
+            count++;
+          }
+        }
+        countScore += count;
+      }
+
+      return {
+        ...image,
+        search_space: SEARCH_SPACE,
+        countScore,
+      };
+    });
+
+    imagesWithCountScore = imagesWithCountScore.sort(
+      (a, b) => b.countScore - a.countScore,
+    );
+
+    (imagesWithCountScore = imagesWithCountScore.filter(
+      (image) => image.countScore && image.countScore > 0,
+    )),
+      // if countScore is 0 or undefined, then the image is not relevant
+
+      setSearchTagImages(imagesWithCountScore);
+    console.log("Search tag images", imagesWithCountScore);
+  }, [searchTags, images]);
+
   return {
-    images: selectedColors.length > 0 ? images : unorderedImages,
+    images:
+      selectedColors.length > 0
+        ? images
+        : searchTags?.length > 0
+          ? searchTagImages
+          : unorderedImages,
     isImagesLoading: loading,
   };
 }

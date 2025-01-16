@@ -18,6 +18,8 @@ export type Image = {
   category?: string | null; // Optional field, allowing null values
   low_resolution_image_url?: string | null; // Optional field, allowing null values
   title: string | null; // Optional field, allowing null values
+  ai_tags?: string | null; // Optional field, allowing null values
+  ai_article_describe?: string | null; // Optional field, allowing null values
 };
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase

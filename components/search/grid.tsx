@@ -24,6 +24,9 @@ const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
 };
 
 const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
+  let sortedImages = images.sort((a, b) => {
+    return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
+  });
   return (
     <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
@@ -50,7 +53,15 @@ function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
-function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
+function BentoGrid({
+  images,
+  searchTags,
+  setSearchTags,
+}: {
+  images: ImageWithSimilarity[];
+  searchTags: string[];
+  setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
+}) {
   let count = 60;
   let [page, setPage] = useState(1);
   let PER_PAGE = 51;
@@ -196,9 +207,28 @@ function BentoGrid({ images }: { images: ImageWithSimilarity[] }) {
 
   return (
     <>
+      <div className="flex items-center gap-4 p-4 overflow-x-scroll max-w-[calc(84vw-80px)] no-scrollbar flex-wrap">
+        {searchTags &&
+          searchTags.length > 0 &&
+          searchTags.map((tag, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 bg-blue-300 rounded-full w-max px-2"
+            >
+              <p>{tag}</p>
+              <button
+                onClick={() => {
+                  setSearchTags(searchTags.filter((t) => t !== tag));
+                }}
+              >
+                <XIcon size={20} />
+              </button>
+            </div>
+          ))}
+      </div>
       <div
         className={`w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col
-          ${currentImages?.length < PER_PAGE ? "pt-[100px]" : "pt-[100px]"}`}
+          ${currentImages?.length < PER_PAGE ? "pt-[0px]" : "pt-[0px]"}`}
       >
         {imageChunks.map((chunk, chunkIndex) => (
           <div
@@ -345,15 +375,23 @@ export default function Grid({
   images,
   isImagesLoading,
   normalGrid,
+  searchTags,
+  setSearchTags,
 }: {
   images: ImageWithSimilarity[];
   isImagesLoading: boolean;
   normalGrid: boolean;
+  searchTags: string[];
+  setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   return (
     <div className="flex flex-col w-full h-[100%] flex-[1]">
-      {!normalGrid ? (
-        <BentoGrid images={images} />
+      {!normalGrid || (searchTags && searchTags.length > 0) ? (
+        <BentoGrid
+          images={images}
+          searchTags={searchTags}
+          setSearchTags={setSearchTags}
+        />
       ) : (
         <NormalGrid images={images} />
       )}

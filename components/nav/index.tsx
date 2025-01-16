@@ -19,11 +19,19 @@ type UserPropType = {
 type NavPropType = {
   user: UserResource | null | undefined;
   cartCount: number;
+  searchTags?: string[];
+  setSearchTags?: React.Dispatch<React.SetStateAction<string[]>>;
+  searchTerm?: string;
+  setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 type ComponentPropType = {
   user: UserResource | null | undefined;
   count: number;
+  searchTags?: string[];
+  setSearchTags?: React.Dispatch<React.SetStateAction<string[]>>;
+  searchTerm?: string;
+  setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 // UserButton Component
@@ -105,7 +113,14 @@ function MobileNav({ user }: ComponentPropType) {
   );
 }
 
-function LargeScreenNav({ user, count }: ComponentPropType) {
+function LargeScreenNav({
+  user,
+  count,
+  searchTags,
+  setSearchTags,
+  searchTerm,
+  setSearchTerm,
+}: ComponentPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
   const [returnOrders, setReturnOrders] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
@@ -142,9 +157,45 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
             type="text"
             placeholder="Search VisualStream.ai"
             className="flex-grow px-2 py-2 outline-none"
+            onChange={(e) =>
+              setSearchTerm ? setSearchTerm(e.target.value) : null
+            }
+            value={searchTerm || ""}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                if (!setSearchTags) return;
+                if (!setSearchTerm) return;
+                if (searchTerm && searchTags) {
+                  if (searchTags.includes(searchTerm)) return;
+                  if (searchTags.length >= 5) {
+                    alert("You can only search for 5 tags at a time");
+                    return;
+                  }
+                  setSearchTags([...searchTags, searchTerm]);
+                  setSearchTerm("");
+                }
+              }
+            }}
           />
           <button className="px-3 text-gray-500">
-            <FiSearch size={20} />
+            <FiSearch
+              size={20}
+              onClick={() => {
+                if (!setSearchTags) return;
+                if (!setSearchTerm) return;
+                if (searchTerm && searchTags) {
+                  if (searchTags.includes(searchTerm)) return;
+
+                  if (searchTags.length >= 5) {
+                    alert("You can only search for 5 tags at a time");
+                    return;
+                  }
+
+                  setSearchTags([...searchTags, searchTerm]);
+                  setSearchTerm("");
+                }
+              }}
+            />
           </button>
         </div>
 
@@ -221,10 +272,24 @@ function LargeScreenNav({ user, count }: ComponentPropType) {
 }
 
 // NavBar Component
-export default function Nav({ user, cartCount }: NavPropType) {
+export default function Nav({
+  user,
+  cartCount,
+  searchTags,
+  setSearchTags,
+  searchTerm,
+  setSearchTerm,
+}: NavPropType) {
   return (
     <>
-      <LargeScreenNav user={user} count={cartCount} />
+      <LargeScreenNav
+        user={user}
+        count={cartCount}
+        searchTags={searchTags}
+        setSearchTags={setSearchTags}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+      />
       <MobileNav user={user} count={cartCount} />
     </>
   );
