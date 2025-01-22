@@ -7,6 +7,7 @@ import PickerContainer, { Color } from "./pickerContainer";
 import useImageSearch from "@/hooks/useImageSearch";
 import { useEffect, useState } from "react";
 import useCart from "../nav/useCart";
+import { PaintBucketIcon } from "lucide-react";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -22,6 +23,7 @@ export default function SearchPage({ user }: UserPropType) {
   );
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTags, setSearchTags] = useState<string[]>([]);
+  const [showPicker, setShowPicker] = useState<boolean>(false);
 
   const { images, isImagesLoading } = useImageSearch({
     selectedColors: selectedColors,
@@ -45,7 +47,7 @@ export default function SearchPage({ user }: UserPropType) {
   });
 
   return (
-    <div className="flex flex-col h-dvh font-primary">
+    <div className={`flex flex-col h-dvh font-primary`}>
       <Nav
         searchTags={searchTags}
         setSearchTags={setSearchTags}
@@ -54,7 +56,19 @@ export default function SearchPage({ user }: UserPropType) {
         user={user}
         cartCount={cartItems.length}
       />
-      <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-hidden">
+      {user && (
+        <div className="flex justify-between items-center p-4 md:hidden">
+          <div className="flex flex-col p-4 md:hidden">
+            <p className="text-lg font-bold"> Weclome Back </p>
+            <p> {user.fullName} </p>
+          </div>
+          <PaintBucketIcon
+            className="h-8 w-8"
+            onClick={() => setShowPicker(true)}
+          />
+        </div>
+      )}
+      <div className="flex-1 flex flex-col-reverse lg:flex-row max-h-dvh overflow-auto">
         <Grid
           images={images}
           isImagesLoading={isImagesLoading}
@@ -67,6 +81,8 @@ export default function SearchPage({ user }: UserPropType) {
           setSelectedColors={setSelectedColors}
           isResizing={isResizing}
           setIsResizing={setIsResizing}
+          showPicker={showPicker}
+          setShowPicker={setShowPicker}
         />
       </div>
     </div>

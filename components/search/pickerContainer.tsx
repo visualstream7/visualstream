@@ -1,4 +1,5 @@
 import { colors } from "@/data/colors";
+import { XIcon } from "lucide-react";
 import { useState } from "react";
 import { TbDots, TbPaint } from "react-icons/tb";
 
@@ -12,6 +13,8 @@ interface PickerContainerProps {
   setSelectedColors: (colors: Color[]) => void;
   isResizing: number | null;
   setIsResizing: (index: number | null) => void;
+  showPicker: boolean;
+  setShowPicker: (show: boolean) => void;
 }
 
 export default function PickerContainer({
@@ -19,6 +22,8 @@ export default function PickerContainer({
   setSelectedColors,
   isResizing,
   setIsResizing,
+  showPicker,
+  setShowPicker,
 }: PickerContainerProps) {
   const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(
     null,
@@ -113,7 +118,20 @@ export default function PickerContainer({
   };
 
   return (
-    <div className="lg:flex-[0.2] mx-auto p-[20px] w-full">
+    <div
+      className={`
+      flex-1 sm:absolute bg-white  mx-auto p-[20px] w-full overflow-auto h-[93vh]
+        ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0      `}
+    >
+      {!showPicker && (
+        <button
+          className="fixed top-4 right-4 w-8 h-8 bg-white rounded-full flex md:hidden items-center justify-center"
+          onClick={() => setShowPicker(false)}
+        >
+          <XIcon className="w-8 h-8" color="black" />
+        </button>
+      )}
+
       <div className="my-4">
         <h1 className="font-bold text-2xl">Step 1</h1>
         <p>Select up to 5 colors</p>
@@ -168,10 +186,10 @@ export default function PickerContainer({
               >
                 <div className="flex items-center justify-center w-min h-full max-w-[100%] overflow-clip flex-wrap mx-auto">
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all opacity-0 ${
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
                       hoveringSwatchIndex === index
-                        ? "opacity-100"
-                        : "opacity-0"
+                        ? "md:opacity-100"
+                        : "md:opacity-0"
                     }`}
                     onClick={() => deleteColor(index)}
                   ></button>
@@ -179,11 +197,13 @@ export default function PickerContainer({
                     {color.percentage?.toFixed(0)}%
                   </p>
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all opacity-0 ${
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
                       hoveringSwatchIndex === index
-                        ? "opacity-100"
-                        : "opacity-0"
-                    }`}
+                        ? "md:opacity-100"
+                        : "md:opacity-0"
+                    }
+
+                    `}
                     onClick={() => {}}
                   ></button>
                 </div>

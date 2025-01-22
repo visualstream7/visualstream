@@ -9,6 +9,15 @@ import { MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
 import { SupabaseWrapper } from "@/database/supabase";
 import useCart from "./useCart";
+import {
+  CarrotIcon,
+  Heart,
+  Home,
+  ShoppingCartIcon,
+  UserIcon,
+} from "lucide-react";
+import { BiCart } from "react-icons/bi";
+import { IoCart } from "react-icons/io5";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -99,15 +108,18 @@ export const UserButton = ({ user }: UserPropType) => {
 };
 
 // MobileNavBar Component
-function MobileNav({ user }: ComponentPropType) {
+function MobileNav({ user, count }: ComponentPropType) {
   return (
-    <div className="w-full block lg:hidden">
-      <div className="bg-[#25384c] text-white py-2 px-4 flex items-center justify-between w-full">
-        <div className="text-xl font-bold">VisualStream</div>
-        <div className="flex items-center gap-4">
-          <FiSearch size={24} />
-          <FiMenu size={24} />
-        </div>
+    <div className="w-full block lg:hidden absolute bottom-0 z-10 h-max bg-white">
+      <div className="text-white px-2 py-4 flex items-center justify-around w-full">
+        <Link href="/">
+          <Home size={24} color="black" />
+        </Link>
+        <Heart size={24} color="black" />
+        <Link href="/cart">
+          <ShoppingCartIcon size={24} color="black" />
+        </Link>
+        <UserIcon size={24} color="black" />
       </div>
     </div>
   );

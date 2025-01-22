@@ -28,7 +28,7 @@ const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
   return (
-    <div className="w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full md:w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
@@ -385,7 +385,7 @@ export default function Grid({
   setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   return (
-    <div className="flex flex-col w-full h-[100%] flex-[1]">
+    <div className="flex flex-col w-full flex-[1]">
       {!normalGrid || (searchTags && searchTags.length > 0) ? (
         <BentoGrid
           images={images}
