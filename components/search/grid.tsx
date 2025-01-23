@@ -207,7 +207,7 @@ function BentoGrid({
 
   return (
     <>
-      <div className="flex items-center gap-4 p-4 overflow-x-scroll max-w-[calc(84vw-80px)] no-scrollbar flex-wrap">
+      <div className="flex items-center gap-4 p-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
         {searchTags &&
           searchTags.length > 0 &&
           searchTags.map((tag, index) => (
@@ -227,7 +227,7 @@ function BentoGrid({
           ))}
       </div>
 
-      <div className="grid md:hidden overflow-auto grid-cols-2 gap-2 m-2">
+      <div className="grid md:hidden overflow-auto grid-cols-2 gap-2 m-2 h-[70vh]">
         {currentImages.map((image: ImageWithSimilarity) => (
           <Link key={image.id} href={`/image/${image.id}`}>
             <ImageComponent image={image} />
