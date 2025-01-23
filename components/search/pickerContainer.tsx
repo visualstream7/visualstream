@@ -117,17 +117,15 @@ export default function PickerContainer({
   return (
     <div
       className={`
-      flex-1 sm:absolute bg-white  mx-auto p-8 w-full overflow-auto h-[80vh]
+      flex-1 fixed z-40 bg-white  mx-auto p-8 w-full overflow-auto h-dvh
         ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0`}
     >
-      {/* {!showPicker && (
-        <button
-          className="fixed top-4 right-4 w-8 h-8 bg-white rounded-full flex md:hidden items-center justify-center"
-          onClick={() => setShowPicker(false)}  // Close PickerContainer on small screens
-        >
-          <XIcon className="w-8 h-8" color="black" />
-        </button>
-      )} */}
+      <button
+        className="flex justify-end h-8 w-full md:hidden"
+        onClick={() => setShowPicker(false)} // Close PickerContainer on small screens
+      >
+        <XIcon className="w-8 h-8" color="black" />
+      </button>
 
       <div className="my-4">
         <h1 className="font-bold text-2xl">Step 1</h1>

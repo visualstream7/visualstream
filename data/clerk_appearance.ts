@@ -11,7 +11,7 @@ let appearance = {
       width: "400px",
       minWidth: "00px",
       maxWidth: "90vw",
-      height: "70vh",
+      height: "90vh",
       minHeight: "max-content",
       boxShadow: "none",
       display: "flex",

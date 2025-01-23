@@ -3,7 +3,7 @@ import { UserResource } from "@clerk/types";
 import { useEffect, useState } from "react";
 import { FiSearch, FiMenu } from "react-icons/fi"; // For icons
 import { HiOutlineShoppingCart } from "react-icons/hi"; // Cart icon
-import { BsChevronDown } from "react-icons/bs"; // Dropdown arrow icon
+import { BsChevronDown, BsGoogle } from "react-icons/bs"; // Dropdown arrow icon
 import { RiDropdownList } from "react-icons/ri";
 import { MdArrowDropDown } from "react-icons/md";
 import Link from "next/link";
@@ -13,11 +13,14 @@ import {
   CarrotIcon,
   Heart,
   Home,
+  LucideLogOut,
   ShoppingCartIcon,
   UserIcon,
 } from "lucide-react";
 import { BiCart } from "react-icons/bi";
 import { IoCart } from "react-icons/io5";
+import { GrGoogle } from "react-icons/gr";
+import { CiLogout } from "react-icons/ci";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -78,12 +81,12 @@ export const UserButton = ({ user }: UserPropType) => {
                 </li>
               )}
               <li className="border-b border-gray-200"></li>
-              <li
+              {/* <li
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                 onClick={() => toggleContextMenu()}
               >
                 Settings
-              </li>
+              </li> */}
               <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                 <SignOutButton>
                   <button className="w-max text-danger font-bold">
@@ -119,7 +122,16 @@ function MobileNav({ user, count }: ComponentPropType) {
         <Link href="/cart">
           <ShoppingCartIcon size={24} color="black" />
         </Link>
-        <UserIcon size={24} color="black" />
+
+        {user ? (
+          <SignOutButton>
+            <LucideLogOut size={24} color="black" />
+          </SignOutButton>
+        ) : (
+          <SignInButton mode="modal">
+            <GrGoogle size={24} color="black" />
+          </SignInButton>
+        )}
       </div>
     </div>
   );
