@@ -110,18 +110,26 @@ export const UserButton = ({ user }: UserPropType) => {
   );
 };
 
-// MobileNavBar Component
 function MobileNav({ user, count }: ComponentPropType) {
   return (
-    <div className="w-full block lg:hidden fixed bottom-0 z-10 h-max bg-white">
+    <div className="w-full block lg:hidden fixed bottom-0 z-10 h-max bg-white shadow-lg">
       <div className="text-white px-2 py-4 flex items-center justify-around w-full">
         <Link href="/">
           <Home size={24} color="black" />
         </Link>
         <Heart size={24} color="black" />
-        <Link href="/cart">
-          <ShoppingCartIcon size={24} color="black" />
-        </Link>
+
+        {/* Cart Icon with Count Badge */}
+        <div className="relative">
+          <Link href="/cart">
+            <ShoppingCartIcon size={24} color="black" />
+          </Link>
+          {count > 0 && (
+            <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {count}
+            </span>
+          )}
+        </div>
 
         {user ? (
           <SignOutButton>
@@ -136,6 +144,7 @@ function MobileNav({ user, count }: ComponentPropType) {
     </div>
   );
 }
+
 
 function LargeScreenNav({
   user,

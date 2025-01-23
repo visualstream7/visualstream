@@ -193,7 +193,7 @@ export default function Cart({ user }: CartProps) {
         </div>
 
         {cartItems && cartItems.length > 0 && (
-          <div className="w-full lg:w-1/4 pl-4  top-6 mt-auto mb-[60px] md:mt-0">
+          <div className="w-full lg:w-1/4 top-6 mt-auto mb-[60px] md:mt-0">
             <div className="bg-white p-6 shadow-md rounded-lg">
               {!showShipping ? (
                 <>
