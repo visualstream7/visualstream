@@ -117,7 +117,10 @@ function MobileNav({ user, count }: ComponentPropType) {
         <Link href="/">
           <Home size={24} color="black" />
         </Link>
+
+        <Link href="/favorites">
         <Heart size={24} color="black" />
+        </Link>
 
         {/* Cart Icon with Count Badge */}
         <div className="relative">
