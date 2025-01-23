@@ -307,7 +307,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                 href={`/product/${image.id}/${product.id}`}
               >
                 <div
-                  className="w-full min-w-[100px] rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4"
+                  className="w-full min-w-[150px] lg:min-w-[100px] rounded shadow-sm lg:shadow-md min-h-full overflow-hidden border border-gray-200 p-4 items-center justify-between flex flex-col gap-4"
                   onMouseEnter={() => setHoveredImage(product.mockup)}
                 >
                   <div className="relative w-full h-full min-h-max my-auto">
