@@ -28,7 +28,7 @@ const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
   return (
-    <div className="w-full md:w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
@@ -90,7 +90,7 @@ function BentoGrid({
 
   const generatePageNumbers = () => {
     const range: number[] = [];
-    const buffer = 2; // Number of pages to show around the current page
+    const buffer = 1; // Number of pages to show around the current page
 
     // Add the first page
     range.push(1);
@@ -226,8 +226,17 @@ function BentoGrid({
             </div>
           ))}
       </div>
+
+      <div className="grid md:hidden overflow-auto grid-cols-2 gap-2 m-2">
+        {currentImages.map((image: ImageWithSimilarity) => (
+          <Link key={image.id} href={`/image/${image.id}`}>
+            <ImageComponent image={image} />
+          </Link>
+        ))}
+      </div>
+
       <div
-        className={`w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden custom-scrollbar flex flex-col
+        className={`hidden md:flex w-[calc(100%-40px)] md:w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-200px)] md:h-max overflow-y-auto overflow-x-hidden custom-scrollbar flex-col
           ${currentImages?.length < PER_PAGE ? "pt-[0px]" : "pt-[0px]"}`}
       >
         {imageChunks.map((chunk, chunkIndex) => (
@@ -340,7 +349,7 @@ function BentoGrid({
       </div>
       {
         // pagination, show prev and next buttons and the dynamic page number
-        <div className="flex justify-center items-center gap-4 my-4 mt-auto">
+        <div className="flex justify-center items-center md:gap-4 gap-2 my-4 mb-[80px]">
           <button
             onClick={handlePreviousPage}
             className="bg-blue-300 p-2 rounded-full"
@@ -385,7 +394,7 @@ export default function Grid({
   setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
 }) {
   return (
-    <div className="flex flex-col w-full flex-[1]">
+    <div className="flex flex-col w-full flex-[1] h-full">
       {!normalGrid || (searchTags && searchTags.length > 0) ? (
         <BentoGrid
           images={images}

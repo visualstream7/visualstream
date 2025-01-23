@@ -110,7 +110,7 @@ export const UserButton = ({ user }: UserPropType) => {
 // MobileNavBar Component
 function MobileNav({ user, count }: ComponentPropType) {
   return (
-    <div className="w-full block lg:hidden absolute bottom-0 z-10 h-max bg-white">
+    <div className="w-full block lg:hidden fixed bottom-0 z-10 h-max bg-white">
       <div className="text-white px-2 py-4 flex items-center justify-around w-full">
         <Link href="/">
           <Home size={24} color="black" />

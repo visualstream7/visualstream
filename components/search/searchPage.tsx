@@ -44,7 +44,7 @@ export default function SearchPage({ user }: UserPropType) {
   const { cartItems } = useCart({
     user: user,
     rerender: false,
-    setRerenderNav: () => { },
+    setRerenderNav: () => {},
   });
 
   return (
@@ -58,7 +58,7 @@ export default function SearchPage({ user }: UserPropType) {
         cartCount={cartItems.length}
       />
       {user && (
-        <div className="flex justify-between items-center p-4 md:hidden">
+        <div className="flex justify-between items-center px-4 md:hidden">
           <div className="flex flex-col p-4 md:hidden">
             <p className="text-lg font-bold"> Welcome Back </p>
             <p> {user.fullName} </p>
@@ -69,14 +69,11 @@ export default function SearchPage({ user }: UserPropType) {
               onClick={() => setShowPicker(true)}
             />
           ) : (
-            <XIcon
-              className="h-8 w-8"
-              onClick={() => setShowPicker(false)}
-            />
+            <XIcon className="h-8 w-8" onClick={() => setShowPicker(false)} />
           )}
         </div>
       )}
-      <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-dvh overflow-auto">
+      <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-hidden">
         <div className={`lg:block ${showPicker ? "block" : "hidden"} md:block`}>
           <PickerContainer
             selectedColors={selectedColors}
@@ -96,7 +93,6 @@ export default function SearchPage({ user }: UserPropType) {
           setSearchTags={setSearchTags}
         />
       </div>
-
     </div>
   );
 }

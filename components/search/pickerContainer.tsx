@@ -25,7 +25,9 @@ export default function PickerContainer({
   showPicker,
   setShowPicker,
 }: PickerContainerProps) {
-  const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(null);
+  const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(
+    null,
+  );
 
   const handleMouseDown = (index: number) => {
     setIsResizing(index);
@@ -115,8 +117,8 @@ export default function PickerContainer({
   return (
     <div
       className={`
-      flex-1 sm:absolute bg-white  mx-auto p-[20px] w-full overflow-auto h-[93vh]
-        ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0      `}
+      flex-1 sm:absolute bg-white  mx-auto p-8 w-full overflow-auto h-[80vh]
+        ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0`}
     >
       {/* {!showPicker && (
         <button
@@ -181,23 +183,25 @@ export default function PickerContainer({
               >
                 <div className="flex items-center justify-center w-min h-full max-w-[100%] overflow-clip flex-wrap mx-auto">
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
+                      hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                      }`}
+                    }`}
                     onClick={() => deleteColor(index)}
                   ></button>
                   <p className="text-white text-sm">
                     {color.percentage?.toFixed(0)}%
                   </p>
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
+                      hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                      }
+                    }
 
                     `}
-                    onClick={() => { }}
+                    onClick={() => {}}
                   ></button>
                 </div>
               </div>

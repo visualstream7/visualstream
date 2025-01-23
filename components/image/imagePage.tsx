@@ -229,7 +229,7 @@ export default function ImagePage({ user, image }: UserPropType) {
   });
 
   return (
-    <div className="flex flex-col lg:max-h-dvh lg:overflow-hidden font-primary">
+    <div className="flex flex-col lg:max-h-dvh overflow-hidden mb-[40px] md:mb-0 font-primary">
       <Nav user={user} cartCount={count} />
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex flex-col justify-center items-center">
@@ -296,7 +296,9 @@ export default function ImagePage({ user, image }: UserPropType) {
           </div>
 
           <div
-            className="lg:grid grid grid-cols-2 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-8 custom-scrollbar"
+            className="
+            flex
+            lg:grid grid-cols-2 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-2  md:p-8 custom-scrollbar"
             onMouseLeave={() => setHoveredImage(null)}
           >
             {getSortedProducts(products).map((product) => (
@@ -305,7 +307,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                 href={`/product/${image.id}/${product.id}`}
               >
                 <div
-                  className="w-full rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4"
+                  className="w-full min-w-[100px] rounded shadow min-h-full overflow-hidden border-black p-4 items-center justify-between flex flex-col gap-4"
                   onMouseEnter={() => setHoveredImage(product.mockup)}
                 >
                   <div className="relative w-full h-full min-h-max my-auto">
