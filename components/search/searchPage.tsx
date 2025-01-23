@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import useCart from "../nav/useCart";
 import { PaintBucketIcon } from "lucide-react";
 import { XIcon } from "lucide-react"; // Make sure to import XIcon
+import { SupabaseWrapper } from "@/database/supabase";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -25,6 +26,7 @@ export default function SearchPage({ user }: UserPropType) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTags, setSearchTags] = useState<string[]>([]);
   const [showPicker, setShowPicker] = useState<boolean>(false);
+  const [likedImages, setLikedImages] = useState<number[]>([]);
 
   const { images, isImagesLoading } = useImageSearch({
     selectedColors: selectedColors,
@@ -46,6 +48,18 @@ export default function SearchPage({ user }: UserPropType) {
     rerender: false,
     setRerenderNav: () => {},
   });
+
+  useEffect(() => {
+    async function fetchLikedImages() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getLikedImages(user!.id);
+      if (result && result.length > 0) {
+        setLikedImages(result.map((image: any) => image.image_id));
+      }
+    }
+
+    if (user) fetchLikedImages();
+  }, [user]);
 
   return (
     <div className={`flex flex-col h-dvh font-primary`}>
@@ -95,6 +109,9 @@ export default function SearchPage({ user }: UserPropType) {
           normalGrid={isNormalGrid}
           searchTags={searchTags}
           setSearchTags={setSearchTags}
+          likedImages={likedImages}
+          setLikedImages={setLikedImages}
+          user={user}
         />
       </div>
     </div>

@@ -933,6 +933,48 @@ class SupabaseWrapper {
     return { result: data, error };
   }
 
+  async getLikedImagesWithDetails(userId: string) {
+    let { result: likedImages, error: likedImagesError } =
+      await this.getLikedImages(userId);
+
+    let imageIds = likedImages?.map((image: any) => image.image_id) || [];
+
+    let { result: images, error: imagesError } = await this.getImages();
+
+    let likedImagesWithDetails = images?.filter((image: any) => {
+      return imageIds.includes(image.id);
+    });
+
+    return { result: likedImagesWithDetails, error: likedImagesError };
+  }
+
+  async getLikedImages(userId: string) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .select("")
+      .eq("user_id", userId);
+
+    return { result: data, error };
+  }
+
+  async likeImage(userId: string, imageId: number) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .insert({ user_id: userId, image_id: imageId });
+
+    return { result: data, error };
+  }
+
+  async unlikeImage(userId: string, imageId: number) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .delete()
+      .eq("user_id", userId)
+      .eq("image_id", imageId);
+
+    return { result: data, error };
+  }
+
   async updateProductCharges(shippingCost: number, vatPercentage: number) {
     const { data, error } = await this.client
       .from("ProductCharges")
