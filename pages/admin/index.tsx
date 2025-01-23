@@ -2,6 +2,7 @@ import { SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
 import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
+import { MenuIcon } from "lucide-react";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -422,63 +423,6 @@ function ProductList({
   );
 }
 
-// Navbar Component
-// function Navbar({ isAdmin, user }: { isAdmin: boolean; user: any }) {
-//   const [isProfileOpen, setIsProfileOpen] = useState(false);
-
-//   const handleProfileClick = () => {
-//     setIsProfileOpen((prev) => !prev);
-//   };
-
-//   return (
-//     <div className="flex items-center justify-between p-4 bg-[#25384c] text-white sticky top-0 z-10">
-//       <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-//       <div className="relative">
-//         {isAdmin && user ? (
-//           <div>
-//             <img
-//               src={user.imageUrl}
-//               alt="Profile"
-//               className="w-10 h-10  rounded-full cursor-pointer"
-//               onClick={handleProfileClick}
-//             />
-//             {isProfileOpen && (
-//               <div className="absolute top-full right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-30">
-//                 <ul className="text-dark font-medium text-center">
-//                   <li className="px-4 pt-2">
-//                     <p className="text-dark font-bold">{user.fullName}</p>
-//                   </li>
-//                   {user.emailAddresses && user.emailAddresses[0] && (
-//                     <li className="px-4 p-2">
-//                       <p className="text-dark font-light break-all">
-//                         {user.emailAddresses[0].emailAddress}
-//                       </p>
-//                     </li>
-//                   )}
-//                   <li className="border-b border-gray-200"></li>
-
-//                   <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-//                     <SignOutButton>
-//                       <button className="w-max text-danger font-bold">
-//                         Sign Out
-//                       </button>
-//                     </SignOutButton>
-//                   </li>
-//                 </ul>
-//               </div>
-//             )}
-//           </div>
-//         ) : (
-//           <SignInButton mode="modal">
-//             <button className="bg-accent text-light p-2 rounded-md">
-//               Sign In
-//             </button>
-//           </SignInButton>
-//         )}
-//       </div>
-//     </div>
-//   );
-// }
 
 export default function Admin() {
   const { user, isLoaded } = useUser();
@@ -489,6 +433,8 @@ export default function Admin() {
     [],
   );
   const [activeTab, setActiveTab] = useState<string>("Products");
+  const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(false); // New state for sidebar visibility
+
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -509,6 +455,7 @@ export default function Admin() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
+    setIsSidebarVisible(false); 
   };
 
   const fetchVariants = async (id: number): Promise<Variant[]> => {
@@ -589,13 +536,25 @@ export default function Admin() {
 
   if (!user) {
     return (
-      <SignInButton mode="modal">
-        <button className="flex bg-accent p-1 px-2 text-light font-bold rounded-md min-w-[80px] w-max items-center justify-center">
-          Sign In
-        </button>
-      </SignInButton>
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-300 max-w-sm w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Admin Access Required
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Please sign in with an authorized admin account to access the admin
+            panel.
+          </p>
+          <SignInButton mode="modal">
+            <button className="flex bg-[#25384c] p-3 px-4 text-white font-bold rounded-md w-full items-center justify-center hover:bg-[#2f4961] transition">
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
+      </div>
     );
   }
+
 
   if (user && !isAdmin) {
     return <div>Unauthorized</div>;
@@ -603,32 +562,41 @@ export default function Admin() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Menu Icon for small screens */}
+      <div className="absolute top-4 left-4 z-50 md:hidden">
+        <button
+          onClick={() => setIsSidebarVisible(!isSidebarVisible)}
+          className="p-2 bg-gray-700 text-white rounded-full"
+        >
+          <MenuIcon className="h-6 w-6" />
+        </button>
+      </div>
+
       {/* Left Sidebar */}
-      <div className="w-1/6 bg-[#25384c] text-white flex flex-col">
-        <div className="flex justify-center  items-center p-4 mb-2">
+      <div
+        className={`fixed inset-0 bg-[#25384c] text-white flex flex-col z-40 transform ${isSidebarVisible ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
+      >
+        <div className="flex justify-center items-center p-4 mb-2">
           <h1 className="text-2xl font-bold">VisualStream</h1>
         </div>
 
         {/* Tabs */}
         <div className="flex flex-col">
           <button
-            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Products" ? "bg-gray-600" : ""}`}
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Products" ? "bg-gray-600" : ""
+              }`}
             onClick={() => handleTabChange("Products")}
           >
             Products
           </button>
           <button
-            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Stripe Details" ? "bg-gray-600" : ""}`}
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Stripe Details" ? "bg-gray-600" : ""
+              }`}
             onClick={() => handleTabChange("Stripe Details")}
           >
             Quick Links
           </button>
-          {/* <button
-    className={`text-white p-2 mb-2 rounded-md ${activeTab === "Analytics" ? "bg-gray-600" : ""}`}
-    onClick={() => handleTabChange("Analytics")}
-  >
-    Analytics
-  </button> */}
         </div>
 
         {isAdmin && user && (
@@ -651,13 +619,21 @@ export default function Admin() {
         )}
       </div>
 
+      {/* Overlay for Sidebar */}
+      {isSidebarVisible && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setIsSidebarVisible(false)}
+        />
+      )}
+
       {/* Right Content Area */}
-      <div className="w-5/6 p-6 flex justify-center  overflow-y-auto">
+      <div className="flex-grow mt-10 lg:mt-0 p-6 flex justify-center overflow-y-auto md:w-5/6">
         {activeTab === "Products" && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-800 ">Products</h2>
+            <h2 className="text-2xl font-bold text-gray-800">Products</h2>
             <p className="text-gray-600 mb-4">
-              Here are all your products for management and updates.{" "}
+              Here are all your products for management and updates.
             </p>
 
             {products && (
@@ -671,7 +647,7 @@ export default function Admin() {
         )}
 
         {activeTab === "Stripe Details" && (
-          <div className="p-4">
+          <div className=" p-2 lg:p-4">
             <h2 className="text-2xl font-bold text-gray-800">Quick Links</h2>
             <p className="text-gray-600">
               Quickly access and manage essential resources and actions through
@@ -742,20 +718,10 @@ export default function Admin() {
             </div>
           </div>
         )}
-
-        {/* Analytics Tab
-        {activeTab === "Analytics" && (
-          <div>
-            <h2 className="text-xl font-bold mb-4">Analytics</h2>
-            <button
-              onClick={() => window.location.href = '/admin/analytics'}
-              className="bg-gray-600 text-white px-6 py-3 rounded-md"
-            >
-              Go to Analytics Page
-            </button>
-          </div>
-        )} */}
       </div>
     </div>
   );
 }
+
+
+
