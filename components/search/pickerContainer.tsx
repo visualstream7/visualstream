@@ -1,7 +1,7 @@
 import { colors } from "@/data/colors";
 import { XIcon } from "lucide-react";
 import { useState } from "react";
-import { TbDots, TbPaint } from "react-icons/tb";
+import { TbDots } from "react-icons/tb";
 
 export interface Color {
   hex: string;
@@ -25,9 +25,7 @@ export default function PickerContainer({
   showPicker,
   setShowPicker,
 }: PickerContainerProps) {
-  const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(
-    null,
-  );
+  const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(null);
 
   const handleMouseDown = (index: number) => {
     setIsResizing(index);
@@ -54,7 +52,6 @@ export default function PickerContainer({
 
     const deltaPercentage = (deltaX / containerWidth) * 100;
 
-    // Adjust the percentages based on movement
     const newCurrentPercentage = Math.max(
       currentColor.percentage + deltaPercentage,
       5,
@@ -64,7 +61,6 @@ export default function PickerContainer({
       5,
     );
 
-    // Ensure total percentages remain at 100%
     if (
       newCurrentPercentage + newNextPercentage <=
       currentColor.percentage + nextColor.percentage
@@ -108,7 +104,6 @@ export default function PickerContainer({
     );
     const normalizationFactor = 100 / totalPercentage;
 
-    // Normalize percentages after deletion
     const normalizedColors = updatedColors.map((color) => ({
       ...color,
       percentage: Math.max(color.percentage * normalizationFactor, 5),
@@ -123,14 +118,14 @@ export default function PickerContainer({
       flex-1 sm:absolute bg-white  mx-auto p-[20px] w-full overflow-auto h-[93vh]
         ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0      `}
     >
-      {!showPicker && (
+      {/* {!showPicker && (
         <button
           className="fixed top-4 right-4 w-8 h-8 bg-white rounded-full flex md:hidden items-center justify-center"
-          onClick={() => setShowPicker(false)}
+          onClick={() => setShowPicker(false)}  // Close PickerContainer on small screens
         >
           <XIcon className="w-8 h-8" color="black" />
         </button>
-      )}
+      )} */}
 
       <div className="my-4">
         <h1 className="font-bold text-2xl">Step 1</h1>
@@ -186,25 +181,23 @@ export default function PickerContainer({
               >
                 <div className="flex items-center justify-center w-min h-full max-w-[100%] overflow-clip flex-wrap mx-auto">
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
-                      hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                    }`}
+                      }`}
                     onClick={() => deleteColor(index)}
                   ></button>
                   <p className="text-white text-sm">
                     {color.percentage?.toFixed(0)}%
                   </p>
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
-                      hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                    }
+                      }
 
                     `}
-                    onClick={() => {}}
+                    onClick={() => { }}
                   ></button>
                 </div>
               </div>

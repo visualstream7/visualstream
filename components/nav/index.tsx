@@ -157,13 +157,13 @@ function LargeScreenNav({
         {/* SearchBar Section */}
         <div className="flex items-center bg-white text-black rounded-sm w-1/2">
           <div className="relative">
-            <select className="bg-gray-200 text-black px-2 py-1 rounded-l-md appearance-none pr-8">
+            {/* <select className="bg-gray-200 text-black px-2 py-1 rounded-l-md appearance-none pr-8">
               <option>All</option>
-            </select>
-            <MdArrowDropDown
+            </select> */}
+            {/* <MdArrowDropDown
               size={20}
               className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
-            />
+            /> */}
           </div>
           <input
             type="text"
@@ -264,19 +264,17 @@ function LargeScreenNav({
 
       {/* LowerNavbar */}
       <div className="bg-[#1c2a3c] text-white py-2 px-4 flex items-center gap-6 w-full">
-        <div className="flex items-center gap-1 cursor-pointer">
-          <FiMenu size={20} />
-          <span>All</span>
-        </div>
         <div className="flex gap-8">
-          <div className="cursor-pointer">LifeStyle & Gifts</div>
-          <div className="cursor-pointer">Wall Decor</div>
-          <div className="cursor-pointer">Tech Accessories</div>
-          <div className="cursor-pointer">Fashion & Travel</div>
-          <div className="cursor-pointer">Sports & Fitness</div>
-          <div className="cursor-pointer">Outdoors</div>
-          <div className="cursor-pointer">About Us</div>
-          <div className="cursor-pointer">Contact Us</div>
+          <div className="cursor-pointer">AI</div>
+          <div className="cursor-pointer">ALPHABET</div>
+          <div className="cursor-pointer">TARCHITECTURE</div>
+          <div className="cursor-pointer">ARTFUL</div>
+          <div className="cursor-pointer">FOOD</div>
+          <div className="cursor-pointer">KIDS</div>
+          <div className="cursor-pointer">MUSIC</div>
+          <div className="cursor-pointer">SPORTS</div>
+          <div className="cursor-pointer">TRAVEL</div>
+          <div className="cursor-pointer">YEARS</div>
         </div>
       </div>
     </div>
