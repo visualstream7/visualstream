@@ -32,7 +32,7 @@ const Shipping: React.FC<ShippingProps> = ({
   setShowShipping,
 }) => {
   const [fullName, setFullName] = useState("");
-  const [country, setCountry] = useState(countries.BD.code);
+  const [country, setCountry] = useState(countries.US.code);
   const [addressLine1, setAddressLine1] = useState("");
   const [addressLine2, setAddressLine2] = useState("");
   const [city, setCity] = useState("");
