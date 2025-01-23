@@ -2,11 +2,90 @@ import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { FullPageSpinner } from "../spinners/fullPageSpiner";
 import { FullContainerSpinner } from "../spinners/fullContainerSpinner";
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, CircleDashed, XIcon } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleDashed,
+  Heart,
+  XIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { ImageWithSimilarity } from "@/libs/ColorAnalyzer/colorAnalyzer";
+import { UserResource } from "@clerk/types";
+import { SupabaseWrapper } from "@/database/supabase";
+import { SignInButton } from "@clerk/nextjs";
 
-const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
+const LikeButton = ({
+  image,
+  likedImages,
+  setLikedImages,
+  user,
+}: {
+  image: ImageWithSimilarity;
+  likedImages: number[];
+  setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  user: UserResource | null | undefined;
+}) => {
+  const supabase = new SupabaseWrapper("CLIENT");
+  const [isHovered, setIsHovered] = useState(false);
+
+  let liked = likedImages.includes(image.id);
+  return (
+    <>
+      {user ? (
+        <Heart
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("user", user);
+            console.log("Liked image", image.id);
+
+            if (user) {
+              if (liked) {
+                setLikedImages(likedImages.filter((id) => id !== image.id));
+                supabase.unlikeImage(user.id, image.id);
+              } else {
+                setLikedImages([...likedImages, image.id]);
+                supabase.likeImage(user.id, image.id);
+              }
+            }
+          }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          fill={`${liked ? "#ff0000" : "#ffffff"}`}
+          size={24}
+          className={`absolute top-2 right-2 opacity-100 ${isHovered || liked ? "md:opacity-100" : "md:opacity-0"}`}
+        />
+      ) : (
+        <SignInButton mode="modal">
+          <Heart
+            onClick={async (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            fill={`${liked ? "#ff0000" : "#ffffff"}`}
+            size={24}
+            className={`absolute top-2 right-2 opacity-100 ${isHovered || liked ? "md:opacity-100" : "md:opacity-0"}`}
+          />
+        </SignInButton>
+      )}
+    </>
+  );
+};
+
+const ImageComponent = ({
+  image,
+  likedImages,
+  setLikedImages,
+  user,
+}: {
+  image: ImageWithSimilarity;
+  likedImages: number[];
+  setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  user: UserResource | null | undefined;
+}) => {
   return (
     <div
       key={image.id}
@@ -19,11 +98,27 @@ const ImageComponent = ({ image }: { image: ImageWithSimilarity }) => {
         alt={image.caption || ""}
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300`}
       />
+      <LikeButton
+        likedImages={likedImages}
+        setLikedImages={setLikedImages}
+        image={image}
+        user={user}
+      />
     </div>
   );
 };
 
-const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
+const NormalGrid = ({
+  images,
+  likedImages,
+  setLikedImages,
+  user,
+}: {
+  images: ImageWithSimilarity[];
+  likedImages: number[];
+  setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  user: UserResource | null | undefined;
+}) => {
   let sortedImages = images.sort((a, b) => {
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
@@ -36,7 +131,12 @@ const NormalGrid = ({ images }: { images: ImageWithSimilarity[] }) => {
             className="relative group overflow-hidden rounded-lg shadow-md"
           >
             <Link key={image.id} href={`/image/${image.id}`} className="h-full">
-              <ImageComponent image={image} />
+              <ImageComponent
+                likedImages={likedImages}
+                setLikedImages={setLikedImages}
+                image={image}
+                user={user}
+              />
             </Link>
           </div>
         ))}
@@ -57,10 +157,16 @@ function BentoGrid({
   images,
   searchTags,
   setSearchTags,
+  likedImages,
+  setLikedImages,
+  user,
 }: {
   images: ImageWithSimilarity[];
   searchTags: string[];
   setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
+  likedImages: number[];
+  setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  user: UserResource | null | undefined;
 }) {
   let count = 60;
   let [page, setPage] = useState(1);
@@ -230,7 +336,12 @@ function BentoGrid({
       <div className="grid md:hidden overflow-auto grid-cols-2 gap-2 m-2 h-[70vh]">
         {currentImages.map((image: ImageWithSimilarity) => (
           <Link key={image.id} href={`/image/${image.id}`}>
-            <ImageComponent image={image} />
+            <ImageComponent
+              image={image}
+              likedImages={likedImages}
+              setLikedImages={setLikedImages}
+              user={user}
+            />
           </Link>
         ))}
       </div>
@@ -254,6 +365,12 @@ function BentoGrid({
                   {i}
                 </p> */}
                 <div className="w-full h-full relative">
+                  <LikeButton
+                    likedImages={likedImages}
+                    setLikedImages={setLikedImages}
+                    image={image}
+                    user={user}
+                  />
                   {selectedImage?.id === image.id && modalPosition && (
                     <div
                       className={`absolute flex flex-col gap-4 top-0 w-[300px] h-[max-content] bg-white z-20 p-4 shadow-md border border-black
@@ -386,23 +503,37 @@ export default function Grid({
   normalGrid,
   searchTags,
   setSearchTags,
+  likedImages,
+  setLikedImages,
+  user,
 }: {
   images: ImageWithSimilarity[];
   isImagesLoading: boolean;
   normalGrid: boolean;
   searchTags: string[];
   setSearchTags: React.Dispatch<React.SetStateAction<string[]>>;
+  likedImages: number[];
+  setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
+  user: UserResource | null | undefined;
 }) {
   return (
     <div className="flex flex-col w-full flex-[1] h-full">
       {!normalGrid || (searchTags && searchTags.length > 0) ? (
         <BentoGrid
           images={images}
+          likedImages={likedImages}
+          setLikedImages={setLikedImages}
           searchTags={searchTags}
           setSearchTags={setSearchTags}
+          user={user}
         />
       ) : (
-        <NormalGrid images={images} />
+        <NormalGrid
+          images={images}
+          likedImages={likedImages}
+          setLikedImages={setLikedImages}
+          user={user}
+        />
       )}
     </div>
   );

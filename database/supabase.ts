@@ -933,6 +933,33 @@ class SupabaseWrapper {
     return { result: data, error };
   }
 
+  async getLikedImages(userId: string) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .select("")
+      .eq("user_id", userId);
+
+    return { result: data, error };
+  }
+
+  async likeImage(userId: string, imageId: number) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .insert({ user_id: userId, image_id: imageId });
+
+    return { result: data, error };
+  }
+
+  async unlikeImage(userId: string, imageId: number) {
+    const { data, error } = await this.client
+      .from("FavouriteImages")
+      .delete()
+      .eq("user_id", userId)
+      .eq("image_id", imageId);
+
+    return { result: data, error };
+  }
+
   async updateProductCharges(shippingCost: number, vatPercentage: number) {
     const { data, error } = await this.client
       .from("ProductCharges")
