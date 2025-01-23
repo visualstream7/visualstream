@@ -119,7 +119,7 @@ function MobileNav({ user, count }: ComponentPropType) {
         </Link>
 
         <Link href="/favorites">
-        <Heart size={24} color="black" />
+          <Heart size={24} color="black" />
         </Link>
 
         {/* Cart Icon with Count Badge */}
@@ -237,6 +237,10 @@ function LargeScreenNav({
 
         {/* Country Dropdown, Profile Icon, Orders, and Cart */}
         <div className="flex items-center gap-6 relative">
+          <Link href="/favorites" className="flex items-center cursor-pointer">
+            <Heart size={22} className="text-light opacity-80 hover:opacity-100 transition-opacity" />
+          </Link>
+
           <div className="relative">
             <div
               className="cursor-pointer flex items-center gap-2"
@@ -290,20 +294,24 @@ function LargeScreenNav({
       <div className="bg-[#1c2a3c] text-white py-2 px-4 flex items-center gap-6 w-full">
         <div className="flex gap-8">
           <div className="cursor-pointer">AI</div>
-          <div className="cursor-pointer">ALPHABET</div>
-          <div className="cursor-pointer">TARCHITECTURE</div>
-          <div className="cursor-pointer">ARTFUL</div>
-          <div className="cursor-pointer">FOOD</div>
-          <div className="cursor-pointer">KIDS</div>
-          <div className="cursor-pointer">MUSIC</div>
-          <div className="cursor-pointer">SPORTS</div>
-          <div className="cursor-pointer">TRAVEL</div>
-          <div className="cursor-pointer">YEARS</div>
+          <div className="cursor-pointer">Alphabet</div>
+          <div className="cursor-pointer">Architecture</div>
+          <div className="cursor-pointer">Artful</div>
+          <div className="cursor-pointer">Food</div>
+          <div className="cursor-pointer">Kids</div>
+          <div className="cursor-pointer">Music</div>
+          <div className="cursor-pointer">Sports</div>
+          <div className="cursor-pointer">Travel</div>
+          <div className="cursor-pointer">Years</div>
+          <Link href="/aboutUs" > <div className="cursor-pointer">About Us</div>
+          </Link>
+          <Link href="/contactUs" > <div className="cursor-pointer">Contact Us</div>
+          </Link>
         </div>
       </div>
     </div>
   );
-}
+} 
 
 // NavBar Component
 export default function Nav({

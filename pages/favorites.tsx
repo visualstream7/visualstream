@@ -86,12 +86,12 @@ const ImageComponent = ({
   return (
     <div
       key={image.id}
-      className="h-[200px] w-full relative overflow-hidden cursor-pointer"
+      className="h-[200px] w-full relative overflow-hidden cursor-pointer group" // Add 'group' here
     >
       <img
         src={image.low_resolution_image_url || ""}
         alt={image.caption || ""}
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300`}
+        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300"
       />
       <LikeButton
         likedImages={likedImages}
@@ -102,6 +102,7 @@ const ImageComponent = ({
     </div>
   );
 };
+
 
 export default function Favourites() {
   const { user, isLoaded } = useUser();
@@ -130,21 +131,39 @@ export default function Favourites() {
   if (!user) return <div>Sign in to view your favourites</div>;
 
   return (
-    <div>
+    <div className="max-h-dvh overflow-hidden bg-gray-50">
       <Nav user={user} cartCount={cartItems.length} />
-      {likedImages.map((image) => {
-        return (
-          <Link href={`/image/${image.id}`}>
-            <ImageComponent
-              key={image.id}
-              image={image}
-              likedImages={likedImages}
-              setLikedImages={setLikedImages}
-              user={user}
-            />
-          </Link>
-        );
-      })}
+
+      {/* Main Content Container */}
+      <div className="container mx-auto py-10 px-4 ">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Your Favourites</h1>
+
+        {/* Scrollable content below the title */}
+        <div className="h-[calc(86vh-4rem)] overflow-y-auto custom-scrollbar scroll-smooth">
+          {likedImages.length === 0 ? (
+            <div className="text-center text-gray-500">No favourite images yet. Start liking some!</div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-6 ">
+              {likedImages.map((image) => (
+                <div key={image.id} className="bg-white shadow-md rounded-lg border border-gray-300 overflow-hidden hover:shadow-lg transition-shadow">
+                  <Link href={`/image/${image.id}`}>
+                    <ImageComponent
+                      image={image}
+                      likedImages={likedImages}
+                      setLikedImages={setLikedImages}
+                      user={user}
+                    />
+                  </Link>
+                  <div className="p-4">
+                    <h2 className="text-lg font-medium text-gray-700 truncate">{image.title || "Untitled"}</h2>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
+
   );
 }
