@@ -14,6 +14,9 @@ import useCart from "../nav/useCart";
 // Import the Shipping component
 import Shipping from "../Shipping"; // Adjust the path as necessary
 import { loadStripe } from "@stripe/stripe-js";
+import { BiArrowBack, BiCart } from "react-icons/bi";
+import { PiEmpty } from "react-icons/pi";
+import { GiEmptyMetalBucket } from "react-icons/gi";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
@@ -65,12 +68,20 @@ export default function Cart({ user }: CartProps) {
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
       <Nav user={user} cartCount={cartItems.length} />
       <div className="flex-1 flex flex-col lg:flex-row p-6">
-        <div className="lg:pr-4 flex flex-col flex-1 h-[80vh]">
+        <div
+          className={`lg:pr-4 flex flex-col flex-1 overflow-hidden ${
+            showShipping ? "max-h-[40vh] " : "max-h-[60vh] "
+          }`}
+        >
+          {" "}
           <div className="h-full pr-2 flex-1 flex flex-col">
             {loading ? (
               <p className="text-gray-600">Loading...</p>
             ) : cartItems.length === 0 ? (
-              <p className="text-gray-600">Your cart is empty.</p>
+              <div className="flex flex-col items-center justify-center h-full">
+                <BiCart className="w-14 h-14 mb-8 text-gray-400" />
+                <p className="text-gray-400 text-lg">Your cart is empty</p>
+              </div>
             ) : (
               <ul className="space-y-4 overflow-auto flex-1 h-[90%] overflow-y-scroll p-4 custom-scrollbar">
                 {cartItems.map((item) => (
@@ -180,8 +191,8 @@ export default function Cart({ user }: CartProps) {
         </div>
 
         {cartItems && cartItems.length > 0 && (
-          <div className="w-full lg:w-1/4 pl-4  top-6">
-            <div className="bg-white p-6 shadow-md rounded-lg">
+          <div className="w-full lg:w-1/4 pl-4  top-6 mt-auto">
+            <div className="bg-white p-6 shadow-md rounded-lg mb-[40px]">
               {!showShipping ? (
                 <>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">
@@ -190,7 +201,9 @@ export default function Cart({ user }: CartProps) {
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="text-gray-700">Total *</span>
-                      <span className="text-gray-700">${subtotal.toFixed(2)}</span>
+                      <span className="text-gray-700">
+                        ${subtotal.toFixed(2)}
+                      </span>
                     </div>
                     <div>
                       <span className="text-gray-400">
@@ -207,7 +220,11 @@ export default function Cart({ user }: CartProps) {
                   </button>
                 </>
               ) : (
-                <Shipping rerenderNav={rerenderNav} setRerenderNav={setRerenderNav} /> // Render the Shipping component when showShipping is true
+                <Shipping
+                  rerenderNav={rerenderNav}
+                  setRerenderNav={setRerenderNav}
+                  setShowShipping={setShowShipping}
+                /> // Render the Shipping component when showShipping is true
               )}
             </div>
           </div>
