@@ -118,7 +118,9 @@ function MobileNav({ user, count }: ComponentPropType) {
         <Link href="/">
           <Home size={24} color="black" />
         </Link>
-        <Heart size={24} color="black" />
+        <Link href="/favorites">
+          <Heart size={24} color="black" />
+        </Link>
         <Link href="/cart">
           <ShoppingCartIcon size={24} color="black" />
         </Link>
