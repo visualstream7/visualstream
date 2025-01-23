@@ -266,7 +266,7 @@ const RelatedProductsCarousel = ({
   };
 
   return (
-    <div className="mt-8 flex justify-center mb-10 px-2 md:px-4 w-max mx-auto max-w-[100vw] lg:max-w-[60vw]">
+    <div className="mt-8 lg:flex lg:justify-center mb-20 lg:mb-10 lg:px-4 w-max mx-auto max-w-[100vw] lg:max-w-[60vw]">
       <div className="w-full">
         <h3 className="text-xl font-semibold mb-4 text-left sm:ml-4 lg:ml-16">
           Products related to this item
@@ -284,7 +284,7 @@ const RelatedProductsCarousel = ({
           {/* Carousel */}
           <div
             ref={carouselRef}
-            className="flex gap-4 overflow-x-auto no-scrollbar w-full px-2 max-w-[80vw] no-scrollbar"
+            className="flex gap-4 no-scrollbar overflow-x-auto  w-full px-2 max-w-[80vw]"
           >
             {getSortedProducts(products)
               .filter((product) => product.id !== current_product_id)
@@ -295,7 +295,7 @@ const RelatedProductsCarousel = ({
                 >
                   <div
                     key={index}
-                    className="h-full flex cursor-pointer flex-col border rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
+                    className="h-full flex cursor-pointer flex-col border border-gray-200 rounded-lg shadow-sm w-[120px] sm:w-[150px] min-w-[120px] sm:min-w-[150px] bg-white p-3"
                   >
                     {
                       // show for puzzle
