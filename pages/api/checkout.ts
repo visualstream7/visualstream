@@ -26,11 +26,15 @@ export default async function handler(
             name: item.name,
             images: [item.image],
           },
-          unit_amount: Math.round(item.price * 100), // TODO: Price should be retrieved from db
+          unit_amount: Math.round(item.price * 100),
         },
         quantity: item.quantity,
       };
     });
+
+    let totalWithoutShipping = cartItems.reduce((acc: number, item: any) => {
+      return acc + item.price * item.quantity;
+    }, 0);
 
     line_items.push({
       price_data: {
@@ -52,7 +56,7 @@ export default async function handler(
           product_data: {
             name: "Tax",
           },
-          unit_amount: taxAmount, 
+          unit_amount: Math.round(taxAmount * totalWithoutShipping),
         },
         quantity: 1,
       });
@@ -72,7 +76,8 @@ export default async function handler(
     // Save the session id to the database
     await database.saveMetadata(session.id, {
       cartItems: cartItems,
-      shippingAmount: 0,
+      shippingAmount: shippingAmount,
+      taxAmount: Math.round(taxAmount * totalWithoutShipping) / 100,
       userId: userId,
       recipient,
     });

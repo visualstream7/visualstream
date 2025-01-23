@@ -70,7 +70,9 @@ export default function Cart({ user }: CartProps) {
       <div className="flex-1 flex flex-col lg:flex-row p-6">
         <div
           className={`lg:pr-4 flex flex-col flex-1 overflow-hidden ${
-            showShipping ? "max-h-[40vh] " : "max-h-[60vh] "
+            showShipping
+              ? "max-h-[40vh] md:max-h-[80vh]"
+              : "max-h-[60vh] md:max-h-[80vh]"
           }`}
         >
           {" "}
@@ -191,8 +193,8 @@ export default function Cart({ user }: CartProps) {
         </div>
 
         {cartItems && cartItems.length > 0 && (
-          <div className="w-full lg:w-1/4 pl-4  top-6 mt-auto md:mt-0">
-            <div className="bg-white p-6 shadow-md rounded-lg mb-[40px]">
+          <div className="w-full lg:w-1/4 pl-4  top-6 mt-auto mb-[60px] md:mt-0">
+            <div className="bg-white p-6 shadow-md rounded-lg">
               {!showShipping ? (
                 <>
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">

@@ -296,7 +296,9 @@ const Shipping: React.FC<ShippingProps> = ({
               <p className="text-sm text-gray-600">
                 Shipping Cost: ${shippingCost.toFixed(2)}
               </p>
-              <p className="text-sm text-gray-600">Tax Rate: {taxRate}%</p>
+              <p className="text-sm text-gray-600">
+                Tax Rate: {taxRate * 100}%
+              </p>
             </div>
           )}
           {shippingError && (

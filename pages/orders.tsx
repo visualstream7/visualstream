@@ -222,7 +222,7 @@ const Orders = () => {
                       <p className="font-semibold">
                         Total:{" "}
                         <span className="text-lg text-blue-600">
-                          ${grandTotal.toFixed(2)}
+                          ${order.total}
                         </span>
                       </p>
                     </div>
