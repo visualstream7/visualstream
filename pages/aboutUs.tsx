@@ -102,7 +102,7 @@ export default function AboutUs() {
                 </section>
 
                 {/* Call to Action */}
-                <section className="py-16 bg-gray-50">
+                <section className="py-16 bg-gray-50 mb-10">
                     <div className="container mx-auto px-6 text-center">
                         <h2 className="text-4xl font-bold text-gray-800">
                             Join Us in Reshaping the Future
@@ -111,9 +111,6 @@ export default function AboutUs() {
                             Creativity is limitless at VisualStream.ai. Let’s revolutionize the
                             print-on-demand industry—where every image tells a story.
                         </p>
-                        <button className="mt-8 px-10 py-4 text-white bg-blue-600 font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
-                            Get Started
-                        </button>
                     </div>
                 </section>
             </div>
