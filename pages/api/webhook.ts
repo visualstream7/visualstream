@@ -100,6 +100,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           variant_id: item.variant_id,
           quantity: item.quantity,
           image: item.original_image,
+          product_id: item.product_id,
         })),
       };
 
