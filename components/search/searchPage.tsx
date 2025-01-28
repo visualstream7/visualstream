@@ -7,8 +7,6 @@ import PickerContainer, { Color } from "./pickerContainer";
 import useImageSearch from "@/hooks/useImageSearch";
 import { useEffect, useState } from "react";
 import useCart from "../nav/useCart";
-import { PaintBucketIcon } from "lucide-react";
-import { XIcon } from "lucide-react"; // Make sure to import XIcon
 import { SupabaseWrapper } from "@/database/supabase";
 
 type UserPropType = {
@@ -19,13 +17,8 @@ export default function SearchPage({ user }: UserPropType) {
   const [selectedColors, setSelectedColors] = useState<Color[]>([]);
   const [isResizing, setIsResizing] = useState<number | null>(null);
   const [isNormalGrid, setIsNormalGrid] = useState<boolean>(true);
-
-  const [gridType, setGridType] = useState<"normal" | "color" | "tag">(
-    "normal",
-  );
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTags, setSearchTags] = useState<string[]>([]);
-  const [showPicker, setShowPicker] = useState<boolean>(false);
   const [likedImages, setLikedImages] = useState<number[]>([]);
 
   const { images, isImagesLoading } = useImageSearch({
@@ -78,30 +71,18 @@ export default function SearchPage({ user }: UserPropType) {
             <p> {user.fullName} </p>
           </div>
         )}
-        {!showPicker ? (
-          <PaintBucketIcon
-            className="h-8 w-8 ml-auto m-2"
-            onClick={() => setShowPicker(true)}
-          />
-        ) : (
-          <XIcon
-            className="h-8 w-8 ml-auto m-2"
-            onClick={() => setShowPicker(false)}
-          />
-        )}
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-hidden">
-        <div className={`lg:block ${showPicker ? "block" : "hidden"} md:block`}>
+      <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-auto">
+        <div className="lg:block md:block">
           <PickerContainer
             selectedColors={selectedColors}
             setSelectedColors={setSelectedColors}
             isResizing={isResizing}
             setIsResizing={setIsResizing}
-            showPicker={showPicker}
-            setShowPicker={setShowPicker}
           />
         </div>
+
 
         <Grid
           images={images}

@@ -13,8 +13,8 @@ interface PickerContainerProps {
   setSelectedColors: (colors: Color[]) => void;
   isResizing: number | null;
   setIsResizing: (index: number | null) => void;
-  showPicker: boolean;
-  setShowPicker: (show: boolean) => void;
+  // showPicker: boolean;
+  // setShowPicker: (show: boolean) => void;
 }
 
 export default function PickerContainer({
@@ -22,8 +22,8 @@ export default function PickerContainer({
   setSelectedColors,
   isResizing,
   setIsResizing,
-  showPicker,
-  setShowPicker,
+  // showPicker,
+  // setShowPicker,
 }: PickerContainerProps) {
   const [hoveringSwatchIndex, setHoveringSwatchIndex] = useState<number | null>(
     null,
@@ -117,15 +117,11 @@ export default function PickerContainer({
   return (
     <div
       className={`
-      flex-1 fixed z-40 bg-white  mx-auto p-8 w-full overflow-auto h-dvh
-        ${!showPicker ? "" : ""} md:relative md:flex-[0.2] top-0`}
+    flex-1 bg-white mx-auto p-8 w-full overflow-auto h-full
+    
+  `}
     >
-      <button
-        className="flex justify-end h-8 w-full md:hidden"
-        onClick={() => setShowPicker(false)} // Close PickerContainer on small screens
-      >
-        <XIcon className="w-8 h-8" color="black" />
-      </button>
+     
 
       <div className="my-4">
         <h1 className="font-bold text-2xl">Step 1</h1>
@@ -181,25 +177,23 @@ export default function PickerContainer({
               >
                 <div className="flex items-center justify-center w-min h-full max-w-[100%] overflow-clip flex-wrap mx-auto">
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
-                      hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                    }`}
+                      }`}
                     onClick={() => deleteColor(index)}
                   ></button>
                   <p className="text-white text-sm">
                     {color.percentage?.toFixed(0)}%
                   </p>
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
-                      hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                    }
+                      }
 
                     `}
-                    onClick={() => {}}
+                    onClick={() => { }}
                   ></button>
                 </div>
               </div>

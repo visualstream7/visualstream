@@ -123,7 +123,7 @@ const NormalGrid = ({
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
   return (
-    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] md:overflow-y-auto custom-scrollbar p-2">
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
@@ -332,8 +332,8 @@ function BentoGrid({
             </div>
           ))}
       </div>
-
-      <div className="grid md:hidden overflow-auto grid-cols-2 gap-2 m-2 h-[70vh]">
+      <div>
+      <div className="grid md:hidden md:overflow-auto grid-cols-2 gap-2 m-2 md:h-[70vh]">
         {currentImages.map((image: ImageWithSimilarity) => (
           <Link key={image.id} href={`/image/${image.id}`}>
             <ImageComponent
@@ -344,6 +344,33 @@ function BentoGrid({
             />
           </Link>
         ))}
+        
+        </div>
+        <div className="flex justify-center items-center md:gap-4 mb-[80px] mt-[30px] gap-2 ">
+          <button
+            onClick={handlePreviousPage}
+            className="bg-blue-300 p-2 rounded-full"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          {generatePageNumbers().map((current, index) => (
+            <button
+              key={index}
+              onClick={() => typeof current === "number" && setPage(current)}
+              className={`p-2 rounded-md ${page === current ? "underline text-blue-600 font-bold" : ""
+                }`}
+              disabled={current === "..."}
+            >
+              {current}
+            </button>
+          ))}
+          <button
+            onClick={handleNextPage}
+            className="bg-blue-300 p-2 rounded-full"
+          >
+            <ChevronRight size={24} />
+          </button>
+        </div>
       </div>
 
       <div
@@ -375,11 +402,10 @@ function BentoGrid({
                     <div
                       className={`absolute flex flex-col gap-4 top-0 w-[300px] h-[max-content] bg-white z-20 p-4 shadow-md border border-black
                       transition-transform duration-300
-                      ${
-                        modalPosition === "left" && selectedImage
+                      ${modalPosition === "left" && selectedImage
                           ? "left-0 -translate-x-[300px]"
                           : "right-0 translate-x-[300px]"
-                      }`}
+                        }`}
                     >
                       <XIcon
                         className="cursor-pointer ml-auto"
@@ -462,10 +488,8 @@ function BentoGrid({
               </div>
             ))}
           </div>
+          
         ))}
-      </div>
-      {
-        // pagination, show prev and next buttons and the dynamic page number
         <div className="flex justify-center items-center md:gap-4 gap-2 my-4 mb-[80px]">
           <button
             onClick={handlePreviousPage}
@@ -477,9 +501,8 @@ function BentoGrid({
             <button
               key={index}
               onClick={() => typeof current === "number" && setPage(current)}
-              className={`p-2 rounded-md ${
-                page === current ? "underline text-blue-600 font-bold" : ""
-              }`}
+              className={`p-2 rounded-md ${page === current ? "underline text-blue-600 font-bold" : ""
+                }`}
               disabled={current === "..."}
             >
               {current}
@@ -492,7 +515,10 @@ function BentoGrid({
             <ChevronRight size={24} />
           </button>
         </div>
-      }
+
+      </div>
+
+      
     </>
   );
 }
