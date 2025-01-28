@@ -58,7 +58,7 @@ export default function AboutUs() {
                         Why <span className="text-blue-500">VisualStream.ai?</span>
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                        <div className="p-6 bg-gray-50 shadow-md border border-gray-200 rounded-lg hover:shadow-lg transition">
                             <h3 className="text-2xl font-semibold text-blue-500 mb-4">
                                 AI-Powered Trends
                             </h3>
@@ -66,7 +66,7 @@ export default function AboutUs() {
                                 Stay ahead with visuals curated from real-time data.
                             </p>
                         </div>
-                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition">
                             <h3 className="text-2xl font-semibold text-blue-500 mb-4">
                                 Effortless Customization
                             </h3>
@@ -75,7 +75,7 @@ export default function AboutUs() {
                                 search.
                             </p>
                         </div>
-                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition">
                             <h3 className="text-2xl font-semibold text-blue-500 mb-4">
                                 Seamless Fulfillment
                             </h3>
@@ -84,7 +84,7 @@ export default function AboutUs() {
                                 Printful.
                             </p>
                         </div>
-                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg border border-gray-200 hover:shadow-lg transition">
                             <h3 className="text-2xl font-semibold text-blue-500 mb-4">
                                 No Hassle, Just Creativity
                             </h3>
