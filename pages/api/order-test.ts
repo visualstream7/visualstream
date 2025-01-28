@@ -67,8 +67,8 @@ export default async function handler(
   const order = getOrderObject(
     {
       image: IMAGE_URL,
-      product_id: PRODUCTS.PHONE_CASE,
-      variant_id: PRODUCT_VARIANTS.PHONE_CASE_VARIANT,
+      product_id: PRODUCTS.BAGPACK,
+      variant_id: PRODUCT_VARIANTS.BAGPACK_VARIANT,
       quantity: 1,
     },
     { height, width },
