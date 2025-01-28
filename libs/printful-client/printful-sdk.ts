@@ -8,6 +8,7 @@ import {
 } from "./config";
 import { ProductResponseType } from "./types";
 import { loadImage } from "canvas";
+import { getOrderObject } from "./getOrderObject";
 
 interface ImageDimensions {
   width: number;
@@ -48,50 +49,11 @@ class Printful {
       };
     }
 
-    // so, each item in items, there is an image property, now, we need to get the image dimensions for each item's image
-    // use promise.all to get all the image dimensions
-
-    // // Calculate the image dimensions and position
-    // const dimensions = await getImageDimensions(imageUrl);
-    // let aspectRatio = dimensions.width / dimensions.height;
-    // let area_width = 750; // Customize based on product area
-    // let area_height = 1000; // Customize based on product area
-    // let image_width = area_width;
-    // let image_height = image_width / aspectRatio;
-
-    // let height_left = area_height - image_height;
-    // let top = height_left / 2;
-
     const processItems = async (items: any[]) => {
       const itemsWithPositions = await Promise.all(
         items.map(async (item: any) => {
           const dimensions = await getImageDimensions(item.image); // Wait for dimensions
-          const aspectRatio = dimensions.width / dimensions.height;
-          const area_width = 750; // Customize based on product area
-          const area_height = 1000; // Customize based on product area
-          const image_width = area_width;
-          const image_height = image_width / aspectRatio;
-          const height_left = area_height - image_height;
-          const top = height_left / 2;
-
-          return {
-            variant_id: item.variant_id,
-            quantity: item.quantity,
-            type: "front",
-            files: [
-              {
-                url: item.image,
-                position: {
-                  area_width: area_width,
-                  area_height: area_height,
-                  width: image_width,
-                  height: image_height,
-                  top: top,
-                  left: 0,
-                },
-              },
-            ],
-          };
+          return getOrderObject(item, dimensions);
         }),
       );
 
@@ -258,7 +220,6 @@ class Printful {
         store_id: 14818720,
       });
 
-
       const response = await fetch("https://api.printful.com/shipping/rates", {
         method: "POST",
         headers: {
@@ -271,7 +232,10 @@ class Printful {
       const rData = await response.json();
 
       if (response.status !== 200 || !rData.result) {
-        return { result: null, error: rData.error?.message || "Failed to fetch shipping rates." };
+        return {
+          result: null,
+          error: rData.error?.message || "Failed to fetch shipping rates.",
+        };
       }
 
       const shippings = rData.result;
@@ -281,7 +245,9 @@ class Printful {
         return { result: null, error: "Invalid shipping rates response." };
       }
 
-      const standard = shippings.find((shipping: any) => shipping.id === "STANDARD");
+      const standard = shippings.find(
+        (shipping: any) => shipping.id === "STANDARD",
+      );
 
       if (!standard) {
         return { result: null, error: "No standard shipping available." };
@@ -292,7 +258,10 @@ class Printful {
       return { result: rate, error: null };
     } catch (error) {
       console.error("Error during fetch:", error);
-      return { result: null, error: (error as any).message || "Unexpected error occurred." };
+      return {
+        result: null,
+        error: (error as any).message || "Unexpected error occurred.",
+      };
     }
   };
 
@@ -324,8 +293,5 @@ class Printful {
     }
   };
 }
-
-
-
 
 export { Printful };
