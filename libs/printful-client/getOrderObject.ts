@@ -7,8 +7,8 @@ const PRODUCTS = {
   T_SHIRT: 71, // done
   TOTE_BAG: 84, // done
   PHONE_CASE: 181, // done
-  HAT: 206,
-  BAGPACK: 279,
+  HAT: 206, // needs thread colors dynamically
+  BAGPACK: 279, // done
   STICKERS: 358,
   HOODIE: 380, // done
   WATER_BOTTLE: 382, // done
@@ -90,6 +90,20 @@ function getOrderObject(item: any, dimensions: any) {
     image_height = image_width / aspectRatio;
     height_left = area_height - image_height;
     top = height_left / 2;
+  } else if (item.product_id === PRODUCTS.HAT) {
+    area_width = 2290;
+    area_height = 1000;
+    image_width = area_width;
+    image_height = image_width / aspectRatio;
+    height_left = area_height - image_height;
+    top = height_left / 2;
+  } else if (item.product_id === PRODUCTS.BAGPACK) {
+    area_width = 710;
+    area_height = 1000;
+    image_width = area_width;
+    image_height = image_width / aspectRatio;
+    height_left = area_height - image_height;
+    top = height_left / 2;
   }
 
   return {
@@ -109,6 +123,20 @@ function getOrderObject(item: any, dimensions: any) {
         },
       },
     ],
+
+    options:
+      item.product_id === PRODUCTS.HAT
+        ? [
+            {
+              id: "embroidery_type",
+              value: "flat",
+            },
+            {
+              id: "thread_colors",
+              value: ["#000000", "#ffffff"],
+            },
+          ]
+        : undefined,
   };
 }
 export { getOrderObject };
