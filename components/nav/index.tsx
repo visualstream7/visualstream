@@ -112,7 +112,7 @@ export const UserButton = ({ user }: UserPropType) => {
 
 function MobileNav({ user, count }: ComponentPropType) {
   return (
-    <div className="w-full block lg:hidden border-t-2 fixed bottom-0 z-10 h-max bg-white shadow-lg">
+    <div className="w-full block lg:hidden border-t-2  fixed bottom-0 z-10 h-max bg-white shadow-lg">
       <div className="text-white px-2 py-4 flex items-center justify-around w-full">
         <Link href="/">
           <Home size={24} color="black" />
@@ -314,6 +314,29 @@ function LargeScreenNav({
 } 
 
 // NavBar Component
+// export default function Nav({
+//   user,
+//   cartCount,
+//   searchTags,
+//   setSearchTags,
+//   searchTerm,
+//   setSearchTerm,
+// }: NavPropType) {
+//   return (
+//     <>
+//       <LargeScreenNav
+//         user={user}
+//         count={cartCount}
+//         searchTags={searchTags}
+//         setSearchTags={setSearchTags}
+//         searchTerm={searchTerm}
+//         setSearchTerm={setSearchTerm}
+//       />
+//       <MobileNav user={user} count={cartCount} />
+//     </>
+//   );
+// }
+
 export default function Nav({
   user,
   cartCount,
@@ -324,6 +347,57 @@ export default function Nav({
 }: NavPropType) {
   return (
     <>
+      {/* Search Bar for Mobile Screens */}
+      <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
+        <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
+          <input
+            type="text"
+            placeholder="Search VisualStream.ai"
+            className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-tl-md rounded-bl-md focus:ring-3 focus:ring-gray-200"
+            onChange={(e) =>
+              setSearchTerm ? setSearchTerm(e.target.value) : null
+            }
+            value={searchTerm || ""}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                if (!setSearchTags) return;
+                if (!setSearchTerm) return;
+                if (searchTerm && searchTags) {
+                  if (searchTags.includes(searchTerm)) return;
+                  if (searchTags.length >= 5) {
+                    alert("You can only search for 5 tags at a time");
+                    return;
+                  }
+                  setSearchTags([...searchTags, searchTerm]);
+                  setSearchTerm("");
+                }
+              }
+            }}
+          />
+          <button className="px-3 text-gray-900">
+            <FiSearch
+              size={20}
+              onClick={() => {
+                if (!setSearchTags) return;
+                if (!setSearchTerm) return;
+                if (searchTerm && searchTags) {
+                  if (searchTags.includes(searchTerm)) return;
+
+                  if (searchTags.length >= 5) {
+                    alert("You can only search for 5 tags at a time");
+                    return;
+                  }
+
+                  setSearchTags([...searchTags, searchTerm]);
+                  setSearchTerm("");
+                }
+              }}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Large Screen Nav */}
       <LargeScreenNav
         user={user}
         count={cartCount}
@@ -332,7 +406,10 @@ export default function Nav({
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
+
+      {/* Mobile Nav */}
       <MobileNav user={user} count={cartCount} />
     </>
   );
 }
+

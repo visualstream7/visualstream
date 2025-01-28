@@ -56,14 +56,6 @@ export default function SearchPage({ user }: UserPropType) {
 
   return (
     <div className={`flex flex-col h-dvh font-primary`}>
-      <Nav
-        searchTags={searchTags}
-        setSearchTags={setSearchTags}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        user={user}
-        cartCount={cartItems.length}
-      />
       <div className="flex justify-between items-center px-4 md:hidden">
         {user && (
           <div className="flex flex-col p-4 md:hidden">
@@ -72,6 +64,15 @@ export default function SearchPage({ user }: UserPropType) {
           </div>
         )}
       </div>
+      <Nav
+        searchTags={searchTags}
+        setSearchTags={setSearchTags}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        user={user}
+        cartCount={cartItems.length}
+      />
+     
 
       <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-auto">
         <div className="lg:block md:block">
