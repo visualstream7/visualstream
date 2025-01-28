@@ -8,68 +8,107 @@ export default function AboutUs() {
     const { cartItems } = useCart({
         user: user,
         rerender: false,
-        setRerenderNav: () => {},
-      });
-
+        setRerenderNav: () => { },
+    });
 
     return (
-        <div className="bg-gray-50">
+        <div className="bg-white">
             <Nav user={user} cartCount={cartItems.length} />
 
             {/* Hero Section */}
-            <section className="bg-gradient-to-r from-[#1c2a36] via-[#25384c] to-[#40566b] text-white py-20">
-                <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold">
-                        About Our Company
+            <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white py-20">
+                <div className="container mx-auto px-6 text-center">
+                    <h1 className="text-5xl font-extrabold leading-tight">
+                        About <span className="text-blue-500">VisualStream.ai</span>
                     </h1>
-                    <p className="mt-4 text-lg md:text-xl max-w-2xl mx-auto">
-                        We strive to bring the best services to our customers with innovation, dedication, and excellence.
+                    <p className="mt-6 text-lg md:text-xl max-w-3xl mx-auto text-gray-300">
+                        Merging AI creativity with seamless automation, empowering creators,
+                        businesses, and art lovers to transform ideas into life—one print at a time.
                     </p>
                 </div>
             </section>
 
-
-            {/* What We Do Section */}
-            <section className="py-16 bg-gray-100">
-                <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-
-                    {/* Right Side */}
+            {/* Vision and Mission Section */}
+            <section className="py-16 bg-gray-50">
+                <div className="container mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-12">
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-800">
-                            What We Do
-                        </h2>
+                        <h2 className="text-4xl font-bold text-gray-800">Our Vision</h2>
                         <p className="mt-4 text-gray-600 leading-relaxed">
-                            From cutting-edge technology solutions to customer-focused services, we pride ourselves on delivering value and results to clients around the globe.
+                            To be the ultimate AI-driven design hub, where creativity meets
+                            technology, empowering anyone to turn inspiration into reality
+                            effortlessly.
+                        </p>
+                    </div>
+                    <div>
+                        <h2 className="text-4xl font-bold text-gray-800">Our Mission</h2>
+                        <p className="mt-4 text-gray-600 leading-relaxed">
+                            We harness cutting-edge AI and automation to deliver
+                            trend-driven, high-quality prints—helping businesses and
+                            individuals create custom, on-demand products with speed,
+                            precision, and innovation.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* Highlights Section */}
-            <section className="py-16">
-                <div className="container mx-auto px-4 text-center">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-8">
-                        Our Highlights
+            {/* Why Choose Us Section */}
+            <section className="py-16 bg-white">
+                <div className="container mx-auto px-6 text-center">
+                    <h2 className="text-4xl font-bold text-gray-800 mb-12">
+                        Why <span className="text-blue-500">VisualStream.ai?</span>
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {/* Highlight Items */}
-                        <div className="bg-white shadow-lg rounded-lg p-6">
-                            <h3 className="text-xl font-bold text-blue-500">10+ Years</h3>
-                            <p className="mt-2 text-gray-600">Experience in the industry.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                            <h3 className="text-2xl font-semibold text-blue-500 mb-4">
+                                AI-Powered Trends
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Stay ahead with visuals curated from real-time data.
+                            </p>
                         </div>
-                        <div className="bg-white shadow-lg rounded-lg p-6">
-                            <h3 className="text-xl font-bold text-blue-500">500+</h3>
-                            <p className="mt-2 text-gray-600">Happy clients worldwide.</p>
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                            <h3 className="text-2xl font-semibold text-blue-500 mb-4">
+                                Effortless Customization
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Find the perfect design in seconds with color-based and tag
+                                search.
+                            </p>
                         </div>
-                        <div className="bg-white shadow-lg rounded-lg p-6">
-                            <h3 className="text-xl font-bold text-blue-500">24/7 Support</h3>
-                            <p className="mt-2 text-gray-600">Always available for you.</p>
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                            <h3 className="text-2xl font-semibold text-blue-500 mb-4">
+                                Seamless Fulfillment
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                Print on anything, from mugs to apparel, directly through
+                                Printful.
+                            </p>
                         </div>
-                        <div className="bg-white shadow-lg rounded-lg p-6">
-                            <h3 className="text-xl font-bold text-blue-500">Global Presence</h3>
-                            <p className="mt-2 text-gray-600">Offices in 10+ countries.</p>
+                        <div className="p-6 bg-gray-50 shadow-md rounded-lg hover:shadow-lg transition">
+                            <h3 className="text-2xl font-semibold text-blue-500 mb-4">
+                                No Hassle, Just Creativity
+                            </h3>
+                            <p className="text-gray-600 leading-relaxed">
+                                We handle everything, so you focus on expressing yourself.
+                            </p>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            {/* Call to Action */}
+            <section className="py-16 bg-gray-50">
+                <div className="container mx-auto px-6 text-center">
+                    <h2 className="text-4xl font-bold text-gray-800">
+                        Join Us in Reshaping the Future
+                    </h2>
+                    <p className="mt-4 text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                        Creativity is limitless at VisualStream.ai. Let’s revolutionize the
+                        print-on-demand industry—where every image tells a story.
+                    </p>
+                    <button className="mt-8 px-10 py-4 text-white bg-blue-600 font-bold rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                        Get Started
+                    </button>
                 </div>
             </section>
         </div>
