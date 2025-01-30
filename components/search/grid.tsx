@@ -516,6 +516,22 @@ export default function Grid({
   setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
   user: UserResource | null | undefined;
 }) {
+  if (isImagesLoading) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <FullContainerSpinner />
+      </div>
+    );
+  }
+
+  if (!images || images.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-full w-full">
+        <p className="text-gray-500">No images found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col w-full flex-[1] h-full">
       {!normalGrid || (searchTags && searchTags.length > 0) ? (

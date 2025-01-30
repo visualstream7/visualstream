@@ -86,14 +86,6 @@ export default function SearchPage({ user }: UserPropType) {
 
   return (
     <div className={`flex flex-col h-dvh font-primary`}>
-      <div className="flex justify-between items-center px-4 md:hidden">
-        {user && (
-          <div className="flex flex-col p-4 md:hidden">
-            <p className="text-lg font-bold"> Welcome Back </p>
-            <p> {user.fullName} </p>
-          </div>
-        )}
-      </div>
       <Nav
         searchTags={searchTags}
         setSearchTags={setSearchTags}

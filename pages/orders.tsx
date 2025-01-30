@@ -201,7 +201,7 @@ const Orders = () => {
                           </p>
                         </div>
                         <p className="text-lg font-bold text-gray-800">
-                          {product.price}
+                          ${product.price}
                         </p>
                       </div>
                     ))}

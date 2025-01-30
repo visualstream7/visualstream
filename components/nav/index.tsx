@@ -368,6 +368,26 @@ export default function Nav({
 }: NavPropType) {
   return (
     <>
+      <div className="flex p-4 md:hidden justify-between items-center">
+        <Link href="/">
+          <div className="text-xl font-bold">VisualStream</div>
+        </Link>
+        {user && (
+          <img
+            src={user.imageUrl}
+            alt="profile"
+            className="w-10 h-10 rounded-full"
+          />
+        )}
+      </div>
+      <div className="flex justify-between items-center px-4 md:hidden">
+        {user && (
+          <div className="flex flex-col py-4 md:hidden">
+            <p className="text-lg font-bold"> Welcome Back </p>
+            <p> {user.fullName} </p>
+          </div>
+        )}
+      </div>
       {/* Search Bar for Mobile Screens */}
       <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
         <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
@@ -418,10 +438,9 @@ export default function Nav({
         </div>
       </div>
 
-      <div className="flex md:hidden items-center gap-4 p-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
-        {searchTags &&
-          searchTags.length > 0 &&
-          searchTags.map((tag, index) => (
+      {searchTags && searchTags.length > 0 && (
+        <div className="flex md:hidden items-center p-2 px-4 gap-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
+          {searchTags.map((tag, index) => (
             <div
               key={index}
               className="flex items-center gap-2 bg-blue-300 rounded-full w-max px-2"
@@ -437,7 +456,8 @@ export default function Nav({
               </button>
             </div>
           ))}
-      </div>
+        </div>
+      )}
 
       {/* Large Screen Nav */}
       <LargeScreenNav
