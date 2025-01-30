@@ -117,12 +117,10 @@ export default function PickerContainer({
   return (
     <div
       className={`
-    flex-1 bg-white mx-auto p-8 w-full overflow-auto h-full
-    
+    flex-1 bg-white mx-auto p-4 md:p-8 w-full overflow-auto h-full
+
   `}
     >
-     
-
       <div className="my-4">
         <h1 className="font-bold text-2xl">Step 1</h1>
         <p>Select up to 5 colors</p>
@@ -177,23 +175,25 @@ export default function PickerContainer({
               >
                 <div className="flex items-center justify-center w-min h-full max-w-[100%] overflow-clip flex-wrap mx-auto">
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/delete.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
+                      hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                      }`}
+                    }`}
                     onClick={() => deleteColor(index)}
                   ></button>
                   <p className="text-white text-sm">
                     {color.percentage?.toFixed(0)}%
                   </p>
                   <button
-                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${hoveringSwatchIndex === index
+                    className={`w-[30px] min-w-[30px] h-[30px] bg-[url(/refine.png)] bg-no-repeat bg-center bg-cover transition-all md:opacity-0 ${
+                      hoveringSwatchIndex === index
                         ? "md:opacity-100"
                         : "md:opacity-0"
-                      }
+                    }
 
                     `}
-                    onClick={() => { }}
+                    onClick={() => {}}
                   ></button>
                 </div>
               </div>

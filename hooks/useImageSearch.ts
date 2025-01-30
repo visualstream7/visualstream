@@ -138,10 +138,12 @@ function overallSimilarity(selectedColors: any, colorComposition: any) {
 
 export default function useImageSearch({
   selectedColors,
+  selectedCategory,
   searchTags,
   isResizing,
 }: {
   selectedColors: { hex: string; percentage: number }[];
+  selectedCategory: string;
   searchTags: string[];
   isResizing: number | null;
 }) {
@@ -166,14 +168,31 @@ export default function useImageSearch({
             similarity: 0,
           };
         });
-        setUnorderedImages(resultWithSimilarity);
-        setImages(resultWithSimilarity);
+        if (selectedCategory === "All") {
+          setUnorderedImages(resultWithSimilarity);
+          setImages(resultWithSimilarity);
+        } else {
+          setUnorderedImages(
+            resultWithSimilarity.filter((image) =>
+              image?.category
+                ?.toLowerCase()
+                .includes(selectedCategory.toLowerCase()),
+            ),
+          );
+          setImages(
+            resultWithSimilarity.filter((image) =>
+              image?.category
+                ?.toLowerCase()
+                .includes(selectedCategory.toLowerCase()),
+            ),
+          );
+        }
         setLoading(false);
       }
     }
 
     fetchImages();
-  }, []);
+  }, [selectedCategory]);
 
   useEffect(() => {
     console.log("Selected colors changed", selectedColors, isResizing);

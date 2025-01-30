@@ -16,11 +16,14 @@ import {
   LucideLogOut,
   ShoppingCartIcon,
   UserIcon,
+  XIcon,
 } from "lucide-react";
 import { BiCart } from "react-icons/bi";
 import { IoCart } from "react-icons/io5";
 import { GrGoogle } from "react-icons/gr";
 import { CiLogout } from "react-icons/ci";
+import { CATEGORIES } from "../search/searchPage";
+import { useRouter } from "next/router";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -35,6 +38,8 @@ type NavPropType = {
   setSearchTags?: React.Dispatch<React.SetStateAction<string[]>>;
   searchTerm?: string;
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
+  selectedCategory?: string;
+  setSelectedCategory?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 type ComponentPropType = {
@@ -44,6 +49,8 @@ type ComponentPropType = {
   setSearchTags?: React.Dispatch<React.SetStateAction<string[]>>;
   searchTerm?: string;
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
+  selectedCategory?: string;
+  setSelectedCategory?: React.Dispatch<React.SetStateAction<string>>;
 };
 
 // UserButton Component
@@ -148,7 +155,6 @@ function MobileNav({ user, count }: ComponentPropType) {
   );
 }
 
-
 function LargeScreenNav({
   user,
   count,
@@ -156,10 +162,14 @@ function LargeScreenNav({
   setSearchTags,
   searchTerm,
   setSearchTerm,
+  selectedCategory,
+  setSelectedCategory,
 }: ComponentPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
   const [returnOrders, setReturnOrders] = useState(false);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+
+  const router = useRouter();
 
   const toggleCountryDropdown = () => {
     setShowCountryDropdown((prev) => !prev);
@@ -238,24 +248,27 @@ function LargeScreenNav({
         {/* Country Dropdown, Profile Icon, Orders, and Cart */}
         <div className="flex items-center gap-6 relative">
           <Link href="/favorites" className="flex items-center cursor-pointer">
-            <Heart size={22} className="text-light opacity-80 hover:opacity-100 transition-opacity" />
+            <Heart
+              size={22}
+              className="text-light opacity-80 hover:opacity-100 transition-opacity"
+            />
           </Link>
 
           <div className="relative">
             <div
               className="cursor-pointer flex items-center gap-2"
-              onClick={toggleCountryDropdown}
+              // onClick={toggleCountryDropdown}
             >
               {selectedCountry}
-              <MdArrowDropDown size={20} />
+              {/* <MdArrowDropDown size={20} /> */}
             </div>
             {showCountryDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-white text-black shadow-lg rounded-md w-20 z-10">
+              <div className="absolute top-full left-0 mt-2 bg-white text-black shadow-lg rounded-md w-max z-10">
                 <ul>
-                  {["🇺🇸", "🇬🇧"].map((country) => (
+                  {["🇺🇸"].map((country) => (
                     <li
                       key={country}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className="px-2 py-2 hover:bg-gray-100 cursor-pointer rounded-md w-max"
                       onClick={() => selectCountry(country)}
                     >
                       {country}
@@ -293,25 +306,31 @@ function LargeScreenNav({
       {/* LowerNavbar */}
       <div className="bg-[#1c2a3c] text-white py-2 px-4 flex items-center gap-6 w-full">
         <div className="flex gap-8">
-          <div className="cursor-pointer">AI</div>
-          <div className="cursor-pointer">Alphabet</div>
-          <div className="cursor-pointer">Architecture</div>
-          <div className="cursor-pointer">Artful</div>
-          <div className="cursor-pointer">Food</div>
-          <div className="cursor-pointer">Kids</div>
-          <div className="cursor-pointer">Music</div>
-          <div className="cursor-pointer">Sports</div>
-          <div className="cursor-pointer">Travel</div>
-          <div className="cursor-pointer">Years</div>
-          <Link href="/aboutUs" > <div className="cursor-pointer">About Us</div>
+          {Object.keys(CATEGORIES).map((category, index) => (
+            // @ts-ignore
+            <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
+              <div
+                className={`cursor-pointer ${
+                  category === selectedCategory && "border-b-2 border-white"
+                }`}
+              >
+                {category}
+              </div>
+            </Link>
+          ))}
+          <Link href="/about">
+            {" "}
+            <div className="cursor-pointer">About Us</div>
           </Link>
-          <Link href="/contactUs" > <div className="cursor-pointer">Contact Us</div>
+          <Link href="/contact">
+            {" "}
+            <div className="cursor-pointer">Contact Us</div>
           </Link>
         </div>
       </div>
     </div>
   );
-} 
+}
 
 // NavBar Component
 // export default function Nav({
@@ -344,6 +363,8 @@ export default function Nav({
   setSearchTags,
   searchTerm,
   setSearchTerm,
+  selectedCategory,
+  setSelectedCategory,
 }: NavPropType) {
   return (
     <>
@@ -397,6 +418,27 @@ export default function Nav({
         </div>
       </div>
 
+      <div className="flex md:hidden items-center gap-4 p-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
+        {searchTags &&
+          searchTags.length > 0 &&
+          searchTags.map((tag, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 bg-blue-300 rounded-full w-max px-2"
+            >
+              <p>{tag}</p>
+              <button
+                onClick={() => {
+                  if (!setSearchTags) return;
+                  setSearchTags(searchTags.filter((t) => t !== tag));
+                }}
+              >
+                <XIcon size={20} />
+              </button>
+            </div>
+          ))}
+      </div>
+
       {/* Large Screen Nav */}
       <LargeScreenNav
         user={user}
@@ -405,6 +447,8 @@ export default function Nav({
         setSearchTags={setSearchTags}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
       />
 
       {/* Mobile Nav */}
@@ -412,4 +456,3 @@ export default function Nav({
     </>
   );
 }
-
