@@ -121,22 +121,21 @@ function getOrderObject(item: any, dimensions: any) {
           top: top < 0 ? 0 : top,
           left: 0,
         },
+        options:
+          item.product_id === PRODUCTS.HAT
+            ? [
+                {
+                  id: "embroidery_type",
+                  value: "flat",
+                },
+                {
+                  id: "full_color",
+                  value: true,
+                },
+              ]
+            : undefined,
       },
     ],
-
-    options:
-      item.product_id === PRODUCTS.HAT
-        ? [
-            {
-              id: "embroidery_type",
-              value: "flat",
-            },
-            {
-              id: "thread_colors",
-              value: ["#000000", "#ffffff"],
-            },
-          ]
-        : undefined,
   };
 }
 export { getOrderObject };

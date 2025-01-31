@@ -276,9 +276,11 @@ export default function ImagePage({ user, image }: UserPropType) {
               {extract_type_name(getProductFromMock(hoveredImage, products))}
             </h2>
           )}
-          <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
-            {image.ai_describe || "Description"}
-          </p>
+          {!hoveredImage && (
+            <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
+              {image.ai_tags || "Description"}
+            </p>
+          )}
         </div>
 
         <div className="flex-1 p-6 lg:p-12 space-y-4 bg-white h-[86vh] lg:overflow-y-hidden flex flex-col">

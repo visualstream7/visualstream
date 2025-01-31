@@ -103,7 +103,6 @@ const ImageComponent = ({
   );
 };
 
-
 export default function Favourites() {
   const { user, isLoaded } = useUser();
   const [likedImages, setLikedImages] = useState<Image[]>([]);
@@ -136,16 +135,23 @@ export default function Favourites() {
 
       {/* Main Content Container */}
       <div className="container mx-auto py-10 px-4 ">
-        <h1 className="text-3xl font-semibold text-gray-800 mb-6">Your Favourites</h1>
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+          Your Favourites
+        </h1>
 
         {/* Scrollable content below the title */}
-        <div className="h-[calc(86vh-4rem)] overflow-y-auto custom-scrollbar scroll-smooth">
+        <div className="h-[70vh] md:h-[calc(80vh-4rem)] md:px-4 overflow-y-auto custom-scrollbar scroll-smooth">
           {likedImages.length === 0 ? (
-            <div className="text-center text-gray-500">No favourite images yet. Start liking some!</div>
+            <div className="text-center text-gray-500">
+              No favourite images yet. Start liking some!
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-6 ">
               {likedImages.map((image) => (
-                <div key={image.id} className="bg-white shadow-md rounded-lg border border-gray-300 overflow-hidden hover:shadow-lg transition-shadow">
+                <div
+                  key={image.id}
+                  className="bg-white shadow-md rounded-lg border border-gray-300 overflow-hidden hover:shadow-lg transition-shadow"
+                >
                   <Link href={`/image/${image.id}`}>
                     <ImageComponent
                       image={image}
@@ -155,7 +161,9 @@ export default function Favourites() {
                     />
                   </Link>
                   <div className="p-4">
-                    <h2 className="text-lg font-medium text-gray-700 truncate">{image.title || "Untitled"}</h2>
+                    <h2 className="text-lg font-medium text-gray-700 truncate">
+                      {image.title || "Untitled"}
+                    </h2>
                   </div>
                 </div>
               ))}
@@ -164,6 +172,5 @@ export default function Favourites() {
         </div>
       </div>
     </div>
-
   );
 }

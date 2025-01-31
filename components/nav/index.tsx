@@ -366,6 +366,8 @@ export default function Nav({
   selectedCategory,
   setSelectedCategory,
 }: NavPropType) {
+  const router = useRouter();
+
   return (
     <>
       <div className="flex p-4 md:hidden justify-between items-center">
@@ -380,65 +382,70 @@ export default function Nav({
           />
         )}
       </div>
-      <div className="flex justify-between items-center px-4 md:hidden">
-        {user && (
-          <div className="flex flex-col py-4 md:hidden">
-            <p className="text-lg font-bold"> Welcome Back </p>
-            <p> {user.fullName} </p>
-          </div>
-        )}
-      </div>
-      {/* Search Bar for Mobile Screens */}
-      <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
-        <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
-          <input
-            type="text"
-            placeholder="Search VisualStream.ai"
-            className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-tl-md rounded-bl-md focus:ring-3 focus:ring-gray-200"
-            onChange={(e) =>
-              setSearchTerm ? setSearchTerm(e.target.value) : null
-            }
-            value={searchTerm || ""}
-            onKeyUp={(e) => {
-              if (e.key === "Enter") {
-                if (!setSearchTags) return;
-                if (!setSearchTerm) return;
-                if (searchTerm && searchTags) {
-                  if (searchTags.includes(searchTerm)) return;
-                  if (searchTags.length >= 5) {
-                    alert("You can only search for 5 tags at a time");
-                    return;
-                  }
-                  setSearchTags([...searchTags, searchTerm]);
-                  setSearchTerm("");
-                }
+
+      {router.pathname === "/" && (
+        <div className="flex justify-between items-center px-4 md:hidden">
+          {user && (
+            <div className="flex flex-col py-4 md:hidden">
+              <p className="text-lg font-bold"> Welcome Back </p>
+              <p> {user.fullName} </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {router.pathname === "/" && (
+        <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
+          <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
+            <input
+              type="text"
+              placeholder="Search VisualStream.ai"
+              className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-tl-md rounded-bl-md focus:ring-3 focus:ring-gray-200"
+              onChange={(e) =>
+                setSearchTerm ? setSearchTerm(e.target.value) : null
               }
-            }}
-          />
-          <button className="px-3 text-gray-900">
-            <FiSearch
-              size={20}
-              onClick={() => {
-                if (!setSearchTags) return;
-                if (!setSearchTerm) return;
-                if (searchTerm && searchTags) {
-                  if (searchTags.includes(searchTerm)) return;
-
-                  if (searchTags.length >= 5) {
-                    alert("You can only search for 5 tags at a time");
-                    return;
+              value={searchTerm || ""}
+              onKeyUp={(e) => {
+                if (e.key === "Enter") {
+                  if (!setSearchTags) return;
+                  if (!setSearchTerm) return;
+                  if (searchTerm && searchTags) {
+                    if (searchTags.includes(searchTerm)) return;
+                    if (searchTags.length >= 5) {
+                      alert("You can only search for 5 tags at a time");
+                      return;
+                    }
+                    setSearchTags([...searchTags, searchTerm]);
+                    setSearchTerm("");
                   }
-
-                  setSearchTags([...searchTags, searchTerm]);
-                  setSearchTerm("");
                 }
               }}
             />
-          </button>
-        </div>
-      </div>
+            <button className="px-3 text-gray-900">
+              <FiSearch
+                size={20}
+                onClick={() => {
+                  if (!setSearchTags) return;
+                  if (!setSearchTerm) return;
+                  if (searchTerm && searchTags) {
+                    if (searchTags.includes(searchTerm)) return;
 
-      {searchTags && searchTags.length > 0 && (
+                    if (searchTags.length >= 5) {
+                      alert("You can only search for 5 tags at a time");
+                      return;
+                    }
+
+                    setSearchTags([...searchTags, searchTerm]);
+                    setSearchTerm("");
+                  }
+                }}
+              />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {router.pathname === "/" && searchTags && searchTags.length > 0 && (
         <div className="flex md:hidden items-center p-2 px-4 gap-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
           {searchTags.map((tag, index) => (
             <div
