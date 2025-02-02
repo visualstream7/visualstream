@@ -137,7 +137,7 @@ export default function PickerContainer({
             className="absolute cursor-pointer hover:border-2 hover:border-white"
             onClick={() => addColor(color)}
             style={{
-              zIndex: 20,
+              zIndex: 2,
               width: "6.25%",
               height: "6.25%",
               left: `${(index % 16) * 6.25}%`,

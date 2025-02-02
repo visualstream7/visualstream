@@ -120,7 +120,6 @@ export const UserButton = ({ user }: UserPropType) => {
   );
 };
 
-
 export const MobileUserModal = ({ user }: UserPropType) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -134,13 +133,12 @@ export const MobileUserModal = ({ user }: UserPropType) => {
         />
       </div>
       {isOpen && (
-        <div
-          className="absolute bg-black bg-opacity-50 w-[100vw] h-[100vh] top-0 flex justify-center items-center z-50"
-        >
-          <div
-            className="w-full h-full bg-white flex flex-col items-center relative"
-          >
-            <button onClick={() => setIsOpen(false)} className="absolute top-5 right-5 text-gray-600 hover:text-black">
+        <div className="fixed bg-black bg-opacity-50 w-[100vw] h-[100vh] top-0 flex justify-center items-center z-50">
+          <div className="w-full h-full bg-white flex flex-col items-center relative">
+            <button
+              onClick={() => setIsOpen(false)}
+              className="absolute top-5 right-5 text-gray-600 hover:text-black"
+            >
               <X size={32} />
             </button>
 
@@ -150,9 +148,13 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 alt="Profile"
                 className="w-24 h-24 rounded-full border border-gray-300 shadow-md"
               />
-              <p className="text-xl text-black font-semibold mt-3">{user?.fullName || "Guest"}</p>
+              <p className="text-xl text-black font-semibold mt-3">
+                {user?.fullName || "Guest"}
+              </p>
               {user?.emailAddresses?.[0] && (
-                <p className="text-sm text-gray-500 mt-1">{user.emailAddresses[0].emailAddress}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {user.emailAddresses[0].emailAddress}
+                </p>
               )}
             </div>
 
@@ -197,7 +199,6 @@ export const MobileUserModal = ({ user }: UserPropType) => {
   );
 };
 
-
 function MobileNav({ user, count }: ComponentPropType) {
   return (
     <>
@@ -231,8 +232,6 @@ function MobileNav({ user, count }: ComponentPropType) {
     </>
   );
 }
-
-
 
 function LargeScreenNav({
   user,
