@@ -129,7 +129,7 @@ export default function PickerContainer({
         <img
           src="/palette.png"
           alt="palette"
-          className="w-full h-full absolute z-0"
+          className="w-full h-full absolute z-1"
         />
         {colors.map((color, index) => (
           <div

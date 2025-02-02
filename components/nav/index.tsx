@@ -13,9 +13,12 @@ import {
   CarrotIcon,
   Heart,
   Home,
+  LogOut,
   LucideLogOut,
+  ShoppingCart,
   ShoppingCartIcon,
   UserIcon,
+  X,
   XIcon,
 } from "lucide-react";
 import { BiCart } from "react-icons/bi";
@@ -117,43 +120,119 @@ export const UserButton = ({ user }: UserPropType) => {
   );
 };
 
+
+export const MobileUserModal = ({ user }: UserPropType) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <>
+      <div onClick={() => setIsOpen(true)} className="cursor-pointer">
+        <img
+          src={user?.imageUrl || "/default-profile.png"}
+          alt="profile"
+          className="w-10 h-10 rounded-full border border-gray-300 shadow-sm"
+        />
+      </div>
+      {isOpen && (
+        <div
+          className="absolute bg-black bg-opacity-50 w-[100vw] h-[100vh] top-0 flex justify-center items-center z-50"
+        >
+          <div
+            className="w-full h-full bg-white flex flex-col items-center relative"
+          >
+            <button onClick={() => setIsOpen(false)} className="absolute top-5 right-5 text-gray-600 hover:text-black">
+              <X size={32} />
+            </button>
+
+            <div className="mt-16 flex flex-col items-center">
+              <img
+                src={user?.imageUrl || "/default-profile.png"}
+                alt="Profile"
+                className="w-24 h-24 rounded-full border border-gray-300 shadow-md"
+              />
+              <p className="text-xl text-black font-semibold mt-3">{user?.fullName || "Guest"}</p>
+              {user?.emailAddresses?.[0] && (
+                <p className="text-sm text-gray-500 mt-1">{user.emailAddresses[0].emailAddress}</p>
+              )}
+            </div>
+
+            <div className="mt-6 w-full max-w-sm">
+              <Link href="/orders">
+                <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
+                  Orders
+                </div>
+              </Link>
+              <Link href="/about">
+                <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
+                  About Us
+                </div>
+              </Link>
+              <Link href="/contact">
+                <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
+                  Contact Us
+                </div>
+              </Link>
+            </div>
+
+            <div className="absolute bottom-6 w-full max-w-sm px-6">
+              {user ? (
+                <SignOutButton>
+                  <button className="w-full bg-red-500 text-white py-3 text-lg font-bold rounded-lg shadow-md hover:bg-red-600 transition">
+                    Sign Out
+                  </button>
+                </SignOutButton>
+              ) : (
+                <SignInButton mode="modal">
+                  <button className="flex items-center gap-2 w-full bg-blue-600 text-white py-3 text-lg font-bold rounded-lg shadow-md hover:bg-blue-700 transition justify-center">
+                    <GrGoogle size={22} />
+                    Sign In with Google
+                  </button>
+                </SignInButton>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+};
+
+
 function MobileNav({ user, count }: ComponentPropType) {
   return (
-    <div className="w-full block lg:hidden border-t-2  fixed bottom-0 z-10 h-max bg-white shadow-lg">
-      <div className="text-white px-2 py-4 flex items-center justify-around w-full">
-        <Link href="/">
-          <Home size={24} color="black" />
-        </Link>
-
-        <Link href="/favorites">
-          <Heart size={24} color="black" />
-        </Link>
-
-        {/* Cart Icon with Count Badge */}
-        <div className="relative">
-          <Link href="/cart">
-            <ShoppingCartIcon size={24} color="black" />
+    <>
+      {/* Bottom Navbar */}
+      <div className="w-full  block lg:hidden border-t-2 fixed bottom-0 z-10 h-max bg-white shadow-lg">
+        <div className="text-white px-2 py-4 flex items-center justify-around w-full">
+          <Link href="/">
+            <Home size={24} color="black" />
           </Link>
-          {count > 0 && (
-            <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-              {count}
-            </span>
-          )}
-        </div>
 
-        {user ? (
-          <SignOutButton>
-            <LucideLogOut size={24} color="black" />
-          </SignOutButton>
-        ) : (
-          <SignInButton mode="modal">
-            <GrGoogle size={24} color="black" />
-          </SignInButton>
-        )}
+          <Link href="/favorites">
+            <Heart size={24} color="black" />
+          </Link>
+
+          {/* Cart Icon with Count Badge */}
+          <div className="relative">
+            <Link href="/cart">
+              <ShoppingCart size={24} color="black" />
+            </Link>
+            {count > 0 && (
+              <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {count}
+              </span>
+            )}
+          </div>
+
+          {/* User Profile Button (Opens Fullscreen Modal) */}
+          <MobileUserModal user={user} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
+
+
 
 function LargeScreenNav({
   user,
@@ -374,13 +453,6 @@ export default function Nav({
         <Link href="/">
           <div className="text-xl font-bold">VisualStream</div>
         </Link>
-        {user && (
-          <img
-            src={user.imageUrl}
-            alt="profile"
-            className="w-10 h-10 rounded-full"
-          />
-        )}
       </div>
 
       {router.pathname === "/" && (
