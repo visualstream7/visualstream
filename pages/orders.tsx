@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { IoArrowBack } from "react-icons/io5";
 
+
 interface Order {
   id: string;
   date: string;
@@ -120,11 +121,7 @@ const Orders = () => {
   return (
     <div className="max-h-dvh h-dvh bg-gray-100 overflow-hidden flex flex-col">
       <Nav user={user} cartCount={count} />
-      {/* Content */}
-      <main className="min-w-[60vw] mx-auto px-4 py-8 flex-1 overflow-hidden">
-        {/* Navbar */}
-
-        {/* Back Arrow & Text */}
+      <main className=" min-w-[80vw] m-auto px-4 py-8 flex-1 overflow-hidden">
         <div className="flex items-center mb-2 text-sm text-gray-800 hover:text-gray-800">
           <Link href="/" className="flex items-center space-x-2">
             <IoArrowBack className="text-lg" />
@@ -132,13 +129,17 @@ const Orders = () => {
           </Link>
         </div>
 
-        {/* Page Title */}
         <h1 className="text-2xl font-extrabold text-gray-800 mb-6">
           My Orders
         </h1>
 
-        <div className="flex flex-col flex-1 overflow-auto h-[70dvh] no-scrollbar">
-          {/* Orders */}
+        {orders.length === 0 ? (
+          <div className="flex items-center justify-center h-[70dvh]">
+            <p className="text-lg text-gray-500">You have no orders yet.</p>
+          </div>
+        ) : (
+
+        <div className="flex flex-col  flex-1 overflow-auto h-[70dvh] no-scrollbar">
           {orders
             .sort((a, b) => {
               return (
@@ -230,8 +231,10 @@ const Orders = () => {
                 </div>
               );
             })}
-        </div>
+            </div>
+        )}
       </main>
+
     </div>
   );
 };

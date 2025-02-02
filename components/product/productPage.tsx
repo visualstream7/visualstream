@@ -21,6 +21,9 @@ import { CircleDashed } from "lucide-react";
 import { setPriority } from "os";
 import { Json } from "@/database/types";
 import useCart from "../nav/useCart";
+import { Bounce, toast } from "react-toastify";
+
+
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -609,6 +612,17 @@ const ProductPage: React.FC<ProductPageProps> = ({
       parseInt(image_id),
       quantity,
     );
+    toast('Item added to cart!', {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "light",
+      transition: Bounce,
+    });
     if (result.length > 0) setCartHasItems(true);
     setRerenderNav((prev) => !prev);
   };

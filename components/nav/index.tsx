@@ -159,22 +159,27 @@ export const MobileUserModal = ({ user }: UserPropType) => {
             </div>
 
             <div className="mt-6 w-full max-w-sm">
-              <Link href="/orders">
-                <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
-                  Orders
-                </div>
-              </Link>
+              {user && (
+                <Link href="/orders">
+                  <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
+                    Orders
+                  </div>
+                </Link>
+              )}
+
               <Link href="/about">
                 <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
                   About Us
                 </div>
               </Link>
+
               <Link href="/contact">
                 <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
                   Contact Us
                 </div>
               </Link>
             </div>
+
 
             <div className="absolute bottom-6 w-full max-w-sm px-6">
               {user ? (
@@ -185,14 +190,14 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 </SignOutButton>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="flex items-center gap-2 w-full bg-blue-600 text-white py-3 text-lg font-bold rounded-lg shadow-md hover:bg-blue-700 transition justify-center">
+                  <button className="flex items-center gap-2 w-full bg-[#25384c] hover:bg-[#1d2d3f] transition text-white py-3 text-lg font-bold rounded-lg shadow-md  justify-center">
                     <GrGoogle size={22} />
                     Sign In with Google
                   </button>
                 </SignInButton>
               )}
             </div>
-          </div>
+        </div>
         </div>
       )}
     </>
