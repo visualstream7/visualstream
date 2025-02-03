@@ -17,6 +17,7 @@ import { loadStripe } from "@stripe/stripe-js";
 import { BiArrowBack, BiCart } from "react-icons/bi";
 import { PiEmpty } from "react-icons/pi";
 import { GiEmptyMetalBucket } from "react-icons/gi";
+import { FullPageSpinner } from "../spinners/fullPageSpiner";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
@@ -67,7 +68,7 @@ export default function Cart({ user }: CartProps) {
   return (
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
       <Nav user={user} cartCount={cartItems.length} />
-      <div className="flex-1 flex flex-col lg:flex-row p-6">
+      <div className="flex-1 flex  flex-col lg:flex-row p-6">
         <div
           className={`lg:pr-4 flex flex-col flex-1 overflow-hidden ${
             showShipping
@@ -78,7 +79,7 @@ export default function Cart({ user }: CartProps) {
           {" "}
           <div className="h-full pr-2 flex-1 flex flex-col">
             {loading ? (
-              <p className="text-gray-600">Loading...</p>
+              <FullPageSpinner/>
             ) : cartItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <BiCart className="w-14 h-14 mb-8 text-gray-400" />
@@ -89,7 +90,7 @@ export default function Cart({ user }: CartProps) {
                 {cartItems.map((item) => (
                   <li
                     key={`${item.product_id}-${item.variant_id}-${item.image_id}`}
-                    className="flex items-center justify-between shadow-lg p-4 rounded-xl border-b hover:shadow-xl transition-all"
+                    className="flex items-center justify-between shadow-md p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-xl transition-all"
                   >
                     <div className="flex items-center space-x-4">
                       {item.mock &&

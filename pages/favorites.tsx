@@ -1,5 +1,6 @@
 import Nav from "@/components/nav";
 import useCart from "@/components/nav/useCart";
+import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
 import { Image } from "@/database/functions/images/getImagesFromDatabase";
 import { SupabaseWrapper } from "@/database/supabase";
 import { SignInButton, useSession, useUser } from "@clerk/nextjs";
@@ -126,7 +127,7 @@ export default function Favourites() {
     setRerenderNav: () => {},
   });
 
-  if (!isLoaded) return <div>Loading...</div>;
+  if (!isLoaded) return <FullPageSpinner/>;
   if (!user) return <div>Sign in to view your favourites</div>;
 
   return (

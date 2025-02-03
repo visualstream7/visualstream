@@ -6,6 +6,7 @@ import {
   incrementCartItem,
   decrementCartItem,
 } from "@/database/functions/users/cart";
+import { Bounce, toast } from "react-toastify";
 export default function useCart({
   rerender,
   user,
@@ -134,6 +135,9 @@ export default function useCart({
     }
   };
 
+  const isMobile = window.innerWidth <= 768; // Detect if screen width is <= 768px (mobile)
+
+
   const handleDecrement = async (
     productId: number,
     variantId: number,
@@ -209,6 +213,19 @@ export default function useCart({
           !(item.product_id === productId && item.variant_id === variantId),
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+      toast('Item removed from cart!',
+        {
+          position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+          autoClose: 1000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "dark",
+          transition: Bounce,
+        });
+
       return;
     }
 
@@ -222,6 +239,17 @@ export default function useCart({
       if (error) {
         throw new Error(error);
       }
+      toast('Item removed from cart!',
+        {
+          position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        transition: Bounce,
+      });
     } catch (error) {
       console.error("Error removing item:", error);
     }

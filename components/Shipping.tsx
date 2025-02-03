@@ -7,7 +7,8 @@ import {
 } from "@/data/states";
 import { useUser } from "@clerk/nextjs";
 import useCart from "@/components/nav/useCart";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiLeftArrow } from "react-icons/bi";
+import { ArrowLeftIcon, MoveLeftIcon } from "lucide-react";
 
 let countries = {
     BD: { name: "Bangladesh", code: "BD" },
@@ -192,7 +193,7 @@ const Shipping: React.FC<ShippingProps> = ({
                     onClick={() => setShowShipping(false)}
                     className="inline-flex items-center px-3 py-1 text-white bg-gradient-to-r from-gray-400 via-gray-500 to-gray-600 hover:from-gray-500 hover:via-gray-600 hover:to-gray-700 rounded-full text-xs font-medium shadow-sm transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-300"
                 >
-                    ← Back
+                    <ArrowLeftIcon size={20}  /> Back
                 </button>
 
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">

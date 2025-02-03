@@ -564,6 +564,8 @@ const ProductPage: React.FC<ProductPageProps> = ({
   };
 
   // handle unsigned add to cart
+  const isMobile = window.innerWidth <= 768; // Detect if screen width is <= 768px (mobile)
+
 
   const unsignedAddToCart = async (): Promise<void> => {
     let cart = localStorage.getItem("cart") || "[]";
@@ -612,15 +614,15 @@ const ProductPage: React.FC<ProductPageProps> = ({
       parseInt(image_id),
       quantity,
     );
-    toast('Item added to cart!', {
-      position: "top-center",
-      autoClose: 5000,
+    toast.success('Item added to cart!', {
+      position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+      autoClose: 1000,
       hideProgressBar: false,
       closeOnClick: false,
       pauseOnHover: true,
       draggable: true,
       progress: undefined,
-      theme: "light",
+      theme: "dark",
       transition: Bounce,
     });
     if (result.length > 0) setCartHasItems(true);

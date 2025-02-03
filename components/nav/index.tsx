@@ -272,20 +272,11 @@ function LargeScreenNav({
           <div className="text-xl font-bold">VisualStream</div>
         </Link>
         {/* SearchBar Section */}
-        <div className="flex items-center bg-white text-black rounded-sm w-1/2">
-          <div className="relative">
-            {/* <select className="bg-gray-200 text-black px-2 py-1 rounded-l-md appearance-none pr-8">
-              <option>All</option>
-            </select> */}
-            {/* <MdArrowDropDown
-              size={20}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 pointer-events-none"
-            /> */}
-          </div>
+        <div className="flex items-center bg-white text-black rounded-md w-1/2">
           <input
             type="text"
             placeholder="Search VisualStream.ai"
-            className="flex-grow px-2 py-2 outline-none"
+            className="flex-grow px-2 py-2  rounded-md outline-none"
             onChange={(e) =>
               setSearchTerm ? setSearchTerm(e.target.value) : null
             }
