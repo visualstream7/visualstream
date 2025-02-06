@@ -13,6 +13,7 @@ import {
   CarrotIcon,
   Heart,
   Home,
+  LogIn,
   LogOut,
   LucideLogOut,
   ShoppingCart,
@@ -189,9 +190,9 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 </SignOutButton>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="flex items-center gap-2 w-full bg-[#25384c] hover:bg-[#1d2d3f] transition text-white py-3 text-lg font-bold rounded-lg shadow-md  justify-center">
-                    <GrGoogle size={22} />
-                    Sign In with Google
+                  <button className="flex items-center gap-2 w-max px-10 m-auto bg-[#7692FF] transition text-white py-3 text-lg font-bold rounded-lg shadow-md  justify-center">
+                    Sign In
+                    <LogIn size={22} />
                   </button>
                 </SignInButton>
               )}

@@ -347,8 +347,8 @@ function BentoGrid({
       </div>
 
       <div
-        className={`hidden md:flex w-[calc(100%-40px)] md:w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-200px)] md:h-max overflow-y-auto overflow-x-hidden custom-scrollbar flex-col
-          ${currentImages?.length < PER_PAGE ? "pt-[0px]" : "pt-[0px]"}`}
+        className={`hidden md:flex w-[calc(100%-40px)] md:w-[calc(100%-80px)] m-auto max-h-[calc(100%-80px)] h-[calc(100%-200px)]  overflow-y-auto overflow-x-hidden custom-scrollbar flex-col
+          ${currentImages?.length < PER_PAGE ? "" : "md:h-max"}`}
       >
         {imageChunks.map((chunk, chunkIndex) => (
           <div
