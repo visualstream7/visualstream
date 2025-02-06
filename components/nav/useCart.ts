@@ -16,6 +16,7 @@ export default function useCart({
   user: UserResource | null | undefined;
 }) {
   const [cartCount, setCartCount] = useState(0);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   let [shipping, setShipping] = useState<number>(0);
   let [tax, setTax] = useState<number>(0);
@@ -36,6 +37,13 @@ export default function useCart({
   >([]);
   const [loading, setLoading] = useState<boolean>(false);
   const database = new SupabaseWrapper("CLIENT");
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", () => {
+      setIsMobile(window.innerWidth < 768);
+    });
+  }, []);
 
   async function fetchCartData(cartData: CartItem[]) {
     setLoading(true);
@@ -135,9 +143,6 @@ export default function useCart({
     }
   };
 
-  const isMobile = window.innerWidth <= 768; // Detect if screen width is <= 768px (mobile)
-
-
   const handleDecrement = async (
     productId: number,
     variantId: number,
@@ -214,17 +219,16 @@ export default function useCart({
       );
       localStorage.setItem("cart", JSON.stringify(updatedCart));
 
-      toast('Item removed from cart!',
-        {
-          position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
-          autoClose: 1000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-          transition: Bounce,
-        });
+      toast("Item removed from cart!", {
+        position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        theme: "dark",
+        transition: Bounce,
+      });
 
       return;
     }
@@ -239,9 +243,8 @@ export default function useCart({
       if (error) {
         throw new Error(error);
       }
-      toast('Item removed from cart!',
-        {
-          position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+      toast("Item removed from cart!", {
+        position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
         autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: false,

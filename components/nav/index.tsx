@@ -180,7 +180,6 @@ export const MobileUserModal = ({ user }: UserPropType) => {
               </Link>
             </div>
 
-
             <div className="absolute bottom-6 w-full max-w-sm px-6">
               {user ? (
                 <SignOutButton>
@@ -197,7 +196,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 </SignInButton>
               )}
             </div>
-        </div>
+          </div>
         </div>
       )}
     </>
@@ -272,11 +271,14 @@ function LargeScreenNav({
           <div className="text-xl font-bold">VisualStream</div>
         </Link>
         {/* SearchBar Section */}
-        <div className="flex items-center bg-white text-black rounded-md w-1/2">
+        <div
+          className={`flex items-center bg-white text-black rounded-md w-1/2 ${router.pathname !== "/" ? "opacity-0" : ""}`}
+        >
           <input
             type="text"
             placeholder="Search VisualStream.ai"
-            className="flex-grow px-2 py-2  rounded-md outline-none"
+            className={`flex-grow px-2 py-2  rounded-md outline-none`}
+            disabled={router.pathname !== "/"}
             onChange={(e) =>
               setSearchTerm ? setSearchTerm(e.target.value) : null
             }

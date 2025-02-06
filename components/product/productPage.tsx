@@ -23,8 +23,6 @@ import { Json } from "@/database/types";
 import useCart from "../nav/useCart";
 import { Bounce, toast } from "react-toastify";
 
-
-
 type UserPropType = {
   user: UserResource | null | undefined;
   image: Image;
@@ -75,6 +73,24 @@ type Image = {
 };
 
 const database = new SupabaseWrapper("CLIENT");
+
+const PRODUCTS = {
+  PAPER_POSTER: 1,
+  CANVAS: 3,
+  MUG: 19,
+  T_SHIRT: 71,
+  TOTE_BAG: 84,
+  PHONE_CASE: 181,
+  HAT: 206,
+  BAGPACK: 279,
+  STICKERS: 358,
+  HOODIE: 380,
+  WATER_BOTTLE: 382,
+  LAPTOP_SLEEVE: 394,
+  SPIRAL_NOTEBOOK: 474,
+  JIGSAW_PUZZLE: 534,
+  METAL_PRINT: 588,
+};
 
 function getSortedProducts(products: Product[]): Product[] {
   // Define the desired sort order based on product IDs
@@ -204,7 +220,7 @@ const RelatedProductsCarousel = ({
 
             const mockup = await client.getMockupImage(
               product.image,
-              product_image.image_url!,
+              product_image.low_resolution_image_url!,
               product.id,
               false,
             );
@@ -566,7 +582,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
   // handle unsigned add to cart
   const isMobile = window.innerWidth <= 768; // Detect if screen width is <= 768px (mobile)
 
-
   const unsignedAddToCart = async (): Promise<void> => {
     let cart = localStorage.getItem("cart") || "[]";
     let cartItems = JSON.parse(cart);
@@ -594,9 +609,24 @@ const ProductPage: React.FC<ProductPageProps> = ({
   };
 
   const addToCart = async (): Promise<void> => {
+    const product_id = parseInt(id);
     // if mockup is not generated, alert user to wait
-    if (!getMockupOfSelectedVariant()?.mock) {
-      alert("Please wait for the mockup to be generated.");
+    if (
+      product_id !== PRODUCTS.STICKERS &&
+      !getMockupOfSelectedVariant()?.mock
+    ) {
+      toast.error("Please wait for the mockup to generate", {
+        position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
+        autoClose: 1000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+      });
+
       return;
     }
 
@@ -614,7 +644,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
       parseInt(image_id),
       quantity,
     );
-    toast.success('Item added to cart!', {
+    toast.success("Item added to cart!", {
       position: isMobile ? "top-center" : "bottom-right", // Top-center for mobile, bottom-right for larger screens
       autoClose: 1000,
       hideProgressBar: false,
@@ -765,30 +795,40 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
         if (firstMock) {
           setSelectedVariantGroup(distinct[0]);
-          setVariantMocks(fetchedMocks);
-          return;
-        }
+          setVariantMocks((mocks) => [...fetchedMocks]);
 
-        const mockup = await getMockupImage(
-          distinct[0],
-          imageResult.image_url!,
-          parseInt(id),
-        );
-        let { mock: dbMock, variantIds } = await addMockupToDatabase(
-          parseInt(image_id),
-          distinct[0].variant_ids,
-          parseInt(id),
-          mockup,
-        );
-
-        // Add the mockup to the variantMocks state
-        //
-        if (dbMock && variantIds) {
-          setVariantMocks((prev) => [
+          // @ts-ignore
+          setProduct((prev) => ({
             ...prev,
-            { variant_id: variantIds[0], mock: dbMock },
-          ]);
-          console.log("Mockup added to database", dbMock, distinct[0]);
+            isLoadingMockup: false,
+            mockup: firstMock.mock,
+          }));
+
+          setLoading(false);
+
+          return;
+        } else {
+          const mockup = await getMockupImage(
+            distinct[0],
+            imageResult.low_resolution_image_url!,
+            parseInt(id),
+          );
+          let { mock: dbMock, variantIds } = await addMockupToDatabase(
+            parseInt(image_id),
+            distinct[0].variant_ids,
+            parseInt(id),
+            mockup,
+          );
+
+          // Add the mockup to the variantMocks state
+          //
+          if (dbMock && variantIds) {
+            setVariantMocks((prev) => [
+              ...prev,
+              { variant_id: variantIds[0], mock: dbMock },
+            ]);
+            console.log("Mockup added to database", dbMock, distinct[0]);
+          }
         }
       } catch (error) {
       } finally {

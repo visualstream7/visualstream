@@ -276,13 +276,26 @@ export default function useImageSearch({
     console.log("Search tag images", imagesWithCountScore);
   }, [searchTags, images]);
 
+  function returnableImages() {
+    // if no color is selected
+    if (selectedColors.length === 0) {
+      if (searchTags?.length > 0) {
+        return searchTagImages;
+      } else {
+        return unorderedImages;
+      }
+    } else {
+      if (searchTags?.length === 0) {
+        return images;
+      } else {
+        let searchTagImagesIDs = searchTagImages.map((image) => image.id);
+        return images.filter((image) => searchTagImagesIDs.includes(image.id));
+      }
+    }
+  }
+
   return {
-    images:
-      selectedColors.length > 0
-        ? images
-        : searchTags?.length > 0
-          ? searchTagImages
-          : unorderedImages,
+    images: returnableImages(),
     isImagesLoading: loading,
   };
 }
