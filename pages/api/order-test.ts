@@ -41,6 +41,7 @@ const PRODUCT_VARIANTS = {
   LAPTOP_SLEEVE_VARIANT: 10985,
   SPIRAL_NOTEBOOK_VARIANT: 12141,
   JIGSAW_PUZZLE_VARIANT: 13431,
+  CANVAS_VARIANT: 5,
 };
 
 async function getImageDimensions(url: string): Promise<ImageDimensions> {
@@ -59,6 +60,16 @@ export default async function handler(
     return res.status(405).json({ result: null, error: "Method not allowed" });
   }
 
+  // query variant id
+
+  const { variant_id } = req.query;
+
+  if (!variant_id) {
+    return res
+      .status(200)
+      .json({ result: null, error: "Variant ID is required" });
+  }
+
   const IMAGE_URL =
     "https://utfs.io/f/8t9iMYLAkULvtfVP55b9HMxIfSmQ2w4nscqr9lTK0huJyCNY";
   // const IMAGE_URL =
@@ -67,8 +78,8 @@ export default async function handler(
   const order = getOrderObject(
     {
       image: IMAGE_URL,
-      product_id: PRODUCTS.BAGPACK,
-      variant_id: PRODUCT_VARIANTS.BAGPACK_VARIANT,
+      product_id: PRODUCTS.PAPER_POSTER,
+      variant_id: variant_id || PRODUCT_VARIANTS.BAGPACK_VARIANT,
       quantity: 1,
     },
     { height, width },
