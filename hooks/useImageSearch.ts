@@ -3,7 +3,7 @@ import { SupabaseWrapper } from "@/database/supabase";
 import ColorAnalyzer, {
   ImageWithSimilarity,
 } from "@/libs/ColorAnalyzer/colorAnalyzer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const hexToRgb = (hex: string) => {
   const bigint = parseInt(hex.slice(1), 16);

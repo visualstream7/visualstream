@@ -41,6 +41,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
+  console.log("event.type", event.type);
   // Handle the event
   switch (event.type) {
     case "checkout.session.completed": {
