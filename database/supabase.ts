@@ -75,6 +75,38 @@ class SupabaseWrapper {
     }
   }
 
+  getLatestImages = async (
+    numberOfImages: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        .from("Images")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(numberOfImages);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error fetching latest images", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
   saveMetadata = async (
     id: string,
     metadata: any,

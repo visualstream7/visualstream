@@ -423,7 +423,6 @@ function ProductList({
   );
 }
 
-
 export default function Admin() {
   const { user, isLoaded } = useUser();
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -434,7 +433,6 @@ export default function Admin() {
   );
   const [activeTab, setActiveTab] = useState<string>("Products");
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(false); // New state for sidebar visibility
-
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -455,7 +453,7 @@ export default function Admin() {
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
-    setIsSidebarVisible(false); 
+    setIsSidebarVisible(false);
   };
 
   const fetchVariants = async (id: number): Promise<Variant[]> => {
@@ -555,7 +553,6 @@ export default function Admin() {
     );
   }
 
-
   if (user && !isAdmin) {
     return <div>Unauthorized</div>;
   }
@@ -574,8 +571,9 @@ export default function Admin() {
 
       {/* Left Sidebar */}
       <div
-        className={`fixed inset-0 bg-[#25384c] text-white flex flex-col z-40 transform ${isSidebarVisible ? "translate-x-0" : "-translate-x-full"
-          } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
+        className={`fixed inset-0 bg-[#25384c] text-white flex flex-col z-40 transform ${
+          isSidebarVisible ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
       >
         <div className="flex justify-center items-center p-4 mb-2">
           <h1 className="text-2xl font-bold">VisualStream</h1>
@@ -584,15 +582,17 @@ export default function Admin() {
         {/* Tabs */}
         <div className="flex flex-col">
           <button
-            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Products" ? "bg-gray-600" : ""
-              }`}
+            className={`text-white p-2 mb-2 rounded-md ${
+              activeTab === "Products" ? "bg-gray-600" : ""
+            }`}
             onClick={() => handleTabChange("Products")}
           >
             Products
           </button>
           <button
-            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Stripe Details" ? "bg-gray-600" : ""
-              }`}
+            className={`text-white p-2 mb-2 rounded-md ${
+              activeTab === "Stripe Details" ? "bg-gray-600" : ""
+            }`}
             onClick={() => handleTabChange("Stripe Details")}
           >
             Quick Links
@@ -655,6 +655,26 @@ export default function Admin() {
             </p>
 
             <div className="grid grid-cols-1 mt-5 sm:grid-cols-3 gap-6">
+              <div
+                onClick={() =>
+                  window.open(
+                    "https://analytics.google.com/analytics/web/#/p476945942/reports/intelligenthome",
+                    "_blank",
+                  )
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img src="/customers.png" alt="" className="w-20 h-20" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  User Analytics
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Monitor the traffic
+                </p>
+              </div>
+
               <div
                 onClick={() =>
                   window.open(
@@ -722,6 +742,3 @@ export default function Admin() {
     </div>
   );
 }
-
-
-
