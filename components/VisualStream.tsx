@@ -10,7 +10,9 @@ export default function VisualStream({
 }: {
   onContinue: () => void;
 }) {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(
+    new Date() > new Date(localStorage.getItem("visualstream") || "0"),
+  );
   const [currentImage, setCurrentImage] = useState(0);
   const [direction, setDirection] = useState(1);
 
@@ -29,6 +31,12 @@ export default function VisualStream({
   }, []);
 
   useEffect(() => {
+    if (!isVisible) {
+      onContinue();
+    }
+  }, [isVisible]);
+
+  useEffect(() => {
     if (images.length === 0) return;
     const interval = setInterval(() => {
       setDirection(1);
@@ -41,6 +49,10 @@ export default function VisualStream({
   const handleContinue = () => {
     setIsVisible(false);
     onContinue();
+    // set a cookie to not show this till x hours
+    let nextTime = new Date();
+    nextTime.setHours(nextTime.getHours() + 1);
+    localStorage.setItem("visualstream", nextTime.toString());
   };
 
   return (
