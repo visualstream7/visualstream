@@ -57,7 +57,7 @@ export default function VisualStream({
 
   return (
     isVisible && (
-      <div className="fixed inset-0 z-50 h-screen w-full flex flex-col justify-end items-center pb-10 px-6 overflow-hidden">
+      <div className="fixed inset-0 z-50 h-[100dvh] w-full flex flex-col justify-end items-center pb-10 px-6 overflow-hidden">
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <div className="absolute inset-0 bg-black"></div>
           <AnimatePresence custom={direction} initial={false}>

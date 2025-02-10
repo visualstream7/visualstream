@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import useCart from "../nav/useCart";
 import { SupabaseWrapper } from "@/database/supabase";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 type UserPropType = {
   user: UserResource | null | undefined;
@@ -96,6 +97,21 @@ export default function SearchPage({ user }: UserPropType) {
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
       />
+
+      <div className="flex gap-8 max-w-full overflow-x-auto p-4">
+        {Object.keys(CATEGORIES).map((category, index) => (
+          // @ts-ignore
+          <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
+            <div
+              className={`cursor-pointer ${
+                category === selectedCategory && "border-b-2 border-white"
+              }`}
+            >
+              {category}
+            </div>
+          </Link>
+        ))}
+      </div>
 
       <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-auto">
         <div className="lg:block md:block">
