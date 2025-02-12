@@ -466,20 +466,17 @@ export default function Nav({
       )}
 
       {router.pathname === "/" && (
-        <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
-          <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
+        <div className="block lg:hidden bg-white text-black py-2 px-4 w-full">
+          <div className="flex items-center bg-gray-100 border border-gray-300 focus-within:ring-2 focus-within:ring-gray-200 text-black rounded-md w-full max-w-[100%] mx-auto">
             <input
               type="text"
               placeholder="Search VisualStream.ai"
-              className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-tl-md rounded-bl-md focus:ring-3 focus:ring-gray-200"
-              onChange={(e) =>
-                setSearchTerm ? setSearchTerm(e.target.value) : null
-              }
+              className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-l-md focus:ring-2 focus:ring-gray-200 w-full min-w-0"
+              onChange={(e) => setSearchTerm?.(e.target.value)}
               value={searchTerm || ""}
               onKeyUp={(e) => {
                 if (e.key === "Enter") {
-                  if (!setSearchTags) return;
-                  if (!setSearchTerm) return;
+                  if (!setSearchTags || !setSearchTerm) return;
                   if (searchTerm && searchTags) {
                     if (searchTags.includes(searchTerm)) return;
                     if (searchTags.length >= 5) {
@@ -492,20 +489,18 @@ export default function Nav({
                 }
               }}
             />
-            <button className="px-3 text-gray-900">
+            <button className="px-3 text-gray-900 flex-shrink-0">
               <FiSearch
                 size={20}
+                className="cursor-pointer"
                 onClick={() => {
-                  if (!setSearchTags) return;
-                  if (!setSearchTerm) return;
+                  if (!setSearchTags || !setSearchTerm) return;
                   if (searchTerm && searchTags) {
                     if (searchTags.includes(searchTerm)) return;
-
                     if (searchTags.length >= 5) {
                       alert("You can only search for 5 tags at a time");
                       return;
                     }
-
                     setSearchTags([...searchTags, searchTerm]);
                     setSearchTerm("");
                   }
@@ -515,6 +510,7 @@ export default function Nav({
           </div>
         </div>
       )}
+
 
       {router.pathname === "/" && searchTags && searchTags.length > 0 && (
         <div className="flex md:hidden items-center p-2 px-4 gap-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">

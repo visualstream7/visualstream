@@ -100,18 +100,19 @@ export default function SearchPage({ user }: UserPropType) {
 
       <div className="flex gap-8 max-w-full overflow-x-auto p-4">
         {Object.keys(CATEGORIES).map((category, index) => (
-          // @ts-ignore
+          //@ts-ignore
           <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
-            <div
-              className={`cursor-pointer ${
-                category === selectedCategory && "border-b-2 border-white"
-              }`}
-            >
-              {category}
+            <div className="flex flex-col items-center cursor-pointer">
+              <span className="pb-2">{category}</span>
+              <div
+                className={`h-[3px] w-full rounded-full transition-all ${category === selectedCategory ? "bg-black w-3/4" : "bg-transparent"
+                  }`}
+              ></div>
             </div>
           </Link>
         ))}
       </div>
+
 
       <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-auto">
         <div className="lg:block md:block">
