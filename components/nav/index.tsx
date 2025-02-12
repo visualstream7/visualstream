@@ -134,7 +134,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
         />
       </div>
       {isOpen && (
-        <div className="fixed bg-black bg-opacity-50 w-[100dvw] h-[100vh] top-0 flex justify-center items-center z-50">
+        <div className="fixed bg-black bg-opacity-50 h-[100vh] top-0 flex justify-center items-center z-50">
           <div className="w-screen h-full bg-white flex flex-col items-center relative">
             <button
               onClick={() => setIsOpen(false)}
