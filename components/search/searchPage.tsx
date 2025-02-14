@@ -98,7 +98,7 @@ export default function SearchPage({ user }: UserPropType) {
         setSelectedCategory={setSelectedCategory}
       />
 
-      <div className="flex gap-8 max-w-full overflow-x-auto p-4">
+      <div className="flex gap-8 max-w-full overflow-x-auto p-4 no-scrollbar">
         {Object.keys(CATEGORIES).map((category, index) => (
           // @ts-ignore
           <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
