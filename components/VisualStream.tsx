@@ -73,7 +73,7 @@ export default function VisualStream({
               <img
                 src={images[currentImage]}
                 alt="Visual Stream Background"
-                className="w-full h-full"
+                className="h-full w-full object-cover"
               />
             </motion.div>
           </AnimatePresence>
@@ -94,9 +94,12 @@ export default function VisualStream({
             {images.map((_, index) => (
               <span
                 key={index}
-                className={`h-2 w-2 rounded-full transition-all duration-300 ${
-                  index === currentImage ? "bg-white scale-110" : "bg-gray-400"
-                }`}
+                className={`h-2 w-2 rounded-full transition-all duration-300
+                  ${
+                    index === currentImage
+                      ? "bg-white scale-110"
+                      : "bg-gray-400"
+                  }`}
               ></span>
             ))}
           </div>

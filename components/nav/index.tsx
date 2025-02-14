@@ -200,7 +200,6 @@ export const MobileUserModal = ({ user }: UserPropType) => {
           </div>
         </div>
       )}
-
     </>
   );
 };
@@ -448,7 +447,7 @@ export default function Nav({
 
   return (
     <>
-      <div className="flex p-4 md:hidden justify-between items-center">
+      <div className="flex p-4 md:hidden justify-between items-center bg-[#25384c] text-white">
         <Link href="/">
           <div className="text-xl font-bold">VisualStream</div>
         </Link>
@@ -466,7 +465,7 @@ export default function Nav({
       )}
 
       {router.pathname === "/" && (
-        <div className="block lg:hidden bg-white text-black py-2 px-4 w-full">
+        <div className="block bg-[#1C2A3C] lg:hidden text-black py-2 px-4 w-full">
           <div className="flex items-center bg-gray-100 border border-gray-300 focus-within:ring-2 focus-within:ring-gray-200 text-black rounded-md w-full max-w-[100%] mx-auto">
             <input
               type="text"
@@ -510,7 +509,6 @@ export default function Nav({
           </div>
         </div>
       )}
-
 
       {router.pathname === "/" && searchTags && searchTags.length > 0 && (
         <div className="flex md:hidden items-center p-2 px-4 gap-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">

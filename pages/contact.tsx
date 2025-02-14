@@ -64,27 +64,17 @@ export default function ContactUs() {
     }
   };
 
-<<<<<<< Updated upstream
-    return (
-        <div className="bg-gray-50">
-            <Nav user={user} cartCount={cartItems.length} />
-            {/* Hero Section */}
-            <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white py-20">
-                <div className="container mx-auto px-4 text-center">
-                    <h1 className="text-4xl md:text-6xl font-bold">Contact <span className="text-blue-500">Us</span> </h1>
-                </div>
-            </section>
-=======
   return (
     <div className="bg-gray-50">
       <Nav user={user} cartCount={cartItems.length} />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold">Contact Us</h1>
+          <h1 className="text-4xl md:text-6xl font-bold">
+            Contact <span className="text-blue-500">Us</span>{" "}
+          </h1>
         </div>
       </section>
->>>>>>> Stashed changes
 
       {/* Contact Information Section */}
       <section className="py-10 mb-8 lg:py-6">
