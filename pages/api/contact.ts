@@ -1,4 +1,4 @@
-import { NextApiRequest, NextApiResponse } from "next";
+\import { NextApiRequest, NextApiResponse } from "next";
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 const mailersend = new MailerSend({
@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
         const sentFrom = new Sender("MS_axmL5i@trial-pq3enl6oprml2vwr.mlsender.net",
             "VisualStream",);
-        const recipients = [new Recipient("waliurrahman957@gmail.com", "Support Team")];
+        const recipients = [new Recipient("visualstream.ai@gmail.com", "Support Team")];
 
         const emailParams = new EmailParams()
             .setFrom(sentFrom)
