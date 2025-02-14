@@ -134,8 +134,8 @@ export const MobileUserModal = ({ user }: UserPropType) => {
         />
       </div>
       {isOpen && (
-        <div className="fixed bg-white w-[100vw] h-[100vh] top-0 flex justify-center items-center z-50">
-          <div className="w-full h-full bg-white flex flex-col items-center relative">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="w-full max-w-md h-full bg-white flex flex-col items-center relative">
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-5 right-5 text-gray-600 hover:text-black"
@@ -159,7 +159,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
               )}
             </div>
 
-            <div className="mt-6 w-full max-w-sm">
+            <div className="mt-6 w-full">
               {user && (
                 <Link href="/orders">
                   <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
@@ -181,7 +181,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
               </Link>
             </div>
 
-            <div className="absolute bottom-6 w-full max-w-sm px-6">
+            <div className="absolute bottom-6 w-full px-6">
               {user ? (
                 <SignOutButton>
                   <button className="w-full bg-red-500 text-white py-3 text-lg font-bold rounded-lg shadow-md hover:bg-red-600 transition">
@@ -190,7 +190,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 </SignOutButton>
               ) : (
                 <SignInButton mode="modal">
-                  <button className="flex items-center gap-2 w-max px-10 m-auto bg-[#7692FF] transition text-white py-3 text-lg font-bold rounded-lg shadow-md  justify-center">
+                  <button className="flex items-center gap-2 w-max px-10 m-auto bg-[#7692FF] transition text-white py-3 text-lg font-bold rounded-lg shadow-md justify-center">
                     Sign In
                     <LogIn size={22} />
                   </button>
@@ -200,6 +200,7 @@ export const MobileUserModal = ({ user }: UserPropType) => {
           </div>
         </div>
       )}
+
     </>
   );
 };
@@ -465,20 +466,17 @@ export default function Nav({
       )}
 
       {router.pathname === "/" && (
-        <div className="block lg:hidden bg-white  text-black py-2 px-4 w-full">
-          <div className="flex items-center bg-gray-100  border border-gray-300 focus:ring-2 focus:ring-gray-200 text-black rounded-md">
+        <div className="block lg:hidden bg-white text-black py-2 px-4 w-full">
+          <div className="flex items-center bg-gray-100 border border-gray-300 focus-within:ring-2 focus-within:ring-gray-200 text-black rounded-md w-full max-w-[100%] mx-auto">
             <input
               type="text"
               placeholder="Search VisualStream.ai"
-              className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-tl-md rounded-bl-md focus:ring-3 focus:ring-gray-200"
-              onChange={(e) =>
-                setSearchTerm ? setSearchTerm(e.target.value) : null
-              }
+              className="flex-grow px-2 py-2 border border-gray-300 outline-none rounded-l-md focus:ring-2 focus:ring-gray-200 w-full min-w-0"
+              onChange={(e) => setSearchTerm?.(e.target.value)}
               value={searchTerm || ""}
               onKeyUp={(e) => {
                 if (e.key === "Enter") {
-                  if (!setSearchTags) return;
-                  if (!setSearchTerm) return;
+                  if (!setSearchTags || !setSearchTerm) return;
                   if (searchTerm && searchTags) {
                     if (searchTags.includes(searchTerm)) return;
                     if (searchTags.length >= 5) {
@@ -491,20 +489,18 @@ export default function Nav({
                 }
               }}
             />
-            <button className="px-3 text-gray-900">
+            <button className="px-3 text-gray-900 flex-shrink-0">
               <FiSearch
                 size={20}
+                className="cursor-pointer"
                 onClick={() => {
-                  if (!setSearchTags) return;
-                  if (!setSearchTerm) return;
+                  if (!setSearchTags || !setSearchTerm) return;
                   if (searchTerm && searchTags) {
                     if (searchTags.includes(searchTerm)) return;
-
                     if (searchTags.length >= 5) {
                       alert("You can only search for 5 tags at a time");
                       return;
                     }
-
                     setSearchTags([...searchTags, searchTerm]);
                     setSearchTerm("");
                   }
@@ -514,6 +510,7 @@ export default function Nav({
           </div>
         </div>
       )}
+
 
       {router.pathname === "/" && searchTags && searchTags.length > 0 && (
         <div className="flex md:hidden items-center p-2 px-4 gap-4 overflow-x-scroll h-min max-w-[calc(90vw-80px)] no-scrollbar flex-wrap">
