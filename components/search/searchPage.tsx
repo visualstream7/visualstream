@@ -98,11 +98,7 @@ export default function SearchPage({ user }: UserPropType) {
         setSelectedCategory={setSelectedCategory}
       />
 
-<<<<<<< HEAD
-      <div className="flex gap-8 max-w-full overflow-x-auto p-4 no-scrollbar">
-=======
       <div className="flex gap-8 md:hidden max-w-full overflow-x-auto p-4">
->>>>>>> bf25b3401d9fd3c0830389780689f298336a4a93
         {Object.keys(CATEGORIES).map((category, index) => (
           //@ts-ignore
           <Link href={`/?category=${CATEGORIES[category]}`} key={index}>

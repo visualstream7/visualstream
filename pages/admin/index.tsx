@@ -726,13 +726,32 @@ export default function Admin() {
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
               >
                 <div className="flex justify-center mb-4">
-                  <img src="/customers.png" alt="" className="w-20 h-20" />
+                  <img src="/customers2.png" alt="" className="w-20 h-20 rounded-full border border-gray-600 p-1" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-2">
                   Customers
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   View all customers and their details.
+                </p>
+              </div>
+              <div
+                onClick={() =>
+                  window.open(
+                    "https://www.printful.com/",
+                    "_blank",
+                  )
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center  mb-4">
+                  <img src="/printful_logo.png" alt="" className="w-20 h-20 rounded-full border border-gray-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Printful
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Printful: Custom Print On Demand & Dropshipping
                 </p>
               </div>
             </div>
