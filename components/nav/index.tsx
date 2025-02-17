@@ -28,12 +28,18 @@ import { GrGoogle } from "react-icons/gr";
 import { CiLogout } from "react-icons/ci";
 import { CATEGORIES } from "../search/searchPage";
 import { useRouter } from "next/router";
+import { colors } from "@/data/colors";
 
 const database = new SupabaseWrapper("CLIENT");
 
 type UserPropType = {
   user: UserResource | null | undefined;
 };
+
+interface Color {
+  hex: string;
+  percentage: number;
+}
 
 type NavPropType = {
   user: UserResource | null | undefined;
@@ -44,6 +50,10 @@ type NavPropType = {
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
   selectedCategory?: string;
   setSelectedCategory?: React.Dispatch<React.SetStateAction<string>>;
+  selectedColors?: any[];
+  setSelectedColors?: React.Dispatch<React.SetStateAction<any[]>>;
+  isResizing?: number | null;
+  setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 type ComponentPropType = {
@@ -55,6 +65,10 @@ type ComponentPropType = {
   setSearchTerm?: React.Dispatch<React.SetStateAction<string>>;
   selectedCategory?: string;
   setSelectedCategory?: React.Dispatch<React.SetStateAction<string>>;
+  selectedColors?: Color[];
+  setSelectedColors?: React.Dispatch<React.SetStateAction<Color[]>>;
+  isResizing?: number | null;
+  setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
 // UserButton Component
@@ -204,11 +218,71 @@ export const MobileUserModal = ({ user }: UserPropType) => {
   );
 };
 
-function MobileNav({ user, count }: ComponentPropType) {
+function MobileNav({
+  user,
+  count,
+  selectedColors,
+  setSelectedColors,
+}: ComponentPropType) {
   return (
     <>
       {/* Bottom Navbar */}
       <div className="w-full  block lg:hidden border-t-2 fixed bottom-0 z-10 h-max bg-white shadow-lg">
+        <div className="grid grid-rows-2 grid-flow-col gap-2 w-full m-2 justify-center overflow-x-auto">
+          {colors.map((color, index) => (
+            <div
+              key={index}
+              className="w-[40px] h-8 bg-black relative"
+              style={{ backgroundColor: color }}
+              onClick={() => {
+                if (setSelectedColors && selectedColors) {
+                  let newColors = [...selectedColors];
+
+                  if (newColors.length >= 5) {
+                    alert("You can only select 5 colors at a time");
+                    return;
+                  }
+
+                  newColors.push({ hex: color, percentage: 0 });
+
+                  for (let i = 0; i < newColors.length; i++) {
+                    newColors[i].percentage = 100 / newColors.length;
+                  }
+                  setSelectedColors(newColors);
+                }
+              }}
+            >
+              {selectedColors &&
+                selectedColors.map((selectedColor) => {
+                  if (selectedColor.hex === color) {
+                    return (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (setSelectedColors && selectedColors) {
+                            let newColors = [...selectedColors];
+                            newColors = newColors.filter(
+                              (selectedColor) => selectedColor.hex !== color,
+                            );
+
+                            for (let i = 0; i < newColors.length; i++) {
+                              newColors[i].percentage = 100 / newColors.length;
+                            }
+
+                            setSelectedColors(newColors);
+                          }
+                        }}
+                        className="absolute top-0 right-0"
+                      >
+                        <X size={20} strokeWidth={4} />
+                      </button>
+                    );
+                  }
+                })}
+            </div>
+          ))}
+        </div>
+
         <div className="text-white px-2 py-4 flex items-center justify-around w-full">
           <Link href="/">
             <Home size={24} color="black" />
@@ -442,6 +516,10 @@ export default function Nav({
   setSearchTerm,
   selectedCategory,
   setSelectedCategory,
+  selectedColors,
+  setSelectedColors,
+  isResizing,
+  setIsResizing,
 }: NavPropType) {
   const router = useRouter();
 
@@ -449,14 +527,14 @@ export default function Nav({
     <>
       <div className="flex p-4 md:hidden justify-between items-center bg-[#25384c] text-white">
         <Link href="/">
-          <div className="text-xl font-bold">VisualStream</div>
+          <div className="text-xl font-bold">VisualStream</div>{" "}
         </Link>
       </div>
 
       {router.pathname === "/" && (
-        <div className="flex justify-between items-center px-4 md:hidden">
+        <div className="flex justify-between items-center px-4 md:hidden bg-[#25384c]">
           {user && (
-            <div className="flex flex-col py-4 md:hidden">
+            <div className="flex flex-col py-4 md:hidden text-white">
               <p className="text-lg font-bold"> Welcome Back </p>
               <p> {user.fullName} </p>
             </div>
@@ -544,7 +622,12 @@ export default function Nav({
       />
 
       {/* Mobile Nav */}
-      <MobileNav user={user} count={cartCount} />
+      <MobileNav
+        user={user}
+        count={cartCount}
+        selectedColors={selectedColors}
+        setSelectedColors={setSelectedColors}
+      />
     </>
   );
 }

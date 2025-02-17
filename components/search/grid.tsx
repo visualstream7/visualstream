@@ -123,7 +123,7 @@ const NormalGrid = ({
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
   return (
-    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-200px)] h-[calc(100%-200px)] overflow-y-auto custom-scrollbar p-2">
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div

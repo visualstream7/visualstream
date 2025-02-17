@@ -39,7 +39,7 @@ export default function SearchPage({ user }: UserPropType) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTags, setSearchTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    CATEGORIES.ALL
+    CATEGORIES.ALL,
   );
 
   const [likedImages, setLikedImages] = useState<number[]>([]);
@@ -96,6 +96,10 @@ export default function SearchPage({ user }: UserPropType) {
         cartCount={cartItems.length}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        selectedColors={selectedColors}
+        setSelectedColors={setSelectedColors}
+        isResizing={isResizing}
+        setIsResizing={setIsResizing}
       />
 
       <div className="flex gap-8 max-w-full overflow-x-auto p-4 no-scrollbar md:hidden bg-[#1C2A3C] text-white">

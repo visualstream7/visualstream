@@ -116,7 +116,7 @@ export default function PickerContainer({
 
   return (
     <div
-      className={`
+      className={`hidden md:block
     flex-1 bg-white mx-auto p-4 md:p-8 w-full overflow-auto h-full
 
   `}
