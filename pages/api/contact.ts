@@ -26,7 +26,7 @@ export default async function handler(
       "VisualStream",
     );
     const recipients = [
-      new Recipient("visualstream.ai@gmail.com", "Support Team"),
+      new Recipient("visualstream709@gmail.com", "Support Team"),
     ];
 
     const emailParams = new EmailParams()

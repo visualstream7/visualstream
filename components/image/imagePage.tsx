@@ -277,8 +277,8 @@ export default function ImagePage({ user, image }: UserPropType) {
             </h2>
           )}
           {!hoveredImage && (
-            <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw]">
-              {image.ai_tags || "Description"}
+            <p className="text-gray-600 text-left m-4 lg:m-0 lg:w-[30vw] h-[100px] overflow-auto">
+              {image.ai_article_describe || "Description"}
             </p>
           )}
         </div>
