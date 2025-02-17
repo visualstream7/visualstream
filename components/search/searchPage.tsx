@@ -39,7 +39,7 @@ export default function SearchPage({ user }: UserPropType) {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchTags, setSearchTags] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    CATEGORIES.ALL,
+    CATEGORIES.ALL
   );
 
   const [likedImages, setLikedImages] = useState<number[]>([]);
