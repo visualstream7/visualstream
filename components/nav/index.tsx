@@ -16,13 +16,14 @@ import {
   LogIn,
   LogOut,
   LucideLogOut,
+  PaintBucket,
   ShoppingCart,
   ShoppingCartIcon,
   UserIcon,
   X,
   XIcon,
 } from "lucide-react";
-import { BiCart } from "react-icons/bi";
+import { BiCart, BiColor, BiPaint } from "react-icons/bi";
 import { IoCart } from "react-icons/io5";
 import { GrGoogle } from "react-icons/gr";
 import { CiLogout } from "react-icons/ci";
@@ -54,6 +55,8 @@ type NavPropType = {
   setSelectedColors?: React.Dispatch<React.SetStateAction<any[]>>;
   isResizing?: number | null;
   setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
+  showPalette?: boolean;
+  setShowPalette?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 type ComponentPropType = {
@@ -69,6 +72,8 @@ type ComponentPropType = {
   setSelectedColors?: React.Dispatch<React.SetStateAction<Color[]>>;
   isResizing?: number | null;
   setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
+  showPalette?: boolean;
+  setShowPalette?: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 // UserButton Component
@@ -182,6 +187,14 @@ export const MobileUserModal = ({ user }: UserPropType) => {
                 </Link>
               )}
 
+              {user && (
+                <Link href="/favorites">
+                  <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
+                    Favorites
+                  </div>
+                </Link>
+              )}
+
               <Link href="/about">
                 <div className="w-full py-4 text-lg text-gray-700 font-medium border-b border-gray-200 hover:bg-gray-100 cursor-pointer text-center">
                   About Us
@@ -223,74 +236,85 @@ function MobileNav({
   count,
   selectedColors,
   setSelectedColors,
+  showPalette,
+  setShowPalette,
 }: ComponentPropType) {
+  const router = useRouter();
+
+  const isHome = router.pathname === "/";
+
   return (
     <>
       {/* Bottom Navbar */}
       <div className="w-full  block lg:hidden border-t-2 fixed bottom-0 z-10 h-max bg-white shadow-lg">
-        <div className="grid grid-rows-2 grid-flow-col gap-2 w-full m-2 justify-center overflow-x-auto">
-          {colors.map((color, index) => (
-            <div
-              key={index}
-              className="w-[40px] h-8 bg-black relative"
-              style={{ backgroundColor: color }}
-              onClick={() => {
-                if (setSelectedColors && selectedColors) {
-                  let newColors = [...selectedColors];
+        {isHome && showPalette && (
+          <div className="grid grid-rows-2 grid-flow-col gap-2 w-full p-2 justify-center overflow-x-auto">
+            {colors.map((color, index) => (
+              <div
+                key={index}
+                className="w-[40px] h-8 bg-black relative"
+                style={{ backgroundColor: color }}
+                onClick={() => {
+                  if (setSelectedColors && selectedColors) {
+                    let newColors = [...selectedColors];
 
-                  if (newColors.length >= 5) {
-                    alert("You can only select 5 colors at a time");
-                    return;
+                    if (newColors.length >= 5) {
+                      alert("You can only select 5 colors at a time");
+                      return;
+                    }
+
+                    newColors.push({ hex: color, percentage: 0 });
+
+                    for (let i = 0; i < newColors.length; i++) {
+                      newColors[i].percentage = 100 / newColors.length;
+                    }
+                    setSelectedColors(newColors);
                   }
+                }}
+              >
+                {selectedColors &&
+                  selectedColors.map((selectedColor) => {
+                    if (selectedColor.hex === color) {
+                      return (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (setSelectedColors && selectedColors) {
+                              let newColors = [...selectedColors];
+                              newColors = newColors.filter(
+                                (selectedColor) => selectedColor.hex !== color,
+                              );
 
-                  newColors.push({ hex: color, percentage: 0 });
+                              for (let i = 0; i < newColors.length; i++) {
+                                newColors[i].percentage =
+                                  100 / newColors.length;
+                              }
 
-                  for (let i = 0; i < newColors.length; i++) {
-                    newColors[i].percentage = 100 / newColors.length;
-                  }
-                  setSelectedColors(newColors);
-                }
-              }}
-            >
-              {selectedColors &&
-                selectedColors.map((selectedColor) => {
-                  if (selectedColor.hex === color) {
-                    return (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (setSelectedColors && selectedColors) {
-                            let newColors = [...selectedColors];
-                            newColors = newColors.filter(
-                              (selectedColor) => selectedColor.hex !== color,
-                            );
-
-                            for (let i = 0; i < newColors.length; i++) {
-                              newColors[i].percentage = 100 / newColors.length;
+                              setSelectedColors(newColors);
                             }
-
-                            setSelectedColors(newColors);
-                          }
-                        }}
-                        className="absolute top-0 right-0"
-                      >
-                        <X size={20} strokeWidth={4} />
-                      </button>
-                    );
-                  }
-                })}
-            </div>
-          ))}
-        </div>
+                          }}
+                          className="absolute top-0 right-0"
+                        >
+                          <X size={20} strokeWidth={4} />
+                        </button>
+                      );
+                    }
+                  })}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="text-white px-2 py-4 flex items-center justify-around w-full">
           <Link href="/">
             <Home size={24} color="black" />
           </Link>
 
-          <Link href="/favorites">
-            <Heart size={24} color="black" />
-          </Link>
+          <PaintBucket
+            size={24}
+            color="black"
+            onClick={() => setShowPalette((prev) => !prev)}
+          />
 
           {/* Cart Icon with Count Badge */}
           <div className="relative">
@@ -520,6 +544,8 @@ export default function Nav({
   setSelectedColors,
   isResizing,
   setIsResizing,
+  showPalette,
+  setShowPalette,
 }: NavPropType) {
   const router = useRouter();
 
@@ -627,6 +653,8 @@ export default function Nav({
         count={cartCount}
         selectedColors={selectedColors}
         setSelectedColors={setSelectedColors}
+        showPalette={showPalette}
+        setShowPalette={setShowPalette}
       />
     </>
   );

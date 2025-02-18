@@ -42,6 +42,8 @@ export default function SearchPage({ user }: UserPropType) {
     CATEGORIES.ALL,
   );
 
+  const [showPalette, setShowPalette] = useState(false);
+
   const [likedImages, setLikedImages] = useState<number[]>([]);
 
   const { images, isImagesLoading } = useImageSearch({
@@ -100,6 +102,8 @@ export default function SearchPage({ user }: UserPropType) {
         setSelectedColors={setSelectedColors}
         isResizing={isResizing}
         setIsResizing={setIsResizing}
+        showPalette={showPalette}
+        setShowPalette={setShowPalette}
       />
 
       <div className="flex gap-8 max-w-full overflow-x-auto p-4 no-scrollbar md:hidden bg-[#1C2A3C] text-white">
@@ -139,6 +143,7 @@ export default function SearchPage({ user }: UserPropType) {
           likedImages={likedImages}
           setLikedImages={setLikedImages}
           user={user}
+          showPalette={showPalette}
         />
       </div>
     </div>
