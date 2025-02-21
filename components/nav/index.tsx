@@ -313,7 +313,9 @@ function MobileNav({
           <PaintBucket
             size={24}
             color="black"
-            onClick={() => setShowPalette((prev) => !prev)}
+            onClick={() => {
+              if (setShowPalette) setShowPalette((prev) => !prev);
+            }}
           />
 
           {/* Cart Icon with Count Badge */}
