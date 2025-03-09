@@ -571,7 +571,7 @@ export default function Admin() {
 
       {/* Left Sidebar */}
       <div
-        className={`fixed inset-0 bg-[#25384c] text-white flex flex-col z-40 transform ${
+        className={`fixed inset-0 bg-[#25384c] text-white  flex flex-col z-40 transform ${
           isSidebarVisible ? "translate-x-0" : "-translate-x-full"
         } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
       >
