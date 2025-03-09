@@ -216,22 +216,20 @@ function ProductCard({
             <div
               key={variant.variant_id}
               className={`relative h-10 w-10 flex items-center justify-center rounded-md border cursor-pointer shadow-sm
-          ${
-            variant.variant_id === selectedVariantId
-              ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
-              : isVariantDiscontinued(variant.variant_id)
-                ? "border-red-500 bg-red-50"
-                : "border-green-500 bg-green-50"
-          } hover:shadow-md transition`}
+          ${variant.variant_id === selectedVariantId
+                  ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
+                  : isVariantDiscontinued(variant.variant_id)
+                    ? "border-red-500 bg-red-50"
+                    : "border-green-500 bg-green-50"
+                } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
               {/* Color Circle */}
               <div
-                className={`w-6 h-6 rounded-full mx-auto border ${
-                  variant.variant_id === selectedVariantId
-                    ? "border-blue-500"
-                    : "border-gray-300"
-                }`}
+                className={`w-6 h-6 rounded-full mx-auto border ${variant.variant_id === selectedVariantId
+                  ? "border-blue-500"
+                  : "border-gray-300"
+                  }`}
                 style={{ backgroundColor: variant.color }}
               ></div>
               {isVariantDiscontinued(variant.variant_id) && (
@@ -260,11 +258,10 @@ function ProductCard({
             <p className="text-sm text-gray-600 mt-1">
               Status:{" "}
               <span
-                className={`font-semibold ${
-                  isVariantDiscontinued(selectedVariantId)
-                    ? "text-red-500"
-                    : "text-green-600"
-                }`}
+                className={`font-semibold ${isVariantDiscontinued(selectedVariantId)
+                  ? "text-red-500"
+                  : "text-green-600"
+                  }`}
               >
                 {isVariantDiscontinued(selectedVariantId)
                   ? "Discontinued"
@@ -434,6 +431,87 @@ export default function Admin() {
   );
   const [activeTab, setActiveTab] = useState<string>("Products");
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(false); // New state for sidebar visibility
+  const [selectedOption, setSelectedOption] = useState("images");
+
+  interface Image {
+    id: number;
+    image_url: string;
+    title: string;
+    category: string;
+  }
+
+  const [images, setImages] = useState<Image[]>([]);
+  const [favoriteImages, setFavoriteImages] = useState<{ category: string; count: number }[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  interface Image {
+    id: number;
+    image_url: string;
+    title: string;
+    category: string;
+  }
+
+  const handleDeleteImage = async (imageId: number): Promise<void> => {
+    if (window.confirm("Are you sure you want to delete this image?")) {
+      try {
+        setLoading(true);
+
+        const { result, error } = await database.deleteImage(imageId);
+
+        if (error) {
+          alert("Error deleting the image: " + error);
+        } else {
+          setImages((prevImages) => prevImages.filter((image) => image.id !== imageId));
+        }
+      } catch (error: any) {
+        alert("Error: " + error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+
+  useEffect(() => {
+    async function fetchImages() {
+      setLoading(true);
+      const { result, error } = await database.getImages();
+
+      if (!error && result) {
+        //@ts-ignore
+        setImages(result);
+      }
+      setLoading(false);
+    }
+
+    async function fetchFavoriteImages() {
+      setLoading(true);
+      const { result, error } = await database.getFavoriteImagesByCategory();
+
+      if (!error && result) {
+        const favoriteCountByCategory = result.reduce((acc: { [key: string]: number }, { category, count }: { category: string; count: number }) => {
+          acc[category] = (acc[category] || 0) + count;
+          return acc;
+        }, {});
+
+        const favoriteImagesData = Object.keys(favoriteCountByCategory).map((category) => ({
+          category,
+          count: favoriteCountByCategory[category],
+        }));
+
+        setFavoriteImages(favoriteImagesData);
+      }
+      setLoading(false);
+    }
+
+
+    if (selectedOption === "images") {
+      fetchImages();
+    } else if (selectedOption === "favorite_images") {
+      fetchFavoriteImages();
+    }
+  }, [selectedOption]);
+
 
   useEffect(() => {
     const checkAdmin = () => {
@@ -572,9 +650,8 @@ export default function Admin() {
 
       {/* Left Sidebar */}
       <div
-        className={`fixed inset-0 bg-[#25384c] text-white  flex flex-col z-40 transform ${
-          isSidebarVisible ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
+        className={`fixed inset-0 bg-[#25384c] text-white  flex flex-col z-40 transform ${isSidebarVisible ? "translate-x-0" : "-translate-x-full"
+          } transition-transform duration-300 md:relative md:translate-x-0 md:w-1/6`}
       >
         <div className="flex justify-center items-center p-4 mb-2">
           <h1 className="text-2xl font-bold">VisualStream</h1>
@@ -583,20 +660,25 @@ export default function Admin() {
         {/* Tabs */}
         <div className="flex flex-col">
           <button
-            className={`text-white p-2 mb-2 rounded-md ${
-              activeTab === "Products" ? "bg-gray-600" : ""
-            }`}
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Products" ? "bg-gray-600" : ""
+              }`}
             onClick={() => handleTabChange("Products")}
           >
             Products
           </button>
           <button
-            className={`text-white p-2 mb-2 rounded-md ${
-              activeTab === "Stripe Details" ? "bg-gray-600" : ""
-            }`}
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Stripe Details" ? "bg-gray-600" : ""
+              }`}
             onClick={() => handleTabChange("Stripe Details")}
           >
             Quick Links
+          </button>
+          <button
+            className={`text-white p-2 mb-2 rounded-md ${activeTab === "Analytics" ? "bg-gray-600" : ""
+              }`}
+            onClick={() => handleTabChange("Analytics")}
+          >
+            Analytics
           </button>
         </div>
 
@@ -802,7 +884,105 @@ export default function Admin() {
             </div>
           </div>
         )}
+
+        {
+          activeTab === "Analytics" && (
+            <div className="space-y-6">
+              {/* Analytics Tab Title */}
+              <h2 className="text-2xl font-bold text-gray-800">Analytics</h2>
+              <div className="mt-4">
+                <select
+                  value={selectedOption}
+                  onChange={(e) => setSelectedOption(e.target.value)}
+                  className="w-full sm:w-64 p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ease-in-out cursor-pointer"
+                >
+                  <option value="images">Images</option>
+                  <option value="favorite_images">Favorite Images</option>
+                </select>
+              </div>
+
+              {/* Content Section */}
+              <div className="mt-4 relative min-h-[400px]">
+                {loading ? (
+                  <p className="absolute top-0 left-0 text-gray-600">Loading...</p>
+                ) : selectedOption === "images" ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {images.map((image) => (
+                      <div
+                        key={image.id}
+                        className="relative p-4 border rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out"
+                      >
+                        <img
+                          src={image.image_url}
+                          alt={image.title}
+                          className="w-full h-40 object-cover rounded-md mb-4"
+                        />
+                        <span className="text-sm text-gray-600 font-medium">{image.category}</span>
+                        <div className="absolute bottom-2 right-2 flex space-x-2">
+                          {/* View Button */}
+                          <a
+                            href={image.image_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-blue-500 text-white px-3 py-1 rounded-md shadow-md hover:bg-blue-600 hover:scale-105 transition-all duration-200 ease-in-out"
+                          >
+                            View
+                          </a>
+
+                          {/* Delete Button */}
+                          <button
+                            onClick={() => handleDeleteImage(image.id)}
+                            className="bg-red-500 text-white px-3 py-1 rounded-md shadow-md hover:bg-red-600 hover:scale-105 transition-all duration-200 ease-in-out"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {favoriteImages.map((item) => (
+                      <div
+                        key={item.category}
+                        className="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ease-in-out transform hover:-translate-y-2 cursor-pointer mb-10"
+                      >
+                        <div className="flex flex-col items-center justify-center space-y-4">
+                          {/* Add an icon or image for each category */}
+                          <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                            <svg
+                              className="w-8 h-8 text-blue-600"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                              ></path>
+                            </svg>
+                          </div>
+                          <p className="text-xl font-semibold text-gray-900">{item.category}</p>
+                          <p className="text-lg text-gray-600">Favorite Count</p>
+                          <p className="text-3xl font-bold text-gray-900">{item.count}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        }
+
+
       </div>
     </div>
   );
+
 }
+
+
