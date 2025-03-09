@@ -113,17 +113,21 @@ const NormalGrid = ({
   likedImages,
   setLikedImages,
   user,
+  showPalette,
 }: {
   images: ImageWithSimilarity[];
   likedImages: number[];
   setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
   user: UserResource | null | undefined;
+  showPalette?: boolean;
 }) => {
   let sortedImages = images.sort((a, b) => {
     return (new Date(b.created_at) as any) - (new Date(a.created_at) as any);
   });
   return (
-    <div className="w-full md:w-[calc(100%-80px)] md:m-auto max-h-[calc(100%-80px)] h-[calc(100%-80px)] overflow-y-auto custom-scrollbar p-2">
+    <div
+      className={`w-full md:w-[calc(100%-80px)] md:m-auto overflow-y-auto custom-scrollbar p-2 ${showPalette ? "max-h-[calc(100%-0px)] h-[calc(100%-0px)]" : "max-h-[calc(100%-0px)] h-[calc(100%-0px)]"}`}
+    >
       <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
@@ -160,6 +164,7 @@ function BentoGrid({
   likedImages,
   setLikedImages,
   user,
+  showPalette,
 }: {
   images: ImageWithSimilarity[];
   searchTags: string[];
@@ -167,6 +172,7 @@ function BentoGrid({
   likedImages: number[];
   setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
   user: UserResource | null | undefined;
+  showPalette?: boolean;
 }) {
   let count = 60;
   let [page, setPage] = useState(1);
@@ -506,6 +512,7 @@ export default function Grid({
   likedImages,
   setLikedImages,
   user,
+  showPalette,
 }: {
   images: ImageWithSimilarity[];
   isImagesLoading: boolean;
@@ -515,6 +522,7 @@ export default function Grid({
   likedImages: number[];
   setLikedImages: React.Dispatch<React.SetStateAction<number[]>>;
   user: UserResource | null | undefined;
+  showPalette?: boolean;
 }) {
   if (isImagesLoading) {
     return (
@@ -542,6 +550,7 @@ export default function Grid({
           searchTags={searchTags}
           setSearchTags={setSearchTags}
           user={user}
+          showPalette={showPalette}
         />
       ) : (
         <NormalGrid
@@ -549,6 +558,7 @@ export default function Grid({
           likedImages={likedImages}
           setLikedImages={setLikedImages}
           user={user}
+          showPalette={showPalette}
         />
       )}
     </div>

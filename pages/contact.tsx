@@ -70,7 +70,9 @@ export default function ContactUs() {
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold">Contact Us</h1>
+          <h1 className="text-4xl md:text-6xl font-bold">
+            Contact <span className="text-blue-500">Us</span>{" "}
+          </h1>
         </div>
       </section>
 

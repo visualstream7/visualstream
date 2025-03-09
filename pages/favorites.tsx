@@ -127,8 +127,8 @@ export default function Favourites() {
     setRerenderNav: () => {},
   });
 
-  if (!isLoaded) return <FullPageSpinner/>;
-  if (!user) return <div>Sign in to view your favourites</div>;
+  if (!isLoaded) return <FullPageSpinner />;
+  if (!user) return <div>Sign in to view your favorites</div>;
 
   return (
     <div className="max-h-dvh overflow-hidden bg-gray-50">
@@ -137,7 +137,7 @@ export default function Favourites() {
       {/* Main Content Container */}
       <div className="container mx-auto py-10 px-4 ">
         <h1 className="text-3xl font-semibold text-gray-800 mb-6">
-          Your Favourites
+          Your Favorites
         </h1>
 
         {/* Scrollable content below the title */}

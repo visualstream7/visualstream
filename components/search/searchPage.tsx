@@ -42,6 +42,8 @@ export default function SearchPage({ user }: UserPropType) {
     CATEGORIES.ALL,
   );
 
+  const [showPalette, setShowPalette] = useState(false);
+
   const [likedImages, setLikedImages] = useState<number[]>([]);
 
   const { images, isImagesLoading } = useImageSearch({
@@ -96,23 +98,31 @@ export default function SearchPage({ user }: UserPropType) {
         cartCount={cartItems.length}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        selectedColors={selectedColors}
+        setSelectedColors={setSelectedColors}
+        isResizing={isResizing}
+        setIsResizing={setIsResizing}
+        showPalette={showPalette}
+        setShowPalette={setShowPalette}
       />
 
-      <div className="flex gap-8 md:hidden max-w-full overflow-x-auto p-4">
+      <div className="flex gap-8 max-w-full overflow-x-auto p-4 no-scrollbar md:hidden bg-[#1C2A3C] text-white">
         {Object.keys(CATEGORIES).map((category, index) => (
           //@ts-ignore
           <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
             <div className="flex flex-col items-center cursor-pointer">
               <span className="pb-2">{category}</span>
               <div
-                className={`h-[3px] w-full rounded-full transition-all ${category === selectedCategory ? "bg-black w-3/4" : "bg-transparent"
-                  }`}
+                className={`h-[3px] w-full rounded-full transition-all ${
+                  category === selectedCategory
+                    ? "bg-black w-3/4"
+                    : "bg-transparent"
+                }`}
               ></div>
             </div>
           </Link>
         ))}
       </div>
-
 
       <div className="flex-1 flex flex-col lg:flex-row-reverse max-h-80vh overflow-auto">
         <div className="lg:block md:block">
@@ -133,6 +143,7 @@ export default function SearchPage({ user }: UserPropType) {
           likedImages={likedImages}
           setLikedImages={setLikedImages}
           user={user}
+          showPalette={showPalette}
         />
       </div>
     </div>

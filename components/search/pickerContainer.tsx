@@ -116,7 +116,7 @@ export default function PickerContainer({
 
   return (
     <div
-      className={`
+      className={`hidden md:block
     flex-1 bg-white mx-auto p-4 md:p-8 w-full overflow-auto h-full
 
   `}
@@ -125,7 +125,7 @@ export default function PickerContainer({
         <h1 className="font-bold text-2xl">Step 1</h1>
         <p>Select up to 5 colors</p>
       </div>
-      <div className="w-[60%] m-auto md:w-[100%] aspect-square md:m-auto relative grid grid-cols-16 border border-gray-300">
+      <div className="w-[60%] md:w-[100%] aspect-square md:m-auto relative grid grid-cols-16 border border-gray-300">
         <img
           src="/palette.png"
           alt="palette"
