@@ -239,8 +239,8 @@ export default function useImageSearch({
       let AI_ARTICLE_DESCRIBE = image.ai_article_describe?.toLowerCase() || "";
       let AI_TAGS = image.ai_tags?.toLowerCase() || "";
 
-      let SEARCH_SPACE =
-        AI_DESCRIBE + " " + AI_ARTICLE_DESCRIBE + " " + AI_TAGS;
+      let SEARCH_SPACE = AI_TAGS;
+      // AI_DESCRIBE + " " + AI_ARTICLE_DESCRIBE + " " + AI_TAGS;
       SEARCH_SPACE = SEARCH_SPACE.toLowerCase();
 
       for (let i = 0; i < searchTags.length; i++) {

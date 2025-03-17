@@ -75,6 +75,122 @@ class SupabaseWrapper {
     }
   }
 
+  addCategory = async (
+    category: any,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        // @ts-ignore
+        .from("categories")
+        .insert([category]);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error adding category to database", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  updateCategory = async (
+    id: number,
+    category: any,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        // @ts-ignore
+        .from("categories")
+        .update(category)
+        .eq("id", id);
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error updating category in database", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getCategoryById = async (
+    id: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      let { data, error } = await this.client
+        // @ts-ignore
+        .from("categories")
+        .select("*")
+        .eq("id", id)
+        .single();
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error fetching category by id", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getCategories = async (): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      // @ts-ignore
+      let { data, error } = await this.client.from("categories").select("*");
+      if (error) {
+        throw new Error(error.message);
+      }
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error fetching categories", error);
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
   getLatestImages = async (
     numberOfImages: number,
   ): Promise<{

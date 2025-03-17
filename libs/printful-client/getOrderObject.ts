@@ -1,4 +1,4 @@
-import { Pi } from "lucide-react";
+import { Pi, Ratio } from "lucide-react";
 
 const PRODUCTS = {
   PAPER_POSTER: 1,
