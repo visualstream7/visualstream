@@ -1167,6 +1167,103 @@ class SupabaseWrapper {
       };
     }
   };
+
+  //deleteImage function by imageId
+  deleteImage = async (
+    imageId: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      const { data, error } = await this.client
+        .from("Images")
+        .delete()
+        .eq("id", imageId);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getFavoriteImagesByCategory = async (): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      // Fetch all favorite images with image_id
+      const { data: favoriteImages, error: favoriteImagesError } = await this.client
+        .from("FavouriteImages")
+        .select("image_id");
+
+      if (favoriteImagesError) {
+        throw new Error(favoriteImagesError.message);
+      }
+
+      // Fetch all images with category
+      const { data: images, error: imagesError } = await this.client
+        .from("Images")
+        .select("id, category");
+
+      if (imagesError) {
+        throw new Error(imagesError.message);
+      }
+
+      // Process the data to count favorite images per category
+      const categoryCounts = images.reduce((acc: { [key: string]: number }, image: any) => {
+        // Filter favorite images for this image_id
+        const favoritesForImage = favoriteImages.filter((fav: any) => fav.image_id === image.id);
+        const favoriteCount = favoritesForImage.length;
+
+        if (favoriteCount > 0) {
+          // Update count for this category
+          if (!acc[image.category]) {
+            acc[image.category] = 0;
+          }
+          acc[image.category] += favoriteCount;
+        }
+        return acc;
+      }, {});
+
+      // Convert the grouped counts to an array for rendering
+      const result = Object.keys(categoryCounts).map((category) => ({
+        category,
+        count: categoryCounts[category],
+      }));
+
+      return {
+        result,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+
+
+
+
 }
 
 export { SupabaseWrapper };
