@@ -46,7 +46,7 @@ export default async function handler(
     });
   }
 
-  let url = `https://visualstream.vercel.app/api/resize?imageUrl=${image_url}&width=${450}&height=${300}&quality=${50}`;
+  let url = `https://visualstream.vercel.app/api/resize?imageUrl=${highResUpload.data.url}&width=${450}&height=${300}&quality=${50}`;
   let lowResUpload = await utapi.uploadFilesFromUrl(url);
 
   if (lowResUpload.error)
