@@ -40,8 +40,12 @@ function findCategoryToRun(categories) {
 async function updateCategoryLastRan(client, categoryId) {
   return client
     .from("categories")
-    .update({ last_ran_at: new Date() })
+    .update({ last_ran_at: new Date(), isRunning: true })
     .eq("id", categoryId);
+}
+
+async function updateCategoryIsRunning(client, categoryId, isRunning) {
+  return client.from("categories").update({ isRunning }).eq("id", categoryId);
 }
 
 async function fetchRSSFeed(url) {
@@ -256,6 +260,11 @@ export default async function handler(req, res) {
         }),
       },
     );
+
+    let processImageData = await processImageResponse.json();
+    console.log("processImageData", processImageData);
+
+    await updateCategoryIsRunning(client, categoryToRun.id, false);
 
     return res.status(200).json({
       categoryToRun,
