@@ -39,13 +39,14 @@ export default async function handler(
 
   let highResUpload = await utapi.uploadFilesFromUrl(image_url);
 
-  if (highResUpload.error)
+  if (highResUpload.error) {
     return res.status(500).json({
       result: null,
       error: highResUpload.error,
     });
+  }
 
-  let url = `https://resize.sardo.work/?imageUrl=${highResUpload.data.url}&width=${450}&height=${300}&quality=${50}`;
+  let url = `https://visualstream.vercel.app/api/resize?imageUrl=${image_url}&width=${450}&height=${300}&quality=${50}`;
   let lowResUpload = await utapi.uploadFilesFromUrl(url);
 
   if (lowResUpload.error)
@@ -58,6 +59,9 @@ export default async function handler(
 
   let { result: colorComposition, error: colorCompositionError } =
     await analyzer.getColorComposition();
+
+  console.log("colorComposition", colorComposition);
+  console.log("colorCompositionError", colorCompositionError);
 
   if (colorCompositionError || !colorComposition) {
     return res.status(500).json({ result: null, error: colorCompositionError });

@@ -94,6 +94,7 @@ class ColorAnalyzer {
   }
 
   private async getImageData(): Promise<Uint8ClampedArray | null> {
+    console.log("fetching image data", this.imageUrl);
     const response = await fetch(this.imageUrl);
     const imageBuffer = await response.arrayBuffer();
     const image = await loadImage(Buffer.from(imageBuffer));
@@ -230,6 +231,7 @@ class ColorAnalyzer {
   }> {
     try {
       const imageData = await this.getImageData();
+
       if (!imageData) {
         throw new Error("Image data is empty");
       }

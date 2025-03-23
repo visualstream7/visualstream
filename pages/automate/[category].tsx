@@ -66,22 +66,61 @@ export default function Category() {
         onClick={() => router.push("/automate")}
         className="text-2xl mb-4 cursor-pointer"
       />
-
       <h2 className="text-xl font-semibold mb-4">Edit Category</h2>
       <label className="block mb-2">Name</label>
-      <input
+      <textarea
         type="text"
         name="name"
         value={editedCategory.name}
         onChange={handleChange}
         className="w-full border p-2 rounded-md mb-4"
       />
-
       <label className="block mb-2">RSS Feed URL</label>
-      <input
+      <textarea
         type="text"
         name="rssFeedUrl"
         value={editedCategory.rssFeedUrl}
+        onChange={handleChange}
+        className="w-full border p-2 rounded-md mb-4"
+      />
+      <label className="block mb-2">Article Summary Prompt</label>
+      <textarea
+        type="text"
+        name="summaryPrompt"
+        value={editedCategory.summaryPrompt}
+        onChange={handleChange}
+        className="w-full border p-2 rounded-md mb-4"
+      />
+      <label className="block mb-2">Social Media Caption Prompt</label>
+      <textarea
+        type="text"
+        name="captionPrompt"
+        value={editedCategory.captionPrompt}
+        onChange={handleChange}
+        className="w-full border p-2 rounded-md mb-4"
+      />
+      <label className="block mb-2">Image Title Prompt</label>
+      <textarea
+        type="text"
+        name="imageTitlePrompt"
+        value={editedCategory.imageTitlePrompt}
+        onChange={handleChange}
+        className="w-full border p-2 rounded-md mb-4"
+      />
+      <label className="block mb-2">Image Generation Prompt</label>
+      <textarea
+        type="text"
+        name="imageGenPrompt"
+        value={editedCategory.imageGenPrompt}
+        onChange={handleChange}
+        className="w-full border p-2 rounded-md mb-4"
+      />
+
+      <label className="block mb-2">Tag Prompt</label>
+      <textarea
+        type="text"
+        name="tagPrompt"
+        value={editedCategory.tagPrompt}
         onChange={handleChange}
         className="w-full border p-2 rounded-md mb-4"
       />
@@ -98,7 +137,6 @@ export default function Category() {
           </option>
         ))}
       </select>
-
       <div className="flex items-center mb-4">
         <label className="mr-2">Paused:</label>
         <button
@@ -108,7 +146,6 @@ export default function Category() {
           {editedCategory.paused ? "Paused" : "Active"}
         </button>
       </div>
-
       <div className="flex gap-4">
         <button
           onClick={updateCategory}

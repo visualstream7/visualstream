@@ -166,6 +166,10 @@ class SupabaseWrapper {
     }
   };
 
+  getClient = () => {
+    return this.client;
+  };
+
   getCategories = async (): Promise<{
     result: any;
     error: string | null;
@@ -1206,9 +1210,8 @@ class SupabaseWrapper {
   }> => {
     try {
       // Fetch all favorite images with image_id
-      const { data: favoriteImages, error: favoriteImagesError } = await this.client
-        .from("FavouriteImages")
-        .select("image_id");
+      const { data: favoriteImages, error: favoriteImagesError } =
+        await this.client.from("FavouriteImages").select("image_id");
 
       if (favoriteImagesError) {
         throw new Error(favoriteImagesError.message);
@@ -1224,20 +1227,25 @@ class SupabaseWrapper {
       }
 
       // Process the data to count favorite images per category
-      const categoryCounts = images.reduce((acc: { [key: string]: number }, image: any) => {
-        // Filter favorite images for this image_id
-        const favoritesForImage = favoriteImages.filter((fav: any) => fav.image_id === image.id);
-        const favoriteCount = favoritesForImage.length;
+      const categoryCounts = images.reduce(
+        (acc: { [key: string]: number }, image: any) => {
+          // Filter favorite images for this image_id
+          const favoritesForImage = favoriteImages.filter(
+            (fav: any) => fav.image_id === image.id,
+          );
+          const favoriteCount = favoritesForImage.length;
 
-        if (favoriteCount > 0) {
-          // Update count for this category
-          if (!acc[image.category]) {
-            acc[image.category] = 0;
+          if (favoriteCount > 0) {
+            // Update count for this category
+            if (!acc[image.category]) {
+              acc[image.category] = 0;
+            }
+            acc[image.category] += favoriteCount;
           }
-          acc[image.category] += favoriteCount;
-        }
-        return acc;
-      }, {});
+          return acc;
+        },
+        {},
+      );
 
       // Convert the grouped counts to an array for rendering
       const result = Object.keys(categoryCounts).map((category) => ({
@@ -1259,11 +1267,6 @@ class SupabaseWrapper {
       };
     }
   };
-
-
-
-
-
 }
 
 export { SupabaseWrapper };
