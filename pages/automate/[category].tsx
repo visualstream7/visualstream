@@ -133,7 +133,7 @@ export default function Category() {
               </h1>
               <p className="text-indigo-100 mt-1">{category.name}</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-col-reverse md:flex-row">
               <div
                 className={`flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${isRunning ? "bg-amber-100 text-amber-800" : "hidden"}`}
               >
