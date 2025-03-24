@@ -143,7 +143,7 @@ class SupabaseWrapper {
   }> => {
     try {
       let { data, error } = await this.client
-        // @ts-ignore
+      //@ts-ignore
         .from("categories")
         .select("*")
         .eq("id", id)
@@ -1267,6 +1267,40 @@ class SupabaseWrapper {
       };
     }
   };
+
+  //delete categories form the database from categories table by category id
+  deleteCategory = async (
+    categoryId: number,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => { 
+    try {
+  
+      const { data, error } = await this.client
+        //@ts-ignore
+        .from("categories")
+        .delete()
+        .eq("id", categoryId);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  }
 }
 
 export { SupabaseWrapper };
