@@ -1,11 +1,23 @@
 // @ts-nocheck
 import { SupabaseWrapper } from "@/database/supabase";
+import { CircleDashed } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiCheck, BiX } from "react-icons/bi";
-import { FiClock, FiPause, FiPlay, FiTag, FiLink, FiEdit2, FiHash, FiAlertCircle, FiGrid } from "react-icons/fi";
+import {
+  FiClock,
+  FiPause,
+  FiPlay,
+  FiTag,
+  FiLink,
+  FiEdit2,
+  FiHash,
+  FiAlertCircle,
+  FiGrid,
+} from "react-icons/fi";
 
 const database = new SupabaseWrapper("CLIENT");
+const client = database.getClient();
 
 const scheduleOptions = [
   { label: "Every 15 minutes", value: 900 },
@@ -23,6 +35,24 @@ export default function Category() {
   const [editedCategory, setEditedCategory] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+
+  useEffect(() => {
+    const taskListener = client
+      .channel("public:categories")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "categories" },
+        (payload) => {
+          console.log("Change received!", payload);
+          setIsRunning(payload.new.isRunning || false);
+        },
+      )
+      .subscribe();
+
+    // add return right here!
+    return () => taskListener.unsubscribe();
+  }, []);
 
   useEffect(() => {
     let categoryId = params?.category || null;
@@ -33,6 +63,7 @@ export default function Category() {
       if (error || !result) return;
       setCategory(result);
       setEditedCategory(result);
+      setIsRunning(result.isRunning);
     }
 
     fetchCategory();
@@ -40,7 +71,9 @@ export default function Category() {
 
   useEffect(() => {
     if (category && editedCategory) {
-      setHasChanges(JSON.stringify(category) !== JSON.stringify(editedCategory));
+      setHasChanges(
+        JSON.stringify(category) !== JSON.stringify(editedCategory),
+      );
     }
   }, [category, editedCategory]);
 
@@ -77,14 +110,15 @@ export default function Category() {
     setEditedCategory({ ...category });
   };
 
-  if (!category || !editedCategory) return (
-    <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="animate-pulse flex flex-col items-center">
-        <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4"></div>
-        <div className="h-4 bg-gray-200 rounded-full w-32"></div>
+  if (!category || !editedCategory)
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded-full w-32"></div>
+        </div>
       </div>
-    </div>
-  );
+    );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -94,11 +128,26 @@ export default function Category() {
         <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-6 sm:px-8 w-full">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-white">Edit Automation</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-white">
+                Edit Automation
+              </h1>
               <p className="text-indigo-100 mt-1">{category.name}</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className={`flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${editedCategory.paused ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+              <div
+                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${isRunning ? "bg-amber-100 text-amber-800" : "hidden"}`}
+              >
+                {isRunning && (
+                  <>
+                    <CircleDashed className="mr-2 animate-spin" />
+                    Running ...
+                  </>
+                )}
+              </div>
+
+              <div
+                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${editedCategory.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}
+              >
                 {editedCategory.paused ? (
                   <>
                     <FiPause className="mr-2" />
@@ -116,7 +165,9 @@ export default function Category() {
                 className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all"
               >
                 <FiGrid className="text-white" />
-                <span className="text-white text-sm font-medium">Dashboard</span>
+                <span className="text-white text-sm font-medium">
+                  Dashboard
+                </span>
               </button>
             </div>
           </div>
@@ -141,7 +192,7 @@ export default function Category() {
                     <input
                       type="text"
                       name="name"
-                      value={editedCategory.name || ''}
+                      value={editedCategory.name || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
                       placeholder="Enter category name"
@@ -156,7 +207,7 @@ export default function Category() {
                       <input
                         type="url"
                         name="rssFeedUrl"
-                        value={editedCategory.rssFeedUrl || ''}
+                        value={editedCategory.rssFeedUrl || ""}
                         onChange={handleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all pl-10"
                         placeholder="https://example.com/feed.xml"
@@ -179,7 +230,7 @@ export default function Category() {
                     </label>
                     <div className="relative">
                       <select
-                        value={editedCategory.schedule || ''}
+                        value={editedCategory.schedule || ""}
                         onChange={handleScheduleChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all appearance-none"
                       >
@@ -197,14 +248,18 @@ export default function Category() {
                         Automation Status
                       </label>
                       <p className="text-sm text-gray-600">
-                        {editedCategory.paused ? "Automation is currently paused" : "Automation is running normally"}
+                        {editedCategory.paused
+                          ? "Automation is currently paused"
+                          : "Automation is running normally"}
                       </p>
                     </div>
                     <button
                       onClick={togglePaused}
-                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${editedCategory.paused ? 'bg-gray-300' : 'bg-indigo-600'}`}
+                      className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${editedCategory.paused ? "bg-gray-300" : "bg-indigo-600"}`}
                     >
-                      <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${editedCategory.paused ? 'translate-x-1' : 'translate-x-6'}`} />
+                      <span
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform ${editedCategory.paused ? "translate-x-1" : "translate-x-6"}`}
+                      />
                     </button>
                   </div>
                 </div>
@@ -225,7 +280,7 @@ export default function Category() {
                     </label>
                     <textarea
                       name="summaryPrompt"
-                      value={editedCategory.summaryPrompt || ''}
+                      value={editedCategory.summaryPrompt || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[120px]"
                       placeholder="Enter prompt for generating summaries..."
@@ -238,11 +293,13 @@ export default function Category() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">
                       Social Caption Prompt
-                      <span className="text-gray-400 ml-1.5 text-xs">(Optional)</span>
+                      <span className="text-gray-400 ml-1.5 text-xs">
+                        (Optional)
+                      </span>
                     </label>
                     <textarea
                       name="captionPrompt"
-                      value={editedCategory.captionPrompt || ''}
+                      value={editedCategory.captionPrompt || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[120px]"
                       placeholder="Enter prompt for generating social captions..."
@@ -263,7 +320,7 @@ export default function Category() {
                     </label>
                     <textarea
                       name="imageTitlePrompt"
-                      value={editedCategory.imageTitlePrompt || ''}
+                      value={editedCategory.imageTitlePrompt || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[100px]"
                       placeholder="Enter prompt for generating image titles..."
@@ -275,7 +332,7 @@ export default function Category() {
                     </label>
                     <textarea
                       name="imageGenPrompt"
-                      value={editedCategory.imageGenPrompt || ''}
+                      value={editedCategory.imageGenPrompt || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[100px]"
                       placeholder="Enter prompt for generating images..."
@@ -287,7 +344,7 @@ export default function Category() {
                     </label>
                     <textarea
                       name="tagPrompt"
-                      value={editedCategory.tagPrompt || ''}
+                      value={editedCategory.tagPrompt || ""}
                       onChange={handleChange}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[100px]"
                       placeholder="Enter prompt for generating tags..."
@@ -309,7 +366,7 @@ export default function Category() {
             <button
               onClick={discardChanges}
               disabled={!hasChanges}
-              className={`flex items-center px-5 py-3 text-sm font-medium rounded-lg transition-all ${hasChanges ? 'text-gray-700 bg-white border border-gray-300 hover:bg-gray-50' : 'text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed'}`}
+              className={`flex items-center px-5 py-3 text-sm font-medium rounded-lg transition-all ${hasChanges ? "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50" : "text-gray-400 bg-gray-100 border border-gray-200 cursor-not-allowed"}`}
             >
               <BiX className="mr-2 text-lg" />
               Discard Changes
@@ -317,13 +374,29 @@ export default function Category() {
             <button
               onClick={updateCategory}
               disabled={!hasChanges || isSaving}
-              className={`flex items-center px-5 py-3 text-sm font-medium text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${hasChanges ? 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700' : 'bg-gradient-to-r from-indigo-400 to-blue-400 cursor-not-allowed'}`}
+              className={`flex items-center px-5 py-3 text-sm font-medium text-white rounded-lg shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${hasChanges ? "bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700" : "bg-gradient-to-r from-indigo-400 to-blue-400 cursor-not-allowed"}`}
             >
               {isSaving ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Saving...
                 </>
