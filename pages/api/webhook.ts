@@ -126,75 +126,98 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const emailParams = new EmailParams()
         .setFrom(sentFrom)
         .setTo(recipients)
-        .setSubject("Your Order Confirmation - VisualStream").setHtml(`
-          <html>
-            <body>
-              <h1>Thank you for your purchase!</h1>
-              <p>Hi ${recipient.name || "Customer"},</p>
-              <p>We are excited to confirm your order. Here are the details:</p>
-              <table style="border-collapse: collapse; width: 100%;">
-                <thead>
-                  <tr>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Item</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Quantity</th>
-                    <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${orderDetails.cart_items
-                    .map(
-                      (item: {
-                        name: string;
-                        quantity: number;
-                        price: number;
-                      }) => `
-                        <tr>
-                          <td style="border: 1px solid #ddd; padding: 8px;">${item.name}</td>
-                          <td style="border: 1px solid #ddd; padding: 8px;">${item.quantity}</td>
-                          <td style="border: 1px solid #ddd; padding: 8px;">$${item.price.toFixed(2)}</td>
-                        </tr>
-                      `,
-                    )
-                    .join("")}
-                </tbody>
-              </table>
-              <p><strong>Shipping Address:</strong> ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}</p>
-              <p><strong>Shipping Amount:</strong> $${orderDetails.shipping_amount}</p>
-              <p><strong>Tax:</strong> $${orderDetails.tax_amount}</p>
-              <p><strong>Total Amount Paid:</strong> $${orderDetails.total_amount}</p>
-              <p>We will notify you once your order is on its way!</p>
-              <p>Thank you for choosing VisualStream.</p>
-              <p>Best regards,<br/>The VisualStream Team</p>
-            </body>
-          </html>
-        `).setText(`
-          Thank you for your purchase!const emailParams = new EmailParams()
-                  .setFrom(sentFrom)
-                  .setTo(recipients)
-                  .setSubject("Subject")
-                  .setHtml(
-                    "Greetings from the team, you got this message through MailerSend.",
-                  )
-                  .setText(
-                    "Greetings from the team, you got this message through MailerSend.",
-                  );
+        .setSubject("Your Order Confirmation - VisualStream")
+        .setHtml(`
+    <html>
+    <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px;">
+      <!-- Thank You Header Image -->
+      <div style="text-align: center; margin-bottom: 30px;">
+        <img src="https://example.com/thank-you-header.png" alt="Thank You" style="max-width: 100%;">
+      </div>
+      
+      <div style="text-align: center; padding-bottom: 20px; margin-bottom: 20px;">
+        <h1 style="color: #2a4365; font-size: 24px; margin-bottom: 10px;">Thank you for your purchase!</h1>
+      </div>
+      
+      <p style="margin-bottom: 16px;">Hi ${recipient.name || "Customer"},</p>
+      <p style="margin-bottom: 24px;">We are excited to confirm your order. Here are the details:</p>
+      
+      <table style="width: 100%; border-collapse: separate; border-spacing: 0; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+        <thead>
+          <tr>
+            <th style="background-color: #2a4365; color: white; padding: 12px; text-align: left;">Item</th>
+            <th style="background-color: #2a4365; color: white; padding: 12px; text-align: left;">Quantity</th>
+            <th style="background-color: #2a4365; color: white; padding: 12px; text-align: left;">Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${orderDetails.cart_items
+            .map(
+              (item: {
+                name: string;
+                quantity: number;
+                price: number;
+              }) => `
+              <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${item.name}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">${item.quantity}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0;">$${item.price.toFixed(2)}</td>
+              </tr>
+            `,
+            )
+            .join("")}
+        </tbody>
+      </table>
+      
+      <div style="background-color: #f8fafc; border-left: 4px solid #2a4365; padding: 16px; margin: 20px 0; border-radius: 0 4px 4px 0;">
+        <p style="margin: 0 0 8px 0;"><strong>Shipping Address:</strong><br>
+        ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}</p>
+        
+        <p style="margin: 8px 0;"><strong>Shipping Amount:</strong> $${orderDetails.shipping_amount}</p>
+        <p style="margin: 8px 0;"><strong>Tax:</strong> $${orderDetails.tax_amount}</p>
+        <p style="margin: 8px 0;"><strong>Total Amount Paid:</strong> $${orderDetails.total_amount}</p>
+      </div>
+      
+      <p style="margin-bottom: 16px;">We will notify you once your order is on its way!</p>
+      <p style="margin-bottom: 24px;">Thank you for choosing VisualStream.</p>
+      
+      <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; color: #718096; font-size: 14px;">
+        <p style="margin: 0;">Best regards,<br>The VisualStream Team</p>
+      </div>
+    </body>
+    </html>
+  `)
+        .setText(`
+    Thank you for your purchase!
 
-          Hi ${recipient.name || "Customer"},
+    Hi ${recipient.name || "Customer"},
 
-          We are excited to confirm your order. Here are the details:
+    We are excited to confirm your order. Here are the details:
 
-          Shipping Address: ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}
-          Shipping Amount: $${orderDetails.shipping_amount}
-          Tax: $${orderDetails.tax_amount}
-          Total Amount Paid: $${orderDetails.total_amount}
+    Order Items:
+    ${orderDetails.cart_items
+            .map(
+              (item: {
+                name: string;
+                quantity: number;
+                price: number;
+              }) => `
+    - ${item.name} (Qty: ${item.quantity}) - $${item.price.toFixed(2)}`
+            )
+            .join("")}
 
-          We will notify you once your order is on its way!
+    Shipping Address: ${recipient?.address1}, ${recipient.country_code}, ${recipient?.city}
+    Shipping Amount: $${orderDetails.shipping_amount}
+    Tax: $${orderDetails.tax_amount}
+    Total Amount Paid: $${orderDetails.total_amount}
 
-          Thank you for choosing VisualStream.
+    We will notify you once your order is on its way!
 
-          Best regards,
-          The VisualStream Team
-        `);
+    Thank you for choosing VisualStream.
+
+    Best regards,
+    The VisualStream Team
+  `);
 
       const mailData = await mailersend.email.send(emailParams);
 

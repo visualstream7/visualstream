@@ -881,6 +881,47 @@ export default function Admin() {
                   Uploadthing: store files and images
                 </p>
               </div>
+
+              <div
+                onClick={() =>
+                  window.open("/automate", "_blank")
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/5026/5026581.png"
+                    alt="Automation Icon"
+                    className="w-20 h-20 rounded-full border border-gray-600"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Automation</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Automate the process of image generation
+                </p>
+              </div>
+
+
+              <div
+                onClick={() =>
+                  window.open(
+                    "automate/create",
+                    "_blank"
+                  )
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/1829/1829586.png"
+                    alt="Upload Icon"
+                    className="w-20 h-20 rounded-full border border-gray-600"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Upload Image</h3>
+                <p className="text-sm text-gray-600 mb-4">Manually upload any image</p>
+              </div>
+
             </div>
           </div>
         )}
