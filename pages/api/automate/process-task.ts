@@ -22,15 +22,19 @@ async function fetchCategories(client) {
 }
 
 function findCategoryToRun(categories) {
-  const nowInSeconds = Date.now() / 1000;
+  const nowInSeconds = Date.now();
 
   for (const category of categories) {
-    const lastRanAt = new Date(category.last_ran_at).getTime() / 1000;
-    console.log("nowInSeconds", nowInSeconds);
-    console.log("lastRanAt", lastRanAt);
-    let difference = nowInSeconds - lastRanAt;
+    const lastRanAt = new Date(category.last_ran_at).getTime();
+    console.log(
+      "nowInSeconds",
+      nowInSeconds,
+      new Date(nowInSeconds).toLocaleString(),
+    );
+    console.log("lastRanAt", lastRanAt, new Date(lastRanAt).toLocaleString());
+    let difference = (nowInSeconds - lastRanAt) / 1000;
     console.log("difference", difference);
-    if (nowInSeconds - lastRanAt > category.schedule) {
+    if (difference > category.schedule) {
       return category;
     }
   }
@@ -173,7 +177,9 @@ export default async function handler(req, res) {
   await updateCategoryLastRan(client, categoryToRun.id);
   const feedData = await fetchRSSFeed(categoryToRun.rssFeedUrl);
   const jsonResult = await parseStringPromise(feedData);
-  const feedTextContent = JSON.stringify(jsonResult, null, 2);
+  let feedTextContent = JSON.stringify(jsonResult, null, 2);
+  feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
+
   try {
     const openai = new OpenAI({
       apiKey: OPENAI_API_KEY,
