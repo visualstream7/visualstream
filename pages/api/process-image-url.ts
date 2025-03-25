@@ -36,8 +36,18 @@ export default async function handler(
   }
 
   let database = new SupabaseWrapper("SERVER", req, res);
+  let highResUpload = null;
+  let lowResUpload = null;
 
-  let highResUpload = await utapi.uploadFilesFromUrl(image_url);
+  if (!image_url.includes("utfs.io")) {
+    highResUpload = await utapi.uploadFilesFromUrl(image_url);
+  } else {
+    highResUpload = {
+      data: {
+        url: image_url,
+      },
+    };
+  }
 
   if (highResUpload.error) {
     return res.status(500).json({
@@ -47,7 +57,7 @@ export default async function handler(
   }
 
   let url = `https://visualstream.vercel.app/api/resize?imageUrl=${highResUpload.data.url}&width=${450}&height=${300}&quality=${50}`;
-  let lowResUpload = await utapi.uploadFilesFromUrl(url);
+  lowResUpload = await utapi.uploadFilesFromUrl(url);
 
   if (lowResUpload.error)
     return res.status(500).json({
