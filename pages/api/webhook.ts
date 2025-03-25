@@ -130,13 +130,9 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
         .setHtml(`
     <html>
     <body style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px;">
-      <!-- Thank You Header Image -->
-      <div style="text-align: center; margin-bottom: 30px;">
-        <img src="https://example.com/thank-you-header.png" alt="Thank You" style="max-width: 100%;">
-      </div>
-      
-      <div style="text-align: center; padding-bottom: 20px; margin-bottom: 20px;">
-        <h1 style="color: #2a4365; font-size: 24px; margin-bottom: 10px;">Thank you for your purchase!</h1>
+      <!-- Gradient Header -->
+      <div style="background: linear-gradient(135deg, #2a4365 0%, #4299e1 100%); padding: 40px 20px; text-align: center; margin: -20px -20px 30px -20px; border-radius: 0 0 8px 8px;">
+        <h1 style="color: white; font-size: 28px; margin: 0; letter-spacing: 0.5px;">Thank You For Your Purchase!</h1>
       </div>
       
       <p style="margin-bottom: 16px;">Hi ${recipient.name || "Customer"},</p>
