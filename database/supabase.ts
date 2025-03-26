@@ -11,6 +11,7 @@ import {
 import { Database, Json } from "./types";
 import { Cat, VariableIcon } from "lucide-react";
 import {
+  getAllFavouritesFromDatabase,
   getImageFromDatabase,
   getImagesFromDatabase,
   Image,
@@ -143,7 +144,7 @@ class SupabaseWrapper {
   }> => {
     try {
       let { data, error } = await this.client
-      //@ts-ignore
+        //@ts-ignore
         .from("categories")
         .select("*")
         .eq("id", id)
@@ -503,6 +504,26 @@ class SupabaseWrapper {
       };
     } catch (error) {
       let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getFavourites = async (): Promise<{
+    result: any[] | null;
+    error: string | null;
+  }> => {
+    try {
+      let data = await getAllFavouritesFromDatabase(this.client);
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknow Error";
       if (error instanceof Error) message = error.message;
       return {
         result: null,
@@ -1274,9 +1295,8 @@ class SupabaseWrapper {
   ): Promise<{
     result: any;
     error: string | null;
-  }> => { 
+  }> => {
     try {
-  
       const { data, error } = await this.client
         //@ts-ignore
         .from("categories")
@@ -1300,7 +1320,7 @@ class SupabaseWrapper {
         error: message,
       };
     }
-  }
+  };
 }
 
 export { SupabaseWrapper };

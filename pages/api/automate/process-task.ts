@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { parseStringPromise } from "xml2js";
 import OpenAI from "openai";
 
-export const config = { maxDuration: 60 };
+export const config = { maxDuration: 200 };
 
 // make a sleep function
 const sleep = (seconds) =>

@@ -52,4 +52,20 @@ async function getImageFromDatabase(
   return image;
 }
 
-export { getImagesFromDatabase, getImageFromDatabase };
+async function getAllFavouritesFromDatabase(
+  supabase: SupabaseClient<Database>,
+) {
+  const { data, error } = await supabase.from("FavouriteImages").select("*");
+
+  if (error || !data) {
+    throw new Error(`Failed to get favourites: ${error.message}`);
+  }
+
+  return data;
+}
+
+export {
+  getImagesFromDatabase,
+  getImageFromDatabase,
+  getAllFavouritesFromDatabase,
+};
