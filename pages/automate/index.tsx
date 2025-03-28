@@ -344,17 +344,33 @@ export default function CategoriesDashboard() {
             </div>
           </div>
 
-          {/* Form Container with better spacing */}
           <form className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50">
             {/* Left Column */}
             <div className="space-y-6">
-              <button
-                onClick={() =>
-                  setType(type === "normal" ? "special" : "normal")
-                }
-              >
-                set type to {type === "normal" ? "special" : "normal"}
-              </button>
+                <div className="flex items-center space-x-4 mb-6">
+                  <span className="text-lg font-medium text-gray-700">Category Type:</span>
+                  <button
+                    type="button"
+                    onClick={() => setType(type === "normal" ? "special" : "normal")}
+                    className="relative inline-flex items-center h-9 rounded-full border border-gray-300 bg-gray-100 p-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 overflow-hidden"
+                  >
+                    <div className={`absolute h-8 rounded-full transition-all duration-200 ease-in-out ${type === "normal"
+                        ? 'left-0.5 w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600'
+                        : 'left-[50%] w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600'
+                      }`}></div>
+
+                    <div className="relative z-10 flex w-full">
+                      <span className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${type === "normal" ? 'text-white' : 'text-gray-600'
+                        }`}>
+                        Normal
+                      </span>
+                      <span className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${type === "special" ? 'text-white' : 'text-gray-600'
+                        }`}>
+                        Special
+                      </span>
+                    </div>
+                  </button>
+                </div>
               {getFields(type).map((field) => (
                 <div key={field.name} className="space-y-2">
                   <label className=" text-sm font-medium text-gray-700 flex items-center">
