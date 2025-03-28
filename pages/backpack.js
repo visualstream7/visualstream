@@ -702,7 +702,7 @@ const Home = () => {
             strokeWidth="1"
           />
           <path
-            d="M 233 310 Q 415 400 597 310"
+            d="M 233 310 Q 415 340 597 310"
             fill="none"
             stroke="black"
             strokeWidth="1"
