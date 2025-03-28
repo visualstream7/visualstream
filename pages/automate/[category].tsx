@@ -37,6 +37,14 @@ export default function Category() {
   const [hasChanges, setHasChanges] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
 
+  async function stopCategoryRunning() {
+    let categoryId = parseInt(params?.category);
+    await client
+      .from("categories")
+      .update({ isRunning: false })
+      .match({ id: categoryId });
+  }
+
   useEffect(() => {
     const taskListener = client
       .channel("public:categories")
@@ -135,12 +143,16 @@ export default function Category() {
             </div>
             <div className="flex items-center gap-4 flex-col-reverse md:flex-row">
               <div
-                className={`flex items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${isRunning ? "bg-amber-100 text-amber-800" : "hidden"}`}
+                className={`flex cursor-pointer items-center px-4 py-2 rounded-full text-sm font-medium shadow-sm ${isRunning ? "bg-amber-100 text-amber-800" : "hidden"}`}
+                onClick={async () => {
+                  await stopCategoryRunning();
+                }}
               >
                 {isRunning && (
                   <>
                     <CircleDashed className="mr-2 animate-spin" />
                     Running ...
+                    <FiPause className="mr-2" />
                   </>
                 )}
               </div>

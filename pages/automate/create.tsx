@@ -24,7 +24,6 @@ export default function ProcessImage() {
   const [activeTab, setActiveTab] = useState("details");
   const [showSuccess, setShowSuccess] = useState(false);
 
-
   const resetForm = () => {
     setFormData({
       caption: "",
@@ -98,13 +97,28 @@ export default function ProcessImage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Manually upload image</h1>
-              <p className="text-lg opacity-90 mt-1 font-light">Manually add image to your database</p>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Manually upload image
+              </h1>
+              <p className="text-lg opacity-90 mt-1 font-light">
+                Manually add image to your database
+              </p>
             </div>
           </div>
         </div>
@@ -125,7 +139,8 @@ export default function ProcessImage() {
               <button
                 onClick={() => setActiveTab("ai")}
                 className={`py-4 px-6 text-center border-b-2 font-medium text-sm ${activeTab === "ai" ? "border-indigo-500 text-indigo-600" : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"}`}
-              >Description & Tags
+              >
+                Description & Tags
               </button>
               <button
                 onClick={() => setActiveTab("media")}
@@ -141,12 +156,19 @@ export default function ProcessImage() {
             {/* Content Details Section */}
             {activeTab === "details" && (
               <div className="px-8 py-6">
-                <h2 className="text-lg font-medium text-gray-900">Content Information</h2>
-                <p className="mt-1 text-sm text-gray-500">Provide essential details about your content</p>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Content Information
+                </h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Provide essential details about your content
+                </p>
 
                 <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-6">
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="title"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Title <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -162,7 +184,10 @@ export default function ProcessImage() {
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="caption" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="caption"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Caption
                     </label>
                     <textarea
@@ -177,7 +202,10 @@ export default function ProcessImage() {
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="category"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Category
                     </label>
                     <input
@@ -192,7 +220,10 @@ export default function ProcessImage() {
                   </div>
 
                   <div className="sm:col-span-3">
-                    <label htmlFor="article_link" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="article_link"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Article Link
                     </label>
                     <div className="mt-1 flex rounded-md shadow-sm">
@@ -217,10 +248,15 @@ export default function ProcessImage() {
             {/* AI Processing Section */}
             {activeTab === "ai" && (
               <div className="px-8 py-6 bg-gray-50/50">
-                <h2 className="text-lg font-medium text-gray-900">AI Enhancements</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  AI Enhancements
+                </h2>
                 <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                   <div className="sm:col-span-6">
-                    <label htmlFor="ai_describe" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="ai_describe"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Image Description
                     </label>
                     <textarea
@@ -232,11 +268,13 @@ export default function ProcessImage() {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
                       placeholder="Describe what's in your image"
                     />
-                   
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="ai_article_describe" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="ai_article_describe"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Article Summary
                     </label>
                     <textarea
@@ -248,11 +286,13 @@ export default function ProcessImage() {
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-2 px-3 border"
                       placeholder="Paste or write a brief summary of the article"
                     />
-                   
                   </div>
 
                   <div className="sm:col-span-6">
-                    <label htmlFor="tags" className="block text-sm font-medium text-gray-700">
+                    <label
+                      htmlFor="tags"
+                      className="block text-sm font-medium text-gray-700"
+                    >
                       Content Tags
                     </label>
                     <div className="mt-1 flex flex-wrap gap-2">
@@ -301,7 +341,9 @@ export default function ProcessImage() {
                         Add
                       </button>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Press Enter or click Add to include tags</p>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Press Enter or click Add to include tags
+                    </p>
                   </div>
                 </div>
               </div>
@@ -310,16 +352,24 @@ export default function ProcessImage() {
             {/* Media Upload Section */}
             {activeTab === "media" && (
               <div className="px-8 py-6">
-                <h2 className="text-lg font-medium text-gray-900">Media Upload</h2>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Media Upload
+                </h2>
                 <p className="mt-1 text-sm text-gray-500">Upload your images</p>
 
                 <div className="mt-6">
-                  <div className={`relative rounded-lg border-2 border-dashed ${imageUrl ? 'border-green-300 bg-green-50' : 'border-gray-300'} p-12 text-center hover:border-indigo-400 transition-colors duration-200`}>
+                  <div
+                    className={`relative rounded-lg border-2 border-dashed ${imageUrl ? "border-green-300 bg-green-50" : "border-gray-300"} p-12 text-center hover:border-indigo-400 transition-colors duration-200`}
+                  >
                     {uploading ? (
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-                        <p className="text-sm text-gray-600">Uploading your media...</p>
-                        <p className="text-xs text-gray-500">Please don't close this window</p>
+                        <p className="text-sm text-gray-600">
+                          Uploading your media...
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Please don't close this window
+                        </p>
                       </div>
                     ) : imageUrl ? (
                       <div className="flex flex-col items-center">
@@ -340,7 +390,9 @@ export default function ProcessImage() {
                             ×
                           </button>
                         </div>
-                        <p className="mt-3 text-sm font-medium text-gray-900">{imageText}</p>
+                        <p className="mt-3 text-sm font-medium text-gray-900">
+                          {imageText}
+                        </p>
                         <button
                           type="button"
                           onClick={() => {
@@ -409,19 +461,28 @@ export default function ProcessImage() {
               </div>
             )}
 
-
-
             {/* Form Actions */}
             <div className="px-8 py-6 bg-gray-50 flex justify-between items-center">
               <div>
                 {activeTab !== "details" && (
                   <button
                     type="button"
-                    onClick={() => setActiveTab(activeTab === "ai" ? "details" : "ai")}
+                    onClick={() =>
+                      setActiveTab(activeTab === "ai" ? "details" : "ai")
+                    }
                     className="inline-flex items-center rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
-                    <svg className="mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                    <svg
+                      className="mr-2 h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                     Back
                   </button>
@@ -431,28 +492,56 @@ export default function ProcessImage() {
                 {activeTab !== "media" ? (
                   <button
                     type="button"
-                    onClick={() => setActiveTab(activeTab === "details" ? "ai" : "media")}
+                    onClick={() =>
+                      setActiveTab(activeTab === "details" ? "ai" : "media")
+                    }
                     className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   >
                     Continue
-                    <svg className="ml-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    <svg
+                      className="ml-2 h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </button>
                 ) : (
                   <button
                     type="submit"
                     disabled={loading || uploading}
-                    className={`inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${loading || uploading
-                      ? "bg-indigo-400 cursor-not-allowed"
-                      : "bg-indigo-600 hover:bg-indigo-700"
-                      }`}
+                    className={`inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
+                      loading || uploading
+                        ? "bg-indigo-400 cursor-not-allowed"
+                        : "bg-indigo-600 hover:bg-indigo-700"
+                    }`}
                   >
                     {loading ? (
                       <>
-                        <svg className="-ml-1 mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        <svg
+                          className="-ml-1 mr-2 h-5 w-5 animate-spin text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
                         </svg>
                         Processing...
                       </>
@@ -470,12 +559,23 @@ export default function ProcessImage() {
               <div className="rounded-md bg-green-50 p-4">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    <svg
+                      className="h-5 w-5 text-green-400"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                        clipRule="evenodd"
+                      />
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800">Success!</h3>
+                    <h3 className="text-sm font-medium text-green-800">
+                      Success!
+                    </h3>
                     <div className="mt-2 text-sm text-green-700">
                       <p>Your content has been successfully submitted.</p>
                     </div>
@@ -484,7 +584,6 @@ export default function ProcessImage() {
               </div>
             </div>
           )}
-          
         </div>
       </main>
     </div>

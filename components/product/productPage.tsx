@@ -1027,6 +1027,9 @@ const ProductPage: React.FC<ProductPageProps> = ({
             <div className="mt-6">
               <h3 className="text-lg font-semibold">Product Details</h3>
               <ProductDescription description={product.description} />
+              <p className="mt-4 font-bold">
+                The final product may differ slightly from the mockup.
+              </p>
             </div>
           </div>
 

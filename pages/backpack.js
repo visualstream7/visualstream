@@ -168,31 +168,31 @@ const Home = () => {
         )}
         <svg className="absolute w-full h-full cursor-pointer" ref={svgRef}>
           <line
-            x1="233"
-            y1="420"
-            x2="231"
-            y2="864"
+            x1="100"
+            y1="100"
+            x2="400"
+            y2="100"
             stroke="red"
             strokeWidth="1"
           />
           <path
-            d="M 233 420 Q 348 440 467 420"
+            d="M 100 100 Q 100 300 100 300"
             fill="none"
-            stroke="red"
+            stroke="blue"
             strokeWidth="1"
           />
           <line
-            x1="467"
-            y1="420"
-            x2="467"
-            y2="864"
+            x1="100"
+            y1="300"
+            x2="400"
+            y2="300"
             stroke="red"
             strokeWidth="1"
           />
           <path
-            d="M 231 864 Q 348 890 467 864"
+            d="M 400 300 Q 100 100 400 400"
             fill="none"
-            stroke="red"
+            stroke="green"
             strokeWidth="1"
           />
         </svg>

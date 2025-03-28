@@ -5,6 +5,7 @@ import {
   bottlePoints,
   configuration,
   mugPoints,
+  totBagPoints,
 } from "./config";
 import { ProductResponseType } from "./types";
 import { loadImage } from "canvas";
@@ -135,7 +136,12 @@ class Printful {
       };
     }
 
-    if (product_id === 19 || product_id === 382 || product_id === 279) {
+    if (
+      product_id === 19 ||
+      product_id === 382 ||
+      product_id === 279 ||
+      product_id === 84
+    ) {
       let points: any[] = [];
 
       if (product_id === 19) {
@@ -144,6 +150,8 @@ class Printful {
         points = bottlePoints;
       } else if (product_id === 279) {
         points = backpackPoints;
+      } else if (product_id === 84) {
+        points = totBagPoints;
       }
       const response = await fetch("/api/special-overlay-image", {
         method: "POST",

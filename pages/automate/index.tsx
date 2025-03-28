@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { SupabaseWrapper } from "@/database/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 
-
 const database = new SupabaseWrapper("CLIENT");
 
 export default function CategoriesDashboard() {
@@ -11,6 +10,8 @@ export default function CategoriesDashboard() {
   const [view, setView] = useState("list");
   const router = useRouter();
   const [deleteCategory, setDeleteCategory] = useState(null);
+  const [type, setType] = useState<"normal" | "special">("normal");
+
   const [category, setCategory] = useState({
     name: "",
     rssFeedUrl: "",
@@ -22,6 +23,32 @@ export default function CategoriesDashboard() {
     schedule: 1800,
     paused: false,
   });
+
+  function getFields(type: "normal" | "special") {
+    if (type === "normal")
+      return [
+        {
+          name: "name",
+          label: "Category Name",
+          placeholder: "e.g. Technology News",
+          icon: "tag",
+        },
+        {
+          name: "rssFeedUrl",
+          label: "RSS Feed URL",
+          placeholder: "https://example.com/feed.xml",
+          icon: "link",
+        },
+      ];
+    return [
+      {
+        name: "name",
+        label: "Category Name",
+        placeholder: "e.g. Technology News",
+        icon: "tag",
+      },
+    ];
+  }
 
   const scheduleOptions = [
     { label: "Every 15 min", value: 900 },
@@ -60,7 +87,10 @@ export default function CategoriesDashboard() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     console.log(category);
-    const { result, error } = await database.addCategory(category);
+    const { result, error } = await database.addCategory({
+      ...category,
+      type: type,
+    });
 
     const { result: categories, error: categoriesError } =
       await database.getCategories();
@@ -82,7 +112,7 @@ export default function CategoriesDashboard() {
   const [deletingId, setDeletingId] = useState(null);
 
   const handleDeleteCategory = async (categoryId: any) => {
-    if (!window.confirm('Are you sure you want to delete this category?')) {
+    if (!window.confirm("Are you sure you want to delete this category?")) {
       return;
     }
 
@@ -91,10 +121,10 @@ export default function CategoriesDashboard() {
       const { error } = await database.deleteCategory(categoryId);
       if (error) throw error;
 
-      setCategories(prev => prev.filter(c => c.id !== categoryId));
+      setCategories((prev) => prev.filter((c) => c.id !== categoryId));
     } catch (error) {
-      console.error('Error deleting category:', error);
-      alert('Failed to delete category');
+      console.error("Error deleting category:", error);
+      alert("Failed to delete category");
     } finally {
       setDeleteCategory(null);
     }
@@ -108,15 +138,30 @@ export default function CategoriesDashboard() {
           <div className="bg-gradient-to-r from-indigo-600 to-blue-500 px-8 py-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white">Content Categories</h2>
-                <p className="text-indigo-100 mt-1">Manage your automated content pipelines</p>
+                <h2 className="text-2xl font-bold text-white">
+                  Content Categories
+                </h2>
+                <p className="text-indigo-100 mt-1">
+                  Manage your automated content pipelines
+                </p>
               </div>
               <button
                 onClick={() => setView("create")}
                 className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-lg text-white transition-all"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
                 <span className="font-medium">Create Category</span>
               </button>
@@ -133,24 +178,64 @@ export default function CategoriesDashboard() {
               >
                 <div className="flex items-center space-x-4">
                   <div className="p-3 bg-indigo-50 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6 text-indigo-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                      />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{cat.name}</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {cat.name}
+                    </h3>
                     <div className="flex items-center space-x-3 mt-1">
                       <span className="text-sm text-gray-500 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
                         </svg>
-                        {scheduleOptions.find((opt) => opt.value === cat.schedule)?.label}
+                        {
+                          scheduleOptions.find(
+                            (opt) => opt.value === cat.schedule,
+                          )?.label
+                        }
                       </span>
                       <span className="text-sm text-gray-500 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-4 w-4 mr-1"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
                         </svg>
-                        Last updated: {new Date(cat.last_ran_at).toLocaleDateString()}
+                        Last updated:{" "}
+                        {new Date(cat.last_ran_at).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -166,21 +251,61 @@ export default function CategoriesDashboard() {
                     disabled={deleteCategory === cat.id}
                   >
                     {deleteCategory === cat.id ? (
-                      <svg className="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin h-5 w-5 text-red-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                     ) : (
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
                       </svg>
                     )}
                   </button>
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${cat.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium ${cat.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}
+                  >
                     {cat.paused ? "Paused" : "Active"}
                   </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5l7 7-7 7"
+                    />
                   </svg>
                 </div>
               </div>
@@ -193,13 +318,28 @@ export default function CategoriesDashboard() {
           <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-6 px-8">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-white/20 rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
                 </svg>
               </div>
               <div>
-                <h2 className="text-2xl font-bold tracking-tight">Create New Category</h2>
-                <p className="text-sm opacity-90 mt-1 font-light">Configure your automated content pipeline</p>
+                <h2 className="text-2xl font-bold tracking-tight">
+                  Create New Category
+                </h2>
+                <p className="text-sm opacity-90 mt-1 font-light">
+                  Configure your automated content pipeline
+                </p>
               </div>
             </div>
           </div>
@@ -208,14 +348,33 @@ export default function CategoriesDashboard() {
           <form className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50">
             {/* Left Column */}
             <div className="space-y-6">
-              {[
-                { name: "name", label: "Category Name", placeholder: "e.g. Technology News", icon: "tag" },
-                { name: "rssFeedUrl", label: "RSS Feed URL", placeholder: "https://example.com/feed.xml", icon: "link" },
-              ].map((field) => (
+              <button
+                onClick={() =>
+                  setType(type === "normal" ? "special" : "normal")
+                }
+              >
+                set type to {type === "normal" ? "special" : "normal"}
+              </button>
+              {getFields(type).map((field) => (
                 <div key={field.name} className="space-y-2">
                   <label className=" text-sm font-medium text-gray-700 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={field.icon === "tag" ? "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" : "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"} />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d={
+                          field.icon === "tag"
+                            ? "M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
+                            : "M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                        }
+                      />
                     </svg>
                     {field.label}
                   </label>
@@ -233,8 +392,19 @@ export default function CategoriesDashboard() {
 
               <div className="space-y-1">
                 <label className=" text-sm font-medium text-gray-700 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 mr-2 text-blue-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
                   </svg>
                   Schedule
                 </label>
@@ -259,9 +429,17 @@ export default function CategoriesDashboard() {
                   id="pauseCategory"
                   className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   checked={category.paused}
-                  onChange={(e) => setCategory(prev => ({ ...prev, paused: e.target.checked }))}
+                  onChange={(e) =>
+                    setCategory((prev) => ({
+                      ...prev,
+                      paused: e.target.checked,
+                    }))
+                  }
                 />
-                <label htmlFor="pauseCategory" className="text-sm font-medium text-gray-700">
+                <label
+                  htmlFor="pauseCategory"
+                  className="text-sm font-medium text-gray-700"
+                >
                   Pause this category
                 </label>
               </div>
@@ -270,22 +448,63 @@ export default function CategoriesDashboard() {
             {/* Right Column */}
             <div className="space-y-5">
               {[
-                { name: "summaryPrompt", label: "Summary Prompt", placeholder: "Write a concise summary highlighting key points...", icon: "annotation" },
-                { name: "captionPrompt", label: "Caption Prompt", placeholder: "Create an engaging social media caption...", icon: "chat-alt" },
-                { name: "imageTitlePrompt", label: "Image Title Prompt", placeholder: "Suggest a title for generated images...", icon: "photograph" },
-                { name: "imageGenPrompt", label: "Image Generation Prompt", placeholder: "Describe the style and content for images...", icon: "color-swatch" },
-                { name: "tagPrompt", label: "Tag Prompt", placeholder: "Suggest relevant tags separated by commas...", icon: "hashtag" },
+                {
+                  name: "summaryPrompt",
+                  label: "Summary Prompt",
+                  placeholder:
+                    "Write a concise summary highlighting key points...",
+                  icon: "annotation",
+                },
+                {
+                  name: "captionPrompt",
+                  label: "Caption Prompt",
+                  placeholder: "Create an engaging social media caption...",
+                  icon: "chat-alt",
+                },
+                {
+                  name: "imageTitlePrompt",
+                  label: "Image Title Prompt",
+                  placeholder: "Suggest a title for generated images...",
+                  icon: "photograph",
+                },
+                {
+                  name: "imageGenPrompt",
+                  label: "Image Generation Prompt",
+                  placeholder: "Describe the style and content for images...",
+                  icon: "color-swatch",
+                },
+                {
+                  name: "tagPrompt",
+                  label: "Tag Prompt",
+                  placeholder: "Suggest relevant tags separated by commas...",
+                  icon: "hashtag",
+                },
               ].map((field) => (
                 <div key={field.name} className="space-y-1">
                   <label className=" text-sm font-medium text-gray-700 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
-                        field.icon === "annotation" ? "M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" :
-                          field.icon === "chat-alt" ? "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" :
-                            field.icon === "photograph" ? "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" :
-                              field.icon === "color-swatch" ? "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" :
-                                "M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
-                      } />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 mr-2 text-blue-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d={
+                          field.icon === "annotation"
+                            ? "M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                            : field.icon === "chat-alt"
+                              ? "M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+                              : field.icon === "photograph"
+                                ? "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                : field.icon === "color-swatch"
+                                  ? "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"
+                                  : "M7 20l4-16m2 16l4-16M6 9h14M4 15h14"
+                        }
+                      />
                     </svg>
                     {field.label}
                   </label>
@@ -318,8 +537,19 @@ export default function CategoriesDashboard() {
               onClick={handleSubmit}
               className="px-5 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-blue-600 rounded-lg hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-all duration-200 flex items-center"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
               </svg>
               Save Category
             </button>

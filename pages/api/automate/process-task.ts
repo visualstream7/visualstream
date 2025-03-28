@@ -180,109 +180,217 @@ export default async function handler(req, res) {
   let feedTextContent = JSON.stringify(jsonResult, null, 2);
   feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
 
-  try {
-    const openai = new OpenAI({
-      apiKey: OPENAI_API_KEY,
-      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
-    });
+  if (categoryToRun.type === "normal") {
+    try {
+      const openai = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+      });
 
-    const feedSummaryByChatgpt = await generateAIContent(
-      openai,
-      `${categoryToRun.summaryPrompt} : "${feedTextContent}"`,
-    );
-    const captionByChatgpt = await generateAIContent(
-      openai,
-      `${categoryToRun.captionPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
-    );
-    const imageTitle = await generateAIContent(
-      openai,
-      `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
-    );
-    const imageGenPrompt = await generateAIContent(
-      openai,
-      `${categoryToRun.imageGenPrompt} : "{image title : ${imageTitle}}"`,
-    );
+      const feedSummaryByChatgpt = await generateAIContent(
+        openai,
+        `${categoryToRun.summaryPrompt} : "${feedTextContent}"`,
+      );
+      const captionByChatgpt = await generateAIContent(
+        openai,
+        `${categoryToRun.captionPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+      );
+      const imageTitle = await generateAIContent(
+        openai,
+        `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
+      );
+      const imageGenPrompt = await generateAIContent(
+        openai,
+        `${categoryToRun.imageGenPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+      );
 
-    const { url, description } = await getGeneratedImage(imageGenPrompt);
+      const { url, description } = await getGeneratedImage(imageGenPrompt);
 
-    const tagGenPrompt = await generateAIContent(
-      openai,
-      `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
-    );
+      const tagGenPrompt = await generateAIContent(
+        openai,
+        `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
+      );
 
-    // https://visualstream.vercel.app/api/add-image
-    // POST
-    // {
-    //   caption,
-    //   title,
-    //   ai_describe,
-    //   article_link,
-    //   category,
-    //   ai_tags,
-    //   ai_article_describe,
-    // }
+      // https://visualstream.vercel.app/api/add-image
+      // POST
+      // {
+      //   caption,
+      //   title,
+      //   ai_describe,
+      //   article_link,
+      //   category,
+      //   ai_tags,
+      //   ai_article_describe,
+      // }
 
-    const addImageResponse = await fetch(
-      "https://visualstream.vercel.app/api/add-image",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const addImageResponse = await fetch(
+        "https://visualstream.vercel.app/api/add-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            caption: captionByChatgpt,
+            title: imageTitle,
+            ai_describe: description,
+            article_link: categoryToRun.rssFeedUrl,
+            category: categoryToRun.name,
+            ai_tags: tagGenPrompt,
+            ai_article_describe: feedSummaryByChatgpt,
+          }),
         },
-        body: JSON.stringify({
-          caption: captionByChatgpt,
-          title: imageTitle,
-          ai_describe: description,
-          article_link: categoryToRun.rssFeedUrl,
-          category: categoryToRun.name,
-          ai_tags: tagGenPrompt,
-          ai_article_describe: feedSummaryByChatgpt,
-        }),
-      },
-    );
+      );
 
-    const addImageData = await addImageResponse.json();
-    console.log("addImageData", addImageData);
+      const addImageData = await addImageResponse.json();
+      console.log("addImageData", addImageData);
 
-    const id = addImageData?.result?.image_data?.id || null;
-    const imageUrl = url;
+      const id = addImageData?.result?.image_data?.id || null;
+      const imageUrl = url;
 
-    // https://visualstream.vercel.app/api/process-image-url
-    // POST
-    // {
-    // image_url, id
-    // }
+      // https://visualstream.vercel.app/api/process-image-url
+      // POST
+      // {
+      // image_url, id
+      // }
 
-    const processImageResponse = await fetch(
-      "https://visualstream.vercel.app/api/process-image-url",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const processImageResponse = await fetch(
+        "https://visualstream.vercel.app/api/process-image-url",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image_url: imageUrl,
+            id,
+          }),
         },
-        body: JSON.stringify({
-          image_url: imageUrl,
-          id,
-        }),
-      },
-    );
+      );
 
-    let processImageData = await processImageResponse.json();
-    console.log("processImageData", processImageData);
+      let processImageData = await processImageResponse.json();
+      console.log("processImageData", processImageData);
 
-    await updateCategoryIsRunning(client, categoryToRun.id, false);
+      await updateCategoryIsRunning(client, categoryToRun.id, false);
 
-    return res.status(200).json({
-      categoryToRun,
-      feedSummaryByChatgpt,
-      captionByChatgpt,
-      imageTitle,
-      imageGenPrompt,
-      generatedImage: url,
-      generatedImageDescription: description,
-      generatedTags: tagGenPrompt,
-    });
-  } catch (error) {
-    return res.status(500).json({ result: null, error: error });
+      return res.status(200).json({
+        categoryToRun,
+        feedSummaryByChatgpt,
+        captionByChatgpt,
+        imageTitle,
+        imageGenPrompt,
+        generatedImage: url,
+        generatedImageDescription: description,
+        generatedTags: tagGenPrompt,
+      });
+    } catch (error) {
+      return res.status(500).json({ result: null, error: error });
+    }
+  } else {
+    try {
+      const openai = new OpenAI({
+        apiKey: OPENAI_API_KEY,
+        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+      });
+
+      const feedSummaryByChatgpt = await generateAIContent(
+        openai,
+        `${categoryToRun.summaryPrompt}`,
+      );
+      const captionByChatgpt = await generateAIContent(
+        openai,
+        `${categoryToRun.captionPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+      );
+      const imageTitle = await generateAIContent(
+        openai,
+        `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
+      );
+      const imageGenPrompt = await generateAIContent(
+        openai,
+        `${categoryToRun.imageGenPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+      );
+
+      const { url, description } = await getGeneratedImage(imageGenPrompt);
+
+      const tagGenPrompt = await generateAIContent(
+        openai,
+        `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
+      );
+
+      // https://visualstream.vercel.app/api/add-image
+      // POST
+      // {
+      //   caption,
+      //   title,
+      //   ai_describe,
+      //   article_link,
+      //   category,
+      //   ai_tags,
+      //   ai_article_describe,
+      // }
+
+      const addImageResponse = await fetch(
+        "https://visualstream.vercel.app/api/add-image",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            caption: captionByChatgpt,
+            title: imageTitle,
+            ai_describe: description,
+            article_link: categoryToRun.rssFeedUrl,
+            category: categoryToRun.name,
+            ai_tags: tagGenPrompt,
+            ai_article_describe: feedSummaryByChatgpt,
+          }),
+        },
+      );
+
+      const addImageData = await addImageResponse.json();
+      console.log("addImageData", addImageData);
+
+      const id = addImageData?.result?.image_data?.id || null;
+      const imageUrl = url;
+
+      // https://visualstream.vercel.app/api/process-image-url
+      // POST
+      // {
+      // image_url, id
+      // }
+
+      const processImageResponse = await fetch(
+        "https://visualstream.vercel.app/api/process-image-url",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image_url: imageUrl,
+            id,
+          }),
+        },
+      );
+
+      let processImageData = await processImageResponse.json();
+      console.log("processImageData", processImageData);
+
+      await updateCategoryIsRunning(client, categoryToRun.id, false);
+
+      return res.status(200).json({
+        categoryToRun,
+        feedSummaryByChatgpt,
+        captionByChatgpt,
+        imageTitle,
+        imageGenPrompt,
+        generatedImage: url,
+        generatedImageDescription: description,
+        generatedTags: tagGenPrompt,
+      });
+    } catch (error) {
+      return res.status(500).json({ result: null, error: error });
+    }
   }
 }
