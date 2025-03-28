@@ -166,7 +166,7 @@ const Home = () => {
             className="w-full h-full absolute opacity-50"
           />
         )}
-        <svg className="absolute w-full h-full cursor-pointer" ref={svgRef}>
+        {/* <svg className="absolute w-full h-full cursor-pointer" ref={svgRef}>
           <line
             x1="100"
             y1="100"
@@ -195,7 +195,7 @@ const Home = () => {
             stroke="green"
             strokeWidth="1"
           />
-        </svg>
+        </svg> */}
         <svg className="absolute w-full h-full pointer-events-none">
           {points.length > 1 && (
             <polygon
