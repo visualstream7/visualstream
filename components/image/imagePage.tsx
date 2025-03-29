@@ -76,7 +76,20 @@ function getSortedProducts(products: Product[]): Product[] {
 }
 
 function getProductFromMock(mock: string, products: Product[]): Product | null {
-  return products.find((product) => product.mockup === mock) || null;
+  if (!mock) return null;
+  let mockKey = mock.split("/");
+  let key = mockKey[mockKey.length - 1];
+  return products.find((product) => product.mockup?.includes(key)) || null;
+}
+
+function getProperFileUrl(url: any) {
+  if (!url) return null;
+  if (url.includes("utfs.io/f")) {
+    let key = url.split("utfs.io/f")[1];
+    console.log("key", key);
+    let newUrl = "https://hhc2cny3ts.ufs.sh/f" + key;
+    return newUrl;
+  } else return url;
 }
 
 function ImageComponent({
@@ -86,17 +99,25 @@ function ImageComponent({
   hoveredImage: string | null;
   image: Image;
 }) {
-  const [displayedImage, setDisplayedImage] = useState(image.image_url);
+  const [displayedImage, setDisplayedImage] = useState(
+    getProperFileUrl(image.image_url),
+  );
   const [isFading, setIsFading] = useState(false);
+
+  console.log(displayedImage);
 
   useEffect(() => {
     if (!hoveredImage) {
-      setDisplayedImage(image.image_url || "");
+      setDisplayedImage(getProperFileUrl(image.image_url) || "");
       setIsFading(false);
     } else if (hoveredImage !== displayedImage) {
       setIsFading(true);
       const fadeTimeout = setTimeout(() => {
-        setDisplayedImage(hoveredImage || image.image_url || "");
+        setDisplayedImage(
+          getProperFileUrl(hoveredImage) ||
+            getProperFileUrl(image.image_url) ||
+            "",
+        );
         setIsFading(false);
       }, 100); // Match the transition duration
 
@@ -106,7 +127,7 @@ function ImageComponent({
 
   return (
     <img
-      src={displayedImage || image.image_url || ""}
+      src={displayedImage || getProperFileUrl(image.image_url) || ""}
       alt="Image Display"
       className={`
         rounded-lg object-cover m-auto
@@ -123,12 +144,12 @@ function getProductMock(product: Product, mocks: any) {
   return mockData ? mockData.mock : null;
 }
 
-export default function
-  ImagePage({ user, image }: UserPropType) {
+export default function ImagePage({ user, image }: UserPropType) {
   const [products, setProducts] = useState<Product[]>([]);
   const fetchProducts = useRef(false);
 
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<Number | null>(null);
 
   useEffect(() => {
     if (fetchProducts.current) return; // Prevent duplicate calls
@@ -240,10 +261,9 @@ export default function
               <span>Back</span>
             </button>
           </Link>
-          {getProductFromMock(hoveredImage!, products)?.id !== 534 &&
-            getProductFromMock(hoveredImage!, products)?.id !== 358 && (
-              <ImageComponent hoveredImage={hoveredImage} image={image} />
-            )}
+          {hoveredId !== 534 && hoveredId !== 358 && (
+            <ImageComponent hoveredImage={hoveredImage} image={image} />
+          )}
           {
             // Jigsaw Puzzle image
             getProductFromMock(hoveredImage!, products)?.id === 534 && (
@@ -261,7 +281,7 @@ export default function
           }
           {
             // Sticker image
-            getProductFromMock(hoveredImage!, products)?.id === 358 && (
+            hoveredId === 358 && (
               <div className="w-[90vw] lg:max-w-[30vw] h-[60vh] m-auto flex items-center">
                 <img
                   src={image.image_url || ""}
@@ -302,7 +322,10 @@ export default function
             className="
             flex
             lg:grid grid-cols-2 lg:grid-cols-5 gap-4 lg:w-full overflow-y-scroll p-2  md:p-8 custom-scrollbar"
-            onMouseLeave={() => setHoveredImage(null)}
+            onMouseLeave={() => {
+              setHoveredImage(null);
+              setHoveredId(null);
+            }}
           >
             {getSortedProducts(products).map((product) => (
               <Link
@@ -311,12 +334,18 @@ export default function
               >
                 <div
                   className="w-full min-w-[150px] lg:min-w-[100px] rounded shadow-sm lg:shadow-md min-h-full overflow-hidden border border-gray-200 p-4 items-center justify-between flex flex-col gap-4"
-                  onMouseEnter={() => setHoveredImage(product.mockup)}
+                  onMouseEnter={() => {
+                    setHoveredImage(getProperFileUrl(product.mockup) || "haha");
+                    setHoveredId(product.id);
+                  }}
                 >
                   <div className="relative w-full h-full min-h-max my-auto">
                     {product.id !== 534 && product.id !== 358 && (
                       <img
-                        src={product.mockup || product.image}
+                        src={
+                          getProperFileUrl(product.mockup) ||
+                          getProperFileUrl(product.image)
+                        }
                         alt={`Thumbnail for ${product.title}`}
                         className="w-full h-full object-cover"
                       />
@@ -325,7 +354,7 @@ export default function
                       <img
                         src="/puzzle.png"
                         style={{
-                          background: `url('${image.image_url || ""}') center/150px 110px no-repeat`,
+                          background: `url('${getProperFileUrl(image.image_url) || ""}') center/150px 110px no-repeat`,
                         }}
                         alt={product.title}
                         className="w-[150px]"
@@ -335,7 +364,7 @@ export default function
                     {product.id === 358 && (
                       <div className="w-[90%] border border-[#00000010] m-auto shadow-lg p-2">
                         <img
-                          src={image.image_url || ""}
+                          src={getProperFileUrl(image.image_url) || ""}
                           alt="Sticker"
                           className="w-full"
                         />
