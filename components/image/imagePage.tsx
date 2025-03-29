@@ -123,7 +123,8 @@ function getProductMock(product: Product, mocks: any) {
   return mockData ? mockData.mock : null;
 }
 
-export default function ImagePage({ user, image }: UserPropType) {
+export default function
+  ImagePage({ user, image }: UserPropType) {
   const [products, setProducts] = useState<Product[]>([]);
   const fetchProducts = useRef(false);
 
@@ -292,7 +293,7 @@ export default function ImagePage({ user, image }: UserPropType) {
           </Link>
 
           <div>
-            <h1 className="text-2xl lg:text-3xl text-gray-900">
+            <h1 className="truncate text-2xl lg:text-3xl text-gray-900">
               {image.title || "Image Title"}
             </h1>
           </div>
