@@ -782,7 +782,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
         const productResult = await fetchProduct();
         const variantsResult = await fetchVariants();
 
-        setLoading(false);
         let fetchedMocks = await fetchVariantMocks(
           productResult.id,
           parseInt(image_id),
@@ -797,22 +796,23 @@ const ProductPage: React.FC<ProductPageProps> = ({
           setSelectedVariantGroup(distinct[0]);
           setVariantMocks((mocks) => [...fetchedMocks]);
 
-          // @ts-ignore
-          setProduct((prev) => ({
-            ...prev,
-            isLoadingMockup: false,
-            mockup: firstMock.mock,
-          }));
+          setProduct((prev) => {
+            if (!prev) return null; // Ensure `prev` is not null
+            const updatedProduct: Product = {
+              ...prev,
+              isLoadingMockup: false,
+              mockup: firstMock.mock,
+            };
+            return updatedProduct;
+          });
 
-          setLoading(false);
-
-          return;
         } else {
           const mockup = await getMockupImage(
             distinct[0],
             imageResult.low_resolution_image_url!,
             parseInt(id),
           );
+
           let { mock: dbMock, variantIds } = await addMockupToDatabase(
             parseInt(image_id),
             distinct[0].variant_ids,
@@ -820,20 +820,19 @@ const ProductPage: React.FC<ProductPageProps> = ({
             mockup,
           );
 
-          // Add the mockup to the variantMocks state
-          //
           if (dbMock && variantIds) {
             setVariantMocks((prev) => [
               ...prev,
               { variant_id: variantIds[0], mock: dbMock },
             ]);
-            console.log("Mockup added to database", dbMock, distinct[0]);
           }
         }
       } catch (error) {
+        console.error("Error fetching data", error);
       } finally {
         setLoading(false);
       }
+
     };
 
     if (image_id) fetchData();
