@@ -335,7 +335,7 @@ export default function ImagePage({ user, image }: UserPropType) {
                 <div
                   className="w-full min-w-[150px] lg:min-w-[100px] rounded shadow-sm lg:shadow-md min-h-full overflow-hidden border border-gray-200 p-4 items-center justify-between flex flex-col gap-4"
                   onMouseEnter={() => {
-                    setHoveredImage(getProperFileUrl(product.mockup) || "haha");
+                    setHoveredImage(getProperFileUrl(product.mockup) || null);
                     setHoveredId(product.id);
                   }}
                 >
