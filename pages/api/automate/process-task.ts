@@ -155,6 +155,31 @@ async function getGeneratedImage(prompt) {
   };
 }
 
+function extractLastLinkBeforePubDate(xmlString) {
+  // Find the index of the first <pubDate> tag.
+  const pubDateIndex = xmlString.indexOf("<pubDate>");
+
+  // Determine the portion of the XML to scan.
+  // If a pubDate is found, we consider only text before it;
+  // otherwise, we use the entire XML string.
+  const searchArea =
+    pubDateIndex !== -1 ? xmlString.substring(0, pubDateIndex) : xmlString;
+
+  // Create a regular expression to match <link>...</link> tags.
+  const linkRegex = /<link>([\s\S]*?)<\/link>/g;
+  let lastLink = null;
+  let match;
+
+  // Loop through all matches in the searchArea.
+  while ((match = linkRegex.exec(searchArea)) !== null) {
+    // Save the link content (trimmed) from each match.
+    lastLink = match[1].trim();
+  }
+
+  // Return the last link found before the first pubDate.
+  return lastLink;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
@@ -178,6 +203,8 @@ export default async function handler(req, res) {
   const feedData = await fetchRSSFeed(categoryToRun.rssFeedUrl);
   const jsonResult = await parseStringPromise(feedData);
   let feedTextContent = JSON.stringify(jsonResult, null, 2);
+
+  let a;
   feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
 
   if (categoryToRun.type === "normal") {
@@ -299,7 +326,7 @@ export default async function handler(req, res) {
       );
       const captionByChatgpt = await generateAIContent(
         openai,
-        `${categoryToRun.captionPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+        `${categoryToRun.captionPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
       );
       const imageTitle = await generateAIContent(
         openai,
@@ -307,7 +334,7 @@ export default async function handler(req, res) {
       );
       const imageGenPrompt = await generateAIContent(
         openai,
-        `${categoryToRun.imageGenPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+        `${categoryToRun.imageGenPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
       );
 
       const { url, description } = await getGeneratedImage(imageGenPrompt);
