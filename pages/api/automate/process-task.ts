@@ -368,7 +368,7 @@ export default async function handler(req, res) {
             caption: captionByChatgpt,
             title: imageTitle,
             ai_describe: description,
-            article_link: categoryToRun.rssFeedUrl,
+            article_link: "n/a",
             category: categoryToRun.name,
             ai_tags: tagGenPrompt,
             ai_article_describe: feedSummaryByChatgpt,
