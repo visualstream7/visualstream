@@ -189,7 +189,7 @@ export default async function handler(req, res) {
 
       const feedSummaryByChatgpt = await generateAIContent(
         openai,
-        `${categoryToRun.summaryPrompt} : "${feedTextContent}"`,
+        `${categoryToRun.summaryPrompt} : "article : ${feedTextContent}"`,
       );
       const captionByChatgpt = await generateAIContent(
         openai,
@@ -197,7 +197,7 @@ export default async function handler(req, res) {
       );
       const imageTitle = await generateAIContent(
         openai,
-        `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
+        `${categoryToRun.imageTitlePrompt} : "article summary: ${feedSummaryByChatgpt}"`,
       );
       const imageGenPrompt = await generateAIContent(
         openai,
