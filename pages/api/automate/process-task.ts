@@ -200,15 +200,16 @@ export default async function handler(req, res) {
   }
 
   await updateCategoryLastRan(client, categoryToRun.id);
-  const feedData = await fetchRSSFeed(categoryToRun.rssFeedUrl);
-  const jsonResult = await parseStringPromise(feedData);
-  let feedTextContent = JSON.stringify(jsonResult, null, 2);
-
-  let a;
-  feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
 
   if (categoryToRun.type === "normal") {
     try {
+      const feedData = await fetchRSSFeed(categoryToRun.rssFeedUrl);
+      const jsonResult = await parseStringPromise(feedData);
+      let feedTextContent = JSON.stringify(jsonResult, null, 2);
+
+      let a;
+      feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
+
       const openai = new OpenAI({
         apiKey: OPENAI_API_KEY,
         baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
