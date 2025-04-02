@@ -357,7 +357,10 @@ export default async function handler(req, res) {
       let processImageData = await processImageResponse.json();
       console.log("processImageData", processImageData);
 
-      await publishInstagramPost(processImageData.image_url, captionByChatgpt);
+      await publishInstagramPost(
+        processImageData.result.image_data.image_url,
+        captionByChatgpt,
+      );
       await updateCategoryIsRunning(client, categoryToRun.id, false);
 
       return res.status(200).json({
@@ -469,7 +472,10 @@ export default async function handler(req, res) {
 
       let processImageData = await processImageResponse.json();
       console.log("processImageData", processImageData);
-      await publishInstagramPost(processImageData.image_url, captionByChatgpt);
+      await publishInstagramPost(
+        processImageData.result.image_data.image_url,
+        captionByChatgpt,
+      );
 
       await updateCategoryIsRunning(client, categoryToRun.id, false);
 
