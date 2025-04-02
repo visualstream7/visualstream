@@ -284,7 +284,9 @@ export default async function handler(req, res) {
         `${categoryToRun.imageGenPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
       );
 
-      const { url, description } = await getGeneratedImage(imageGenPrompt);
+      const { url, description } = await getGeneratedImage(
+        `${imageGenPrompt}  --aspect 16:9`,
+      );
 
       const tagGenPrompt = await generateAIContent(
         openai,
@@ -400,7 +402,9 @@ export default async function handler(req, res) {
         `${categoryToRun.imageGenPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
       );
 
-      const { url, description } = await getGeneratedImage(imageGenPrompt);
+      const { url, description } = await getGeneratedImage(
+        `${imageGenPrompt}  --aspect 16:9`,
+      );
 
       const tagGenPrompt = await generateAIContent(
         openai,
