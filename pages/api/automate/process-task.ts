@@ -34,6 +34,8 @@ async function publishInstagramPost(imageUrl, caption) {
       },
     );
 
+    console.log("uploadResponse", uploadResponse);
+
     const uploadData = await uploadResponse.json();
     if (!uploadData.id) throw new Error("Failed to upload media.");
 
