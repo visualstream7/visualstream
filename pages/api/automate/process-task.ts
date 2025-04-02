@@ -12,6 +12,56 @@ const sleep = (seconds) =>
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+async function publishInstagramPost(imageUrl, caption) {
+  const accessToken =
+    "EAAUO4ZAMgtkIBOxVvZC7IYxGpqFxIOmtLBaRGcLUZCcgNZCgo5iyD7wUGgZBpyS2bu0Qrw6DtqElR2H4kbO179elKh2mmSfwKiMbXntZALVi5267Y6CjFDgNuaL967aq3IMAdgdQ8hSJkohWS0QghsQh1P0pUsLbNQTlef4ahZAjfYICnXauP7LDZBiZA"; // Replace with your actual access token
+  const instagramAccountId = "17841463996337780"; // Replace with your Instagram account ID
+
+  try {
+    // Step 1: Upload the image to Instagram
+    const uploadResponse = await fetch(
+      `https://graph.facebook.com/v22.0/${instagramAccountId}/media`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          image_url: imageUrl,
+          caption: caption,
+          access_token: accessToken,
+        }),
+      },
+    );
+
+    const uploadData = await uploadResponse.json();
+    if (!uploadData.id) throw new Error("Failed to upload media.");
+
+    // Step 2: Publish the uploaded image
+    const publishResponse = await fetch(
+      `https://graph.facebook.com/v22.0/${instagramAccountId}/media_publish`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          creation_id: uploadData.id,
+          access_token: accessToken,
+        }),
+      },
+    );
+
+    const publishData = await publishResponse.json();
+    if (!publishData.id) throw new Error("Failed to publish media.");
+
+    console.log("Post published successfully!", publishData);
+    return publishData;
+  } catch (error) {
+    console.error("Error publishing post:", error);
+  }
+}
+
 async function fetchCategories(client) {
   const { data, error } = await client
     .from("categories")
@@ -270,6 +320,12 @@ export default async function handler(req, res) {
         },
       );
 
+      if (!url) {
+        return res
+          .status(500)
+          .json({ result: null, error: "No image generated" });
+      }
+
       const addImageData = await addImageResponse.json();
       console.log("addImageData", addImageData);
 
@@ -299,6 +355,7 @@ export default async function handler(req, res) {
       let processImageData = await processImageResponse.json();
       console.log("processImageData", processImageData);
 
+      await publishInstagramPost(processImageData.image_url, captionByChatgpt);
       await updateCategoryIsRunning(client, categoryToRun.id, false);
 
       return res.status(200).json({
@@ -376,6 +433,12 @@ export default async function handler(req, res) {
         },
       );
 
+      if (!url) {
+        return res
+          .status(500)
+          .json({ result: null, error: "No image generated" });
+      }
+
       const addImageData = await addImageResponse.json();
       console.log("addImageData", addImageData);
 
@@ -404,6 +467,7 @@ export default async function handler(req, res) {
 
       let processImageData = await processImageResponse.json();
       console.log("processImageData", processImageData);
+      await publishInstagramPost(processImageData.image_url, captionByChatgpt);
 
       await updateCategoryIsRunning(client, categoryToRun.id, false);
 
