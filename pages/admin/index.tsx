@@ -771,6 +771,26 @@ export default function Admin() {
               <div
                 onClick={() =>
                   window.open(
+                    "https://supabase.com/dashboard/project/xkwhbcurrwiqrioskcgh",
+                    "_blank",
+                  )
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img src="/customers.png" alt="" className="w-20 h-20" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Supabase
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Monitor the database
+                </p>
+              </div>
+
+              <div
+                onClick={() =>
+                  window.open(
                     "https://analytics.google.com/analytics/web/#/p476945942/reports/intelligenthome",
                     "_blank",
                   )
