@@ -305,6 +305,12 @@ export default async function handler(req, res) {
       //   ai_article_describe,
       // }
 
+      if (!url) {
+        return res
+          .status(500)
+          .json({ result: null, error: "No image generated" });
+      }
+
       const addImageResponse = await fetch(
         "https://visualstream.vercel.app/api/add-image",
         {
@@ -324,14 +330,9 @@ export default async function handler(req, res) {
         },
       );
 
-      if (!url) {
-        return res
-          .status(500)
-          .json({ result: null, error: "No image generated" });
-      }
+      
 
       const addImageData = await addImageResponse.json();
-      console.log("addImageData", addImageData);
 
       const id = addImageData?.result?.image_data?.id || null;
       const imageUrl = url;
@@ -423,6 +424,13 @@ export default async function handler(req, res) {
       //   ai_article_describe,
       // }
 
+      if (!url) {
+        return res
+          .status(500)
+          .json({ result: null, error: "No image generated" });
+      }
+
+
       const addImageResponse = await fetch(
         "https://visualstream.vercel.app/api/add-image",
         {
@@ -442,12 +450,7 @@ export default async function handler(req, res) {
         },
       );
 
-      if (!url) {
-        return res
-          .status(500)
-          .json({ result: null, error: "No image generated" });
-      }
-
+     
       const addImageData = await addImageResponse.json();
       console.log("addImageData", addImageData);
 
