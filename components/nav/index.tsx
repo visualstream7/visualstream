@@ -317,11 +317,11 @@ function MobileNav({
 
         <div className="text-white px-2 py-4 flex items-center justify-around w-full">
           <Link href="/">
-            <Home size={24} color="black" />
+            <Home size={26} color="black" />
           </Link>
 
           <PaintBucket
-            size={24}
+            size={26}
             color="black"
             onClick={() => {
               if (setShowPalette) setShowPalette((prev) => !prev);
@@ -331,7 +331,7 @@ function MobileNav({
           {/* Cart Icon with Count Badge */}
           <div className="relative">
             <Link href="/cart">
-              <ShoppingCart size={24} color="black" />
+              <ShoppingCart size={26} color="black" />
             </Link>
             {count > 0 && (
               <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
@@ -572,6 +572,15 @@ export default function Nav({
   const router = useRouter();
 
 
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowWelcome(false);
+    }, 3000); // Hide after 3 seconds
+    return () => clearTimeout(timer);
+  }, []);
+
   
   return (
     <>
@@ -581,14 +590,19 @@ export default function Nav({
         </Link>
       </div>
 
-      {router.pathname === "/" && (
-        <div className="flex justify-between items-center px-4 md:hidden bg-[#25384c]">
-          {user && (
-            <div className="flex flex-col py-4 md:hidden text-white">
-              <p className="text-lg font-bold"> Welcome Back </p>
-              <p> {user.fullName} </p>
-            </div>
-          )}
+      {router.pathname === "/" && user && (
+        <div className={`
+    md:hidden bg-[#25384c] overflow-hidden
+    transition-all duration-500 ease-in-out
+    ${showWelcome ? "max-h-32 opacity-100 py-4" : "max-h-0 opacity-0 py-0"}
+  `}>
+          <div className={`
+      px-4 transition-all duration-300 ease-in-out
+      ${showWelcome ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"}
+    `}>
+            <p className="text-lg font-bold text-white">Welcome Back</p>
+            <p className="text-sm text-gray-200">{user.fullName}</p>
+          </div>
         </div>
       )}
 
