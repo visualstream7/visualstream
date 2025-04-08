@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SupabaseWrapper } from "@/database/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -11,6 +13,9 @@ export default function CategoriesDashboard() {
   const router = useRouter();
   const [deleteCategory, setDeleteCategory] = useState(null);
   const [type, setType] = useState<"normal" | "special">("normal");
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
 
   const [category, setCategory] = useState({
     name: "",
@@ -23,6 +28,48 @@ export default function CategoriesDashboard() {
     schedule: 1800,
     paused: false,
   });
+
+  interface Category {
+    id: string;
+    name: string;
+    displayName?: string;
+    rssFeedUrl?: string;
+    summaryPrompt?: string;
+    captionPrompt?: string;
+    imageTitlePrompt?: string;
+    imageGenPrompt?: string;
+    tagPrompt?: string;
+    schedule?: number;
+    last_ran_at?: string;
+    paused?: boolean;
+    priority?: number;
+
+  }
+
+  const handleEditDisplayName = (category: Category) => {
+    setEditingId(category.id);
+    setEditValue(category.displayName || category.name);
+  };
+
+  const handleSaveDisplayName = async (categoryId: string) => {
+    try {
+      const updatedCategories = categories.map(cat =>
+        cat.id === categoryId ? { ...cat, displayName: editValue } : cat
+      );
+      setCategories(updatedCategories);
+      setEditingId(null);
+
+      // Update in database - pass just the string value
+      await database.updateCategoryDisplayName(
+        Number(categoryId),
+        editValue  // Just pass the string value directly
+      );
+    } catch (error) {
+      console.error("Failed to update display name:", error);
+      // Optional: Revert UI if update fails
+      setEditingId(categoryId);
+    }
+  };
 
   function getFields(type: "normal" | "special") {
     if (type === "normal")
@@ -59,20 +106,50 @@ export default function CategoriesDashboard() {
     { label: "Every 8 hours", value: 28800 },
   ];
 
-  useEffect(() => {
-    async function fetchCategories() {
-      const { result, error } = await database.getCategories();
-      if (!error && result) {
-        setCategories(
-          result.map((cat: any) => ({
-            ...cat,
-            schedule: parseInt(cat.schedule),
-          })),
-        );
-      }
+  
+
+  async function fetchCategories() {
+    const { result, error } = await database.getCategories();
+    if (!error && result) {
+      setCategories(
+        result.map((cat: any) => ({
+          ...cat,
+          schedule: parseInt(cat.schedule),
+        }))
+          //@ts-ignore
+        .sort((a, b) => a.priority - b.priority) // Sort by priority
+      );
     }
+  }
+
+  useEffect(() => {
     fetchCategories();
   }, []);
+
+  const handleDragEnd = async(result:any) => {
+    if (!result.destination) return;
+
+    const items = Array.from(categories);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    // Update priorities based on new order
+    const updatedCategories = items.map((cat, index) => ({
+      ...cat,
+      priority: index
+    }));
+
+    setCategories(updatedCategories);
+
+    // Update priorities in database
+    try {
+      await database.updateCategoryPriorities(updatedCategories);
+    } catch (error) {
+      console.error("Error updating priorities:", error);
+      // Revert if error
+      fetchCategories();
+    }
+  };
 
   // realtime updates to categories
 
@@ -89,6 +166,7 @@ export default function CategoriesDashboard() {
     console.log(category);
     const { result, error } = await database.addCategory({
       ...category,
+      displayName: category.name,
       type: type,
     });
 
@@ -170,146 +248,145 @@ export default function CategoriesDashboard() {
 
           {/* Category list */}
           <div className="p-6 space-y-4">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                className="flex max-w-[80vw] justify-between mx-auto items-center p-5 border border-gray-300 rounded-xl hover:shadow-md transition-all cursor-pointer"
-                onClick={() => router.push(`/automate/${cat.id}`)}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className="p-3 bg-indigo-50 rounded-lg">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-indigo-600"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                      />
-                    </svg>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="categories">
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="p-6 space-y-4"
+                  >
+                    {categories.map((cat, index) => (
+                      <Draggable key={cat.id} draggableId={cat.id.toString()} index={index}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className={`flex justify-between items-center p-5 mx-auto w-full max-w-[80vw] border border-indigo-300 rounded-xl hover:shadow-md transition-all cursor-pointer ${snapshot.isDragging ? 'bg-indigo-50 shadow-lg border-indigo-200' : 'bg-white'
+                              }`}
+                            onClick={(e) => {
+                              if (!editingId && !(e.target as HTMLElement).closest('.edit-button')) {
+                                router.push(`/automate/${cat.id}`);
+                              }
+                            }}
+                          >
+                            {/* Left side - Drag handle and main content */}
+                            <div className="flex items-center space-x-4 w-full">
+                              {/* Drag handle */}
+                              <div
+                                {...provided.dragHandleProps}
+                                className="p-2.5 bg-indigo-50 rounded-lg cursor-move hover:bg-indigo-100 transition-colors"
+                              >
+                                <svg className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                </svg>
+                              </div>
+
+                              {/* Content area */}
+                              <div className="flex-grow min-w-0">
+                                {editingId === cat.id ? (
+                                  <div className="flex items-center space-x-4 w-full">
+                                    <input
+                                      type="text"
+                                      value={editValue}
+                                      onChange={(e) => setEditValue(e.target.value)}
+                                      className="flex-grow border border-gray-300 rounded-lg px-4 py-2.5 text-base font-medium focus:ring-.5 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                      autoFocus
+                                      onKeyDown={(e) => e.key === 'Enter' && handleSaveDisplayName(cat.id)}
+                                    />
+                                    <div className="flex space-x-3">
+                                      <button
+                                        onClick={() => setEditingId(null)}
+                                        className="edit-button px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors border border-gray-300 shadow-sm"
+                                      >
+                                        Cancel
+                                      </button>
+                                      <button
+                                        onClick={() => handleSaveDisplayName(cat.id)}
+                                        className="edit-button px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+                                      >
+                                        Save
+                                      </button>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col space-y-1.5">
+                                    <div className="flex items-center">
+                                      <h3 className="text-lg font-semibold text-gray-800 truncate">
+                                        {cat.displayName || cat.name}
+                                      </h3>
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEditDisplayName(cat);
+                                        }}
+                                        className="edit-button ml-3 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                        title="Edit display name"
+                                      >
+                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                      </button>
+                                    </div>
+
+                                    <div className="flex items-center space-x-5 text-sm text-gray-600">
+                                      <span className="flex items-center space-x-1.5">
+                                        <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span className="whitespace-nowrap">
+                                          {scheduleOptions.find(opt => opt.value === cat.schedule)?.label}
+                                        </span>
+                                      </span>
+                                      <span className="flex items-center space-x-1.5">
+                                        <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span className="whitespace-nowrap">
+                                          Updated: {new Date(cat.last_ran_at).toLocaleDateString()}
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Right side - Status and actions */}
+                            <div className="flex items-center space-x-4 ml-4">
+                              {editingId !== cat.id && (
+                                <>
+                                  <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${cat.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+                                    }`}>
+                                    {cat.paused ? "Paused" : "Active"}
+                                  </span>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteCategory(cat.id);
+                                    }}
+                                    className="edit-button p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                    title="Delete category"
+                                  >
+                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {cat.name}
-                    </h3>
-                    <div className="flex items-center space-x-3 mt-1">
-                      <span className="text-sm text-gray-500 flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        {
-                          scheduleOptions.find(
-                            (opt) => opt.value === cat.schedule,
-                          )?.label
-                        }
-                      </span>
-                      <span className="text-sm text-gray-500 flex items-center">
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4 mr-1"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                          />
-                        </svg>
-                        Last updated:{" "}
-                        {new Date(cat.last_ran_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteCategory(cat.id);
-                    }}
-                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors duration-200"
-                    title="Delete category"
-                    disabled={deleteCategory === cat.id}
-                  >
-                    {deleteCategory === cat.id ? (
-                      <svg
-                        className="animate-spin h-5 w-5 text-red-500"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    ) : (
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    )}
-                  </button>
-                  <span
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium ${cat.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}
-                  >
-                    {cat.paused ? "Paused" : "Active"}
-                  </span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5 text-gray-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-            ))}
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
         </div>
       ) : (

@@ -48,7 +48,25 @@ export interface Variant {
   discontinued: boolean;
 }
 
-export interface Order {}
+export interface Order { }
+
+// types/category.ts (or wherever you keep your types)
+export interface Category {
+  id: number;
+  name: string;
+  displayName?: string;  // Optional display name
+  rssFeedUrl?: string;
+  summaryPrompt?: string;
+  captionPrompt?: string;
+  imageTitlePrompt?: string;
+  imageGenPrompt?: string;
+  tagPrompt?: string;
+  schedule: number;
+  paused: boolean;
+  priority: number;
+  last_ran_at?: string;
+  type?: string;
+}
 
 // Define overload signatures for the constructor
 class SupabaseWrapper {
@@ -1315,6 +1333,86 @@ class SupabaseWrapper {
       let message = "Unknown Error";
       if (error instanceof Error) message = error.message;
 
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  };
+
+  getAutomateCategories = async (): Promise<{
+    result: any;
+    error: string | null;
+  }> => { 
+    try {
+      const { data, error } = await this.client
+        //@ts-ignore
+        .from("categories")
+        .select("*");
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      let message = "Unknown Error";
+      if (error instanceof Error) message = error.message;
+
+      return {
+        result: null,
+        error: message,
+      };
+    }
+  }
+
+  updateCategoryPriorities(
+    categories: { id: number; priority: number }[],
+  ): Promise<
+    {
+      data: any;
+      error: any;
+    }[]
+  > {
+    const updates = categories.map((cat) =>
+      this.client
+        //@ts-ignore
+        .from("categories")
+        // @ts-ignore
+        .update({ priority: cat.priority })
+        .eq("id", cat.id),
+    );
+
+    return Promise.all(updates);
+  }
+
+  updateCategoryDisplayName = async (
+    id: number,
+    displayName: string,
+  ): Promise<{
+    result: any;
+    error: string | null;
+  }> => {
+    try {
+      const { data, error } = await (this.client as any)
+        .from("categories")
+        .update({ displayName: displayName }) // Use the correct column name
+        .eq("id", id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      return {
+        result: data,
+        error: null,
+      };
+    } catch (error) {
+      console.error("Error updating category in database", error);
+      const message = error instanceof Error ? error.message : "Unknown Error";
       return {
         result: null,
         error: message,

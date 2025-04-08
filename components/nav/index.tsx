@@ -27,9 +27,15 @@ import { BiCart, BiColor, BiPaint } from "react-icons/bi";
 import { IoCart } from "react-icons/io5";
 import { GrGoogle } from "react-icons/gr";
 import { CiLogout } from "react-icons/ci";
-import { CATEGORIES } from "../search/searchPage";
 import { useRouter } from "next/router";
 import { colors } from "@/data/colors";
+
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string;
+  // ... other fields
+}
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -57,6 +63,8 @@ type NavPropType = {
   setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
   showPalette?: boolean;
   setShowPalette?: React.Dispatch<React.SetStateAction<boolean>>;
+  categories: Category[];
+  setCategories?: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 type ComponentPropType = {
@@ -74,6 +82,8 @@ type ComponentPropType = {
   setIsResizing?: React.Dispatch<React.SetStateAction<number | null>>;
   showPalette?: boolean;
   setShowPalette?: React.Dispatch<React.SetStateAction<boolean>>;
+  categories: Category[];
+  setCategories?: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
 // UserButton Component
@@ -347,6 +357,8 @@ function LargeScreenNav({
   setSearchTerm,
   selectedCategory,
   setSelectedCategory,
+  categories,
+  setCategories,
 }: ComponentPropType) {
   const [selectedCountry, setSelectedCountry] = useState("🇺🇸");
   const [returnOrders, setReturnOrders] = useState(false);
@@ -483,24 +495,30 @@ function LargeScreenNav({
       {/* LowerNavbar */}
       <div className="bg-[#1c2a3c] text-white py-2 px-4 flex items-center gap-6 w-full">
         <div className="flex gap-8">
-          {Object.keys(CATEGORIES).map((category, index) => (
-            // @ts-ignore
-            <Link href={`/?category=${CATEGORIES[category]}`} key={index}>
-              <div
-                className={`cursor-pointer ${
-                  category === selectedCategory && "border-b-2 border-white"
-                }`}
-              >
-                {category}
+          
+          <Link href="/?category=All">
+            <div className={`cursor-pointer ${selectedCategory === 'All' ? "border-b-2 border-white" : ""}`}>
+              All
+            </div>
+          </Link>
+
+          {/* Categories - now properly typed */}
+          {categories?.map((category: Category) => (
+            <Link
+              href={`/?category=${category.name}`}
+              key={category.id}  // Better to use id than index
+            >
+              <div className={`cursor-pointer ${category.name === selectedCategory ? "border-b-2 border-white" : ""}`}>
+                {category.displayName || category.name}
               </div>
             </Link>
           ))}
+
+          {/* Static links */}
           <Link href="/about">
-            {" "}
             <div className="cursor-pointer">About Us</div>
           </Link>
           <Link href="/contact">
-            {" "}
             <div className="cursor-pointer">Contact Us</div>
           </Link>
         </div>
@@ -548,9 +566,13 @@ export default function Nav({
   setIsResizing,
   showPalette,
   setShowPalette,
+  categories,
+  setCategories,
 }: NavPropType) {
   const router = useRouter();
 
+
+  
   return (
     <>
       <div className="flex p-4 md:hidden justify-between items-center bg-[#25384c] text-white">
@@ -647,6 +669,8 @@ export default function Nav({
         setSearchTerm={setSearchTerm}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        categories={categories}
+        setCategories={setCategories}
       />
 
       {/* Mobile Nav */}
@@ -657,6 +681,7 @@ export default function Nav({
         setSelectedColors={setSelectedColors}
         showPalette={showPalette}
         setShowPalette={setShowPalette}
+        categories={categories}
       />
     </>
   );
