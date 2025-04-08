@@ -9,6 +9,13 @@ import { Heart } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string; // or display_name if that's the field name in your DB
+  priority?: number;
+}
+
 const LikeButton = ({
   image,
   likedImages,
@@ -107,6 +114,24 @@ const ImageComponent = ({
 export default function Favourites() {
   const { user, isLoaded } = useUser();
   const [likedImages, setLikedImages] = useState<Image[]>([]);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getAutomateCategories();
+      if (result) {
+        const sortedCategories = (result as Category[])
+          .slice()
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
+      }
+    }
+    fetchCategories();
+  }, []);
+
   useEffect(() => {
     async function fetchLikedImages() {
       let supabase = new SupabaseWrapper("CLIENT");
@@ -132,7 +157,7 @@ export default function Favourites() {
 
   return (
     <div className="max-h-dvh overflow-hidden bg-gray-50">
-      <Nav user={user} cartCount={cartItems.length} />
+      <Nav user={user} cartCount={cartItems.length} categories={categories} />
 
       {/* Main Content Container */}
       <div className="container mx-auto py-10 px-4 ">

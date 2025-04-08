@@ -14,6 +14,13 @@ type UserPropType = {
   image: Image;
 };
 
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string; // or display_name if that's the field name in your DB
+  priority?: number;
+}
+
 interface Product {
   id: number;
   title: string;
@@ -150,6 +157,22 @@ export default function ImagePage({ user, image }: UserPropType) {
 
   const [hoveredImage, setHoveredImage] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<Number | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    async function fetchCategories() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getAutomateCategories();
+      if (result) {
+        const sortedCategories = (result as Category[])
+          .slice()
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
+      }
+    }
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     if (fetchProducts.current) return; // Prevent duplicate calls
@@ -252,7 +275,7 @@ export default function ImagePage({ user, image }: UserPropType) {
 
   return (
     <div className="flex flex-col lg:max-h-dvh overflow-hidden mb-[40px] md:mb-0 font-primary">
-      <Nav user={user} cartCount={count} />
+      <Nav user={user} cartCount={count} categories={categories} />
       <div className="flex-1 flex flex-col lg:flex-row">
         <div className="flex-1 flex flex-col justify-center items-center">
           <Link href="/">

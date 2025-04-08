@@ -28,6 +28,13 @@ type UserPropType = {
   image: Image;
 };
 
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string; // or display_name if that's the field name in your DB
+  priority?: number;
+}
+
 interface Product {
   id: number;
   title: string;
@@ -413,6 +420,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   const [hoveredGroup, setHoveredGroup] = useState<DistinctVariantGroup | null>( // Track hovered group
     null,
   );
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const { cartItems } = useCart({
     rerender: rerenderNav,
@@ -772,6 +780,21 @@ const ProductPage: React.FC<ProductPageProps> = ({
     cacheImageSourceArray();
   }, [variantMocks]);
 
+  useEffect(() => {
+    async function fetchCategories() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getAutomateCategories();
+      if (result) {
+        const sortedCategories = (result as Category[])
+          .slice()
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
+      }
+    }
+    fetchCategories();
+  }, []);
+
   // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -805,7 +828,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
             };
             return updatedProduct;
           });
-
         } else {
           const mockup = await getMockupImage(
             distinct[0],
@@ -832,7 +854,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
       } finally {
         setLoading(false);
       }
-
     };
 
     if (image_id) fetchData();
@@ -845,7 +866,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden">
-      <Nav user={user} cartCount={cartItems.length} />
+      <Nav user={user} cartCount={cartItems.length} categories={categories} />
       <div className="flex flex-col overflow-auto">
         <Link href={`/image/${image_id}`}>
           <button className="flex items-center text-gray-800 hover:text-gray-800 m-4 lg:hidden">

@@ -1,7 +1,15 @@
 import Nav from "@/components/nav";
 import useCart from "@/components/nav/useCart";
+import { SupabaseWrapper } from "@/database/supabase";
 import { useUser } from "@clerk/nextjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string; // or display_name if that's the field name in your DB
+  priority?: number;
+}
 
 export default function ContactUs() {
   const { user, isLoaded } = useUser();
@@ -10,6 +18,7 @@ export default function ContactUs() {
     rerender: false,
     setRerenderNav: () => {},
   });
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -64,9 +73,24 @@ export default function ContactUs() {
     }
   };
 
+  useEffect(() => {
+    async function fetchCategories() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getAutomateCategories();
+      if (result) {
+        const sortedCategories = (result as Category[])
+          .slice()
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
+      }
+    }
+    fetchCategories();
+  }, []);
+
   return (
     <div className="bg-gray-50">
-      <Nav user={user} cartCount={cartItems.length} />
+      <Nav user={user} cartCount={cartItems.length} categories={categories} />
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700 text-white py-20">
         <div className="container mx-auto px-4 text-center">
