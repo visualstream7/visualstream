@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SupabaseWrapper } from "@/database/supabase";
 import { UserResource } from "@clerk/types";
 import {
@@ -27,6 +27,13 @@ interface CartProps {
   user: UserResource | null | undefined;
 }
 
+interface Category {
+  id: number;
+  name: string;
+  displayName?: string; // or display_name if that's the field name in your DB
+  priority?: number;
+}
+
 const database = new SupabaseWrapper("CLIENT");
 
 export default function Cart({ user }: CartProps) {
@@ -42,7 +49,7 @@ export default function Cart({ user }: CartProps) {
     handleDecrement,
     removeItemFromCart,
   } = useCart({ rerender: rerenderNav, setRerenderNav: setRerenderNav, user });
-
+  const [categories, setCategories] = useState<Category[]>([]);
   async function handleCheckout() {
     setShowShipping(true); // Show the shipping form when "Proceed to Checkout" is clicked
   }
@@ -65,9 +72,24 @@ export default function Cart({ user }: CartProps) {
     return price.toFixed(2);
   }
 
+  useEffect(() => {
+    async function fetchCategories() {
+      let supabase = new SupabaseWrapper("CLIENT");
+      const { result, error } = await supabase.getAutomateCategories();
+      if (result) {
+        const sortedCategories = (result as Category[])
+          .slice()
+          .sort((a, b) => (a.priority || 0) - (b.priority || 0));
+
+        setCategories(sortedCategories);
+      }
+    }
+    fetchCategories();
+  }, []);
+
   return (
     <div className="flex flex-col bg-white h-dvh lg:overflow-y-hidden">
-      <Nav user={user} cartCount={cartItems.length} />
+      <Nav user={user} cartCount={cartItems.length} categories={categories} />
       <div className="flex-1 flex  flex-col lg:flex-row p-6">
         <div
           className={`lg:pr-4 flex flex-col flex-1 overflow-hidden ${
@@ -79,7 +101,7 @@ export default function Cart({ user }: CartProps) {
           {" "}
           <div className="h-full pr-2 flex-1 flex flex-col">
             {loading ? (
-              <FullPageSpinner/>
+              <FullPageSpinner />
             ) : cartItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <BiCart className="w-14 h-14 mb-8 text-gray-400" />
