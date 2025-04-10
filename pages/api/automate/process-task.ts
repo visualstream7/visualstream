@@ -262,9 +262,9 @@ export default async function handler(req, res) {
   }
 
   const database = new SupabaseWrapper("SERVER", req, res);
-  const instagram_access_token = await fetchAccessToken(database);
   const client = database.getClient();
   const { categories, error } = await fetchCategories(client);
+  const instagram_access_token = await fetchAccessToken(client);
 
   const categoryToRun = findCategoryToRun(categories);
   if (!categoryToRun || error) {
