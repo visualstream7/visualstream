@@ -4,6 +4,7 @@ import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
 import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
 import { MenuIcon } from "lucide-react";
 import { MdEmail } from "react-icons/md";
+import { list_of_admin_emails } from "@/data/admins";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -535,14 +536,7 @@ export default function Admin() {
 
   useEffect(() => {
     const checkAdmin = () => {
-      const list_of_admin_emails = [
-        "mdmarufbinsalim@gmail.com",
-        "waliurrahman957@gmail.com",
-        "visualstream709@gmail.com",
-      ];
-
       const userEmail = user?.emailAddresses[0].emailAddress;
-
       setIsAdmin(
         userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
       );

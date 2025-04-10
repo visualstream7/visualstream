@@ -115,91 +115,99 @@ async function generateAIContent(openai, prompt) {
     // store: true,
     messages: [{ role: "user", content: prompt }],
   });
+  console.log("completion : ", completion.choices[0].message.content);
   return completion.choices[0].message.content;
 }
 
 async function getGeneratedImage(prompt) {
-  const response = await fetch("https://api.userapi.ai/midjourney/v2/imagine", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-    },
-    body: JSON.stringify({ prompt: prompt }),
-  });
-  const data = await response.json();
-  let imagineHash = data?.hash || null;
-  console.log("imagineHash", imagineHash);
-  await sleep(40);
-
-  // upscale
-  const responseUpscale = await fetch(
-    "https://api.userapi.ai/midjourney/v2/upscale",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+  try {
+    const response = await fetch(
+      "https://api.userapi.ai/midjourney/v2/imagine",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+        },
+        body: JSON.stringify({ prompt: prompt }),
       },
-      body: JSON.stringify({ hash: imagineHash, choice: 1 }),
-    },
-  );
-  const dataUpscale = await responseUpscale.json();
-  console.log("dataUpscale", dataUpscale);
-  let upscaleHash = dataUpscale?.hash || null;
-  console.log("upscaleHash", upscaleHash);
-  await sleep(40);
+    );
+    const data = await response.json();
+    let imagineHash = data?.hash || null;
+    console.log("imagineHash", imagineHash);
+    await sleep(40);
 
-  // https://api.userapi.ai/midjourney/v2/status?hash=eb4c4381-bde5-44f9-b91f-a3953113af45 get request with api-key and content-type application/json
-
-  const responseStatus = await fetch(
-    `https://api.userapi.ai/midjourney/v2/status?hash=${upscaleHash}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+    // upscale
+    const responseUpscale = await fetch(
+      "https://api.userapi.ai/midjourney/v2/upscale",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+        },
+        body: JSON.stringify({ hash: imagineHash, choice: 1 }),
       },
-    },
-  );
-  console.log("responseStatus", responseStatus);
-  const dataStatus = await responseStatus.json();
-  console.log("dataStatus", dataStatus);
-  let result = dataStatus?.result?.url || dataStatus?.result?.proxy_url || null;
+    );
+    const dataUpscale = await responseUpscale.json();
+    console.log("dataUpscale", dataUpscale);
+    let upscaleHash = dataUpscale?.hash || null;
+    console.log("upscaleHash", upscaleHash);
+    await sleep(40);
 
-  const description = await fetch(
-    "https://api.userapi.ai/midjourney/v2/describe",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+    const responseStatus = await fetch(
+      `https://api.userapi.ai/midjourney/v2/status?hash=${upscaleHash}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+        },
       },
-      body: JSON.stringify({ url: result }),
-    },
-  );
-  const descriptionData = await description.json();
-  let descriptionHash = descriptionData?.hash || null;
-  console.log("descriptionHash", descriptionHash);
-  await sleep(40);
+    );
+    console.log("responseStatus", responseStatus);
+    const dataStatus = await responseStatus.json();
+    console.log("dataStatus", dataStatus);
+    let result =
+      dataStatus?.result?.url || dataStatus?.result?.proxy_url || null;
 
-  const responseDescription = await fetch(
-    `https://api.userapi.ai/midjourney/v2/status?hash=${descriptionHash}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+    const description = await fetch(
+      "https://api.userapi.ai/midjourney/v2/describe",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+        },
+        body: JSON.stringify({ url: result }),
       },
-    },
-  );
+    );
+    const descriptionData = await description.json();
+    let descriptionHash = descriptionData?.hash || null;
+    console.log("descriptionHash", descriptionHash);
+    await sleep(40);
 
-  const dataDescription = await responseDescription.json();
-  console.log("dataDescription", dataDescription);
-  let descriptionResult = dataDescription?.result
-    ? dataDescription?.result[0]
-    : "No description found";
-  console.log("descriptionResult", descriptionResult);
+    const responseDescription = await fetch(
+      `https://api.userapi.ai/midjourney/v2/status?hash=${descriptionHash}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
+        },
+      },
+    );
+
+    const dataDescription = await responseDescription.json();
+    console.log("dataDescription", dataDescription);
+    let descriptionResult = dataDescription?.result
+      ? dataDescription?.result[0]
+      : "No description found";
+    console.log("descriptionResult", descriptionResult);
+  } catch (error) {
+    console.error("Error generating image:", error);
+    return { url: null, description: null };
+  }
 
   return {
     url: result,
@@ -281,12 +289,11 @@ export default async function handler(req, res) {
       );
       const imageGenPrompt = await generateAIContent(
         openai,
-        `${categoryToRun.imageGenPrompt} : "{article summary : ${feedSummaryByChatgpt}}"`,
+        `You must resopnd with only 2 lines (the image generation prompt). Don't explain anything or use any conversational language. Just respond with the prompt.
+        ${categoryToRun.imageGenPrompt}, "{article summary : ${feedSummaryByChatgpt}}"`,
       );
 
-      const { url, description } = await getGeneratedImage(
-        `${imageGenPrompt}  --aspect 16:9`,
-      );
+      const { url, description } = await getGeneratedImage(`${imageGenPrompt}`);
 
       const tagGenPrompt = await generateAIContent(
         openai,
@@ -329,8 +336,6 @@ export default async function handler(req, res) {
           }),
         },
       );
-
-      
 
       const addImageData = await addImageResponse.json();
 
@@ -390,46 +395,49 @@ export default async function handler(req, res) {
         openai,
         `${categoryToRun.summaryPrompt}`,
       );
+      console.log(
+        "-------------------------------------------------------------",
+      );
       const captionByChatgpt = await generateAIContent(
         openai,
         `${categoryToRun.captionPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
+      );
+      console.log(
+        "-------------------------------------------------------------",
       );
       const imageTitle = await generateAIContent(
         openai,
         `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
       );
+      console.log(
+        "-------------------------------------------------------------",
+      );
       const imageGenPrompt = await generateAIContent(
         openai,
         `${categoryToRun.imageGenPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
       );
+      console.log(
+        "-------------------------------------------------------------",
+      );
 
-      const { url, description } = await getGeneratedImage(
-        `${imageGenPrompt}  --aspect 16:9`,
+      const { url, description } = await getGeneratedImage(`${imageGenPrompt}`);
+      console.log(
+        "-------------------------------------------------------------",
       );
 
       const tagGenPrompt = await generateAIContent(
         openai,
         `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
       );
-
-      // https://visualstream.vercel.app/api/add-image
-      // POST
-      // {
-      //   caption,
-      //   title,
-      //   ai_describe,
-      //   article_link,
-      //   category,
-      //   ai_tags,
-      //   ai_article_describe,
-      // }
+      console.log(
+        "-------------------------------------------------------------",
+      );
 
       if (!url) {
         return res
           .status(500)
           .json({ result: null, error: "No image generated" });
       }
-
 
       const addImageResponse = await fetch(
         "https://visualstream.vercel.app/api/add-image",
@@ -450,7 +458,6 @@ export default async function handler(req, res) {
         },
       );
 
-     
       const addImageData = await addImageResponse.json();
       console.log("addImageData", addImageData);
 

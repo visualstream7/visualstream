@@ -1,8 +1,11 @@
 // @ts-nocheck
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { OurFileRouter } from "@/app/api/uploadthing/core";
 import { UploadButton } from "@/utils/uploadthing";
+import { list_of_admin_emails } from "@/data/admins";
+import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
+import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 
 export default function ProcessImage() {
   const [formData, setFormData] = useState({
@@ -23,6 +26,9 @@ export default function ProcessImage() {
   const [tags, setTags] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("details");
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  const { user, isLoaded } = useUser();
 
   const resetForm = () => {
     setFormData({
@@ -90,11 +96,64 @@ export default function ProcessImage() {
     }
   };
 
+  useEffect(() => {
+    const checkAdmin = () => {
+      const userEmail = user?.emailAddresses[0].emailAddress;
+      setIsAdmin(
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
+      );
+    };
+    checkAdmin();
+  }, [user]);
+
+  if (!isLoaded) return <FullPageSpinner />;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-300 max-w-sm w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Admin Access Required
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Please sign in with an authorized admin account to access the admin
+            panel.
+          </p>
+          <SignInButton mode="modal">
+            <button className="flex bg-[#25384c] p-3 px-4 text-white font-bold rounded-md w-full items-center justify-center hover:bg-[#2f4961] transition">
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (user && !isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-300 max-w-sm w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            You do not have permission to access this page with your current
+            account.
+          </p>
+          <SignOutButton>
+            <button className="flex bg-[#25384c] p-3 px-4 text-white font-bold rounded-md w-full items-center justify-center hover:bg-[#2f4961] transition">
+              Sign Out
+            </button>
+          </SignOutButton>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Premium Header */}
       <div className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white py-8 px-8 shadow-md">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-white/20 rounded-lg backdrop-blur-sm">
               <svg
@@ -121,6 +180,27 @@ export default function ProcessImage() {
               </p>
             </div>
           </div>
+          {user && (
+            <SignOutButton>
+              <button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-lg text-white transition-all">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H3"
+                  />
+                </svg>
+                <span className="font-medium">Sign Out</span>
+              </button>
+            </SignOutButton>
+          )}
         </div>
       </div>
 

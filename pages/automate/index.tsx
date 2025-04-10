@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { SupabaseWrapper } from "@/database/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { list_of_admin_emails } from "@/data/admins";
+import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
+import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -43,7 +45,6 @@ export default function CategoriesDashboard() {
     last_ran_at?: string;
     paused?: boolean;
     priority?: number;
-
   }
 
   const handleEditDisplayName = (category: Category) => {
@@ -53,8 +54,8 @@ export default function CategoriesDashboard() {
 
   const handleSaveDisplayName = async (categoryId: string) => {
     try {
-      const updatedCategories = categories.map(cat =>
-        cat.id === categoryId ? { ...cat, displayName: editValue } : cat
+      const updatedCategories = categories.map((cat) =>
+        cat.id === categoryId ? { ...cat, displayName: editValue } : cat,
       );
       setCategories(updatedCategories);
       setEditingId(null);
@@ -62,7 +63,7 @@ export default function CategoriesDashboard() {
       // Update in database - pass just the string value
       await database.updateCategoryDisplayName(
         Number(categoryId),
-        editValue  // Just pass the string value directly
+        editValue, // Just pass the string value directly
       );
     } catch (error) {
       console.error("Failed to update display name:", error);
@@ -106,18 +107,17 @@ export default function CategoriesDashboard() {
     { label: "Every 8 hours", value: 28800 },
   ];
 
-  
-
   async function fetchCategories() {
     const { result, error } = await database.getCategories();
     if (!error && result) {
       setCategories(
-        result.map((cat: any) => ({
-          ...cat,
-          schedule: parseInt(cat.schedule),
-        }))
+        result
+          .map((cat: any) => ({
+            ...cat,
+            schedule: parseInt(cat.schedule),
+          }))
           //@ts-ignore
-        .sort((a, b) => a.priority - b.priority) // Sort by priority
+          .sort((a, b) => a.priority - b.priority), // Sort by priority
       );
     }
   }
@@ -126,7 +126,7 @@ export default function CategoriesDashboard() {
     fetchCategories();
   }, []);
 
-  const handleDragEnd = async(result:any) => {
+  const handleDragEnd = async (result: any) => {
     if (!result.destination) return;
 
     const items = Array.from(categories);
@@ -136,7 +136,7 @@ export default function CategoriesDashboard() {
     // Update priorities based on new order
     const updatedCategories = items.map((cat, index) => ({
       ...cat,
-      priority: index
+      priority: index,
     }));
 
     setCategories(updatedCategories);
@@ -187,7 +187,9 @@ export default function CategoriesDashboard() {
     setView("list");
   };
 
+  const { user, isLoaded } = useUser();
   const [deletingId, setDeletingId] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const handleDeleteCategory = async (categoryId: any) => {
     if (!window.confirm("Are you sure you want to delete this category?")) {
@@ -208,6 +210,59 @@ export default function CategoriesDashboard() {
     }
   };
 
+  useEffect(() => {
+    const checkAdmin = () => {
+      const userEmail = user?.emailAddresses[0].emailAddress;
+      setIsAdmin(
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
+      );
+    };
+    checkAdmin();
+  }, [user]);
+
+  if (!isLoaded) return <FullPageSpinner />;
+  if (!user) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-300 max-w-sm w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Admin Access Required
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Please sign in with an authorized admin account to access the admin
+            panel.
+          </p>
+          <SignInButton mode="modal">
+            <button className="flex bg-[#25384c] p-3 px-4 text-white font-bold rounded-md w-full items-center justify-center hover:bg-[#2f4961] transition">
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
+      </div>
+    );
+  }
+
+  if (user && !isAdmin) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-md border border-gray-300 max-w-sm w-full text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Access Denied
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            You do not have permission to access this page with your current
+            account.
+          </p>
+          <SignOutButton>
+            <button className="flex bg-[#25384c] p-3 px-4 text-white font-bold rounded-md w-full items-center justify-center hover:bg-[#2f4961] transition">
+              Sign Out
+            </button>
+          </SignOutButton>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full h-full">
       {view === "list" ? (
@@ -223,26 +278,49 @@ export default function CategoriesDashboard() {
                   Manage your automated content pipelines
                 </p>
               </div>
-              <button
-                onClick={() => setView("create")}
-                className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-lg text-white transition-all"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setView("create")}
+                  className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-lg text-white transition-all"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                <span className="font-medium">Create Category</span>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
+                  </svg>
+                  <span className="font-medium">Create Category</span>
+                </button>
+                {user && (
+                  <SignOutButton>
+                    <button className="flex items-center gap-2 bg-white/20 hover:bg-white/30 px-5 py-2.5 rounded-lg text-white transition-all">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H3"
+                        />
+                      </svg>
+                      <span className="font-medium">Sign Out</span>
+                    </button>
+                  </SignOutButton>
+                )}
+              </div>
             </div>
           </div>
 
@@ -257,15 +335,27 @@ export default function CategoriesDashboard() {
                     className="p-6 space-y-4"
                   >
                     {categories.map((cat, index) => (
-                      <Draggable key={cat.id} draggableId={cat.id.toString()} index={index}>
+                      <Draggable
+                        key={cat.id}
+                        draggableId={cat.id.toString()}
+                        index={index}
+                      >
                         {(provided, snapshot) => (
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className={`flex justify-between items-center p-5 mx-auto w-full max-w-[80vw] border border-indigo-300 rounded-xl hover:shadow-md transition-all cursor-pointer ${snapshot.isDragging ? 'bg-indigo-50 shadow-lg border-indigo-200' : 'bg-white'
-                              }`}
+                            className={`flex justify-between items-center p-5 mx-auto w-full max-w-[80vw] border border-indigo-300 rounded-xl hover:shadow-md transition-all cursor-pointer ${
+                              snapshot.isDragging
+                                ? "bg-indigo-50 shadow-lg border-indigo-200"
+                                : "bg-white"
+                            }`}
                             onClick={(e) => {
-                              if (!editingId && !(e.target as HTMLElement).closest('.edit-button')) {
+                              if (
+                                !editingId &&
+                                !(e.target as HTMLElement).closest(
+                                  ".edit-button",
+                                )
+                              ) {
                                 router.push(`/automate/${cat.id}`);
                               }
                             }}
@@ -277,8 +367,18 @@ export default function CategoriesDashboard() {
                                 {...provided.dragHandleProps}
                                 className="p-2.5 bg-indigo-50 rounded-lg cursor-move hover:bg-indigo-100 transition-colors"
                               >
-                                <svg className="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+                                <svg
+                                  className="h-5 w-5 text-indigo-600"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M4 8h16M4 16h16"
+                                  />
                                 </svg>
                               </div>
 
@@ -289,10 +389,15 @@ export default function CategoriesDashboard() {
                                     <input
                                       type="text"
                                       value={editValue}
-                                      onChange={(e) => setEditValue(e.target.value)}
+                                      onChange={(e) =>
+                                        setEditValue(e.target.value)
+                                      }
                                       className="flex-grow border border-gray-300 rounded-lg px-4 py-2.5 text-base font-medium focus:ring-.5 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                       autoFocus
-                                      onKeyDown={(e) => e.key === 'Enter' && handleSaveDisplayName(cat.id)}
+                                      onKeyDown={(e) =>
+                                        e.key === "Enter" &&
+                                        handleSaveDisplayName(cat.id)
+                                      }
                                     />
                                     <div className="flex space-x-3">
                                       <button
@@ -302,7 +407,9 @@ export default function CategoriesDashboard() {
                                         Cancel
                                       </button>
                                       <button
-                                        onClick={() => handleSaveDisplayName(cat.id)}
+                                        onClick={() =>
+                                          handleSaveDisplayName(cat.id)
+                                        }
                                         className="edit-button px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
                                       >
                                         Save
@@ -323,27 +430,65 @@ export default function CategoriesDashboard() {
                                         className="edit-button ml-3 p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                                         title="Edit display name"
                                       >
-                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        <svg
+                                          className="h-4 w-4"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                                          />
                                         </svg>
                                       </button>
                                     </div>
 
                                     <div className="flex items-center space-x-5 text-sm text-gray-600">
                                       <span className="flex items-center space-x-1.5">
-                                        <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <svg
+                                          className="h-4 w-4 text-gray-400 flex-shrink-0"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                          />
                                         </svg>
                                         <span className="whitespace-nowrap">
-                                          {scheduleOptions.find(opt => opt.value === cat.schedule)?.label}
+                                          {
+                                            scheduleOptions.find(
+                                              (opt) =>
+                                                opt.value === cat.schedule,
+                                            )?.label
+                                          }
                                         </span>
                                       </span>
                                       <span className="flex items-center space-x-1.5">
-                                        <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        <svg
+                                          className="h-4 w-4 text-gray-400 flex-shrink-0"
+                                          fill="none"
+                                          viewBox="0 0 24 24"
+                                          stroke="currentColor"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                          />
                                         </svg>
                                         <span className="whitespace-nowrap">
-                                          Updated: {new Date(cat.last_ran_at).toLocaleDateString()}
+                                          Updated:{" "}
+                                          {new Date(
+                                            cat.last_ran_at,
+                                          ).toLocaleDateString()}
                                         </span>
                                       </span>
                                     </div>
@@ -356,8 +501,13 @@ export default function CategoriesDashboard() {
                             <div className="flex items-center space-x-4 ml-4">
                               {editingId !== cat.id && (
                                 <>
-                                  <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${cat.paused ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-                                    }`}>
+                                  <span
+                                    className={`px-3 py-1.5 rounded-full text-sm font-medium ${
+                                      cat.paused
+                                        ? "bg-amber-100 text-amber-800"
+                                        : "bg-emerald-100 text-emerald-800"
+                                    }`}
+                                  >
                                     {cat.paused ? "Paused" : "Active"}
                                   </span>
                                   <button
@@ -368,12 +518,32 @@ export default function CategoriesDashboard() {
                                     className="edit-button p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Delete category"
                                   >
-                                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    <svg
+                                      className="h-5 w-5"
+                                      fill="none"
+                                      viewBox="0 0 24 24"
+                                      stroke="currentColor"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                      />
                                     </svg>
                                   </button>
-                                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  <svg
+                                    className="h-5 w-5 text-gray-300"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M9 5l7 7-7 7"
+                                    />
                                   </svg>
                                 </>
                               )}
@@ -424,30 +594,43 @@ export default function CategoriesDashboard() {
           <form className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8 bg-gray-50">
             {/* Left Column */}
             <div className="space-y-6">
-                <div className="flex items-center space-x-4 mb-6">
-                  <span className="text-lg font-medium text-gray-700">Category Type:</span>
-                  <button
-                    type="button"
-                    onClick={() => setType(type === "normal" ? "special" : "normal")}
-                    className="relative inline-flex items-center h-9 rounded-full border border-gray-300 bg-gray-100 p-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 overflow-hidden"
-                  >
-                    <div className={`absolute h-8 rounded-full transition-all duration-200 ease-in-out ${type === "normal"
-                        ? 'left-0.5 w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600'
-                        : 'left-[50%] w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600'
-                      }`}></div>
+              <div className="flex items-center space-x-4 mb-6">
+                <span className="text-lg font-medium text-gray-700">
+                  Category Type:
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setType(type === "normal" ? "special" : "normal")
+                  }
+                  className="relative inline-flex items-center h-9 rounded-full border border-gray-300 bg-gray-100 p-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 overflow-hidden"
+                >
+                  <div
+                    className={`absolute h-8 rounded-full transition-all duration-200 ease-in-out ${
+                      type === "normal"
+                        ? "left-0.5 w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600"
+                        : "left-[50%] w-[50%] bg-gradient-to-r from-indigo-500 to-blue-600"
+                    }`}
+                  ></div>
 
-                    <div className="relative z-10 flex w-full">
-                      <span className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${type === "normal" ? 'text-white' : 'text-gray-600'
-                        }`}>
-                        Normal
-                      </span>
-                      <span className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${type === "special" ? 'text-white' : 'text-gray-600'
-                        }`}>
-                        Special
-                      </span>
-                    </div>
-                  </button>
-                </div>
+                  <div className="relative z-10 flex w-full">
+                    <span
+                      className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${
+                        type === "normal" ? "text-white" : "text-gray-600"
+                      }`}
+                    >
+                      Normal
+                    </span>
+                    <span
+                      className={`flex-1 px-4 py-1 text-sm font-medium rounded-full text-center transition-colors duration-200 ${
+                        type === "special" ? "text-white" : "text-gray-600"
+                      }`}
+                    >
+                      Special
+                    </span>
+                  </div>
+                </button>
+              </div>
               {getFields(type).map((field) => (
                 <div key={field.name} className="space-y-2">
                   <label className=" text-sm font-medium text-gray-700 flex items-center">
