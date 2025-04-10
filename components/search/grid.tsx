@@ -128,7 +128,7 @@ const NormalGrid = ({
     <div
       className={`w-full md:w-[calc(100%-80px)] md:m-auto overflow-y-auto custom-scrollbar p-2 ${showPalette ? "max-h-[calc(100%-0px)] h-[calc(100%-0px)]" : "max-h-[calc(100%-0px)] h-[calc(100%-0px)]"}`}
     >
-      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 auto-rows-[140px]">
+      <div className="grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 mb-20 auto-rows-[140px]">
         {images.map((image: ImageWithSimilarity) => (
           <div
             key={image.id}
