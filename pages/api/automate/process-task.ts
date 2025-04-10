@@ -12,9 +12,10 @@ const sleep = (seconds) =>
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-async function publishInstagramPost(imageUrl, caption) {
-  const accessToken =
-    "EAAUO4ZAMgtkIBOxVvZC7IYxGpqFxIOmtLBaRGcLUZCcgNZCgo5iyD7wUGgZBpyS2bu0Qrw6DtqElR2H4kbO179elKh2mmSfwKiMbXntZALVi5267Y6CjFDgNuaL967aq3IMAdgdQ8hSJkohWS0QghsQh1P0pUsLbNQTlef4ahZAjfYICnXauP7LDZBiZA"; // Replace with your actual access token
+async function publishInstagramPost(imageUrl, caption, instagram_access_token) {
+  const accessToken = instagram_access_token; // Replace with your actual access token
+  // const accessToken =
+  //   "EAAUO4ZAMgtkIBOxVvZC7IYxGpqFxIOmtLBaRGcLUZCcgNZCgo5iyD7wUGgZBpyS2bu0Qrw6DtqElR2H4kbO179elKh2mmSfwKiMbXntZALVi5267Y6CjFDgNuaL967aq3IMAdgdQ8hSJkohWS0QghsQh1P0pUsLbNQTlef4ahZAjfYICnXauP7LDZBiZA"; // Replace with your actual access token
   const instagramAccountId = "17841463996337780"; // Replace with your Instagram account ID
 
   try {
@@ -240,12 +241,28 @@ function extractLastLinkBeforePubDate(xmlString) {
   return lastLink;
 }
 
+const fetchAccessToken = async (supabase) => {
+  const { data, error } = await supabase
+    // @ts-ignore
+    .from("variables")
+    .select("*")
+    .eq("id", "insta_token")
+    .single();
+
+  if (error) {
+    return null;
+  } else {
+    return data.value;
+  }
+};
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ result: null, error: "Method Not Allowed" });
   }
 
   const database = new SupabaseWrapper("SERVER", req, res);
+  const instagram_access_token = await fetchAccessToken(database);
   const client = database.getClient();
   const { categories, error } = await fetchCategories(client);
 
@@ -289,7 +306,8 @@ export default async function handler(req, res) {
       );
       const imageGenPrompt = await generateAIContent(
         openai,
-        `You must resopnd with only 2 lines (the image generation prompt). Don't explain anything or use any conversational language. Just respond with the prompt.
+        `
+          You must resopnd with only 2 lines (the image generation prompt). Don't explain anything or use any conversational language. Just respond with the prompt.
         ${categoryToRun.imageGenPrompt}, "{article summary : ${feedSummaryByChatgpt}}"`,
       );
 
@@ -368,6 +386,7 @@ export default async function handler(req, res) {
       await publishInstagramPost(
         processImageData.result.image_data.image_url,
         captionByChatgpt,
+        instagram_access_token,
       );
       await updateCategoryIsRunning(client, categoryToRun.id, false);
 
