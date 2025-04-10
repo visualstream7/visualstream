@@ -2,7 +2,7 @@ import { SignInButton, useUser, SignOutButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
 import { Product, SupabaseWrapper, Variant } from "@/database/supabase";
 import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
-import { MenuIcon } from "lucide-react";
+import { CircleDashed, MenuIcon } from "lucide-react";
 import { MdEmail } from "react-icons/md";
 import { list_of_admin_emails } from "@/data/admins";
 
@@ -436,6 +436,25 @@ export default function Admin() {
   const [activeTab, setActiveTab] = useState<string>("Products");
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(false); // New state for sidebar visibility
   const [selectedOption, setSelectedOption] = useState("images");
+  const [accessToken, setAccessToken] = useState<string>("");
+  const [isUpdatingAccessToken, setIsUpdatingAccessToken] = useState(false);
+
+  async function handleUpdationOfToken() {
+    if (!accessToken) return;
+    setIsUpdatingAccessToken(true);
+    const supabase = database.getClient();
+
+    const { error } = await supabase
+      // @ts-ignore
+      .from("variables")
+      // @ts-ignore
+      .update({ value: accessToken })
+      .eq("id", "insta_token");
+    if (error) {
+      console.error("Error updating access token:", error);
+    }
+    setIsUpdatingAccessToken(false);
+  }
 
   interface Image {
     id: number;
@@ -617,6 +636,28 @@ export default function Admin() {
     }
   }, [isAdmin]);
 
+  useEffect(() => {
+    const supabase = database.getClient();
+    const fetchAccessToken = async () => {
+      const { data, error } = await supabase
+        // @ts-ignore
+        .from("variables")
+        .select("*")
+        .eq("id", "insta_token")
+        .single();
+
+      if (error) {
+        console.error("Error fetching access token:", error);
+      } else {
+        console.log("Access token fetched:", data);
+        // @ts-ignore
+        setAccessToken(data.value);
+      }
+    };
+
+    fetchAccessToken();
+  }, []);
+
   function getFavCount(image_id: number, favouriteIds: any[]) {
     let ids = [...favouriteIds];
     let favCount = ids.filter((id) => id.image_id === image_id).length;
@@ -704,6 +745,14 @@ export default function Admin() {
           >
             Analytics
           </button>
+          <button
+            className={`text-white p-2 mb-2 rounded-md ${
+              activeTab === "Variables" ? "bg-gray-600" : ""
+            }`}
+            onClick={() => handleTabChange("Variables")}
+          >
+            Variables
+          </button>
         </div>
 
         {isAdmin && user && (
@@ -750,6 +799,39 @@ export default function Admin() {
                 setVariantGroups={setVariantGroups}
               />
             )}
+          </div>
+        )}
+
+        {activeTab === "Variables" && (
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">Variables</h2>
+            <p className="text-gray-600 mb-4">
+              Here are all your variables for management and updates.
+            </p>
+            <div className="flex flex-col">
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Instagram Access Token
+              </label>
+              <input
+                placeholder="Instagram Access Token"
+                type="text"
+                value={accessToken}
+                onChange={(e) => setAccessToken(e.target.value)}
+                className="border p-2 rounded-md w-full mb-4"
+              />
+              <button
+                onClick={handleUpdationOfToken}
+                disabled={isUpdatingAccessToken}
+                className="bg-[#3b4a5e] text-white px-6 py-2 rounded-md flex items-center justify-center hover:bg-[#2d3b47] transition duration-300"
+              >
+                Save
+                {isUpdatingAccessToken ? (
+                  <CircleDashed className="ml-2 w-6 h-6 animate-spin" />
+                ) : (
+                  ""
+                )}
+              </button>
+            </div>
           </div>
         )}
 
