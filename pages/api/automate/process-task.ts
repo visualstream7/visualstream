@@ -3,6 +3,9 @@ import { SupabaseWrapper } from "@/database/supabase";
 import { NextApiRequest, NextApiResponse } from "next";
 import { parseStringPromise } from "xml2js";
 import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
+import https from "https";
+import FormData from "form-data";
 
 export const config = { maxDuration: 200 };
 
@@ -11,6 +14,94 @@ const sleep = (seconds) =>
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+async function uploadToTmpFiles(buffer, filename) {
+  const form = new FormData();
+  form.append("file", buffer, {
+    filename: filename,
+    contentType: "image/png",
+  });
+
+  const options = {
+    method: "POST",
+    headers: form.getHeaders(),
+  };
+  let url = null;
+
+  const req = https.request(
+    "https://tmpfiles.org/api/v1/upload",
+    options,
+    (res) => {
+      let data = "";
+      res.on("data", (chunk) => (data += chunk));
+      res.on("end", () => {
+        try {
+          const json = JSON.parse(data);
+          url = json.data.url;
+          // if tmpfiles.org is in url but,url doesn't include /dl
+          // replace tmpfiles.org with tmpfiles.org/dl
+          if (url.includes("tmpfiles.org") && !url.includes("/dl")) {
+            console.log(
+              "URL doesn't include /dl, replacing tmpfiles.org with tmpfiles.org/dl",
+            );
+            url = url.replace("tmpfiles.org", "tmpfiles.org/dl");
+          }
+
+          console.log("TmpFiles URL:", url);
+        } catch (err) {
+          console.error("Failed to parse response:", data);
+        }
+      });
+    },
+  );
+
+  req.on("error", (err) => {
+    console.error("Upload error:", err.message);
+  });
+
+  form.pipe(req);
+  return new Promise((resolve) => {
+    req.on("close", () => {
+      resolve(url);
+    });
+  });
+}
+
+async function generateImageFromPrompt(prompt) {
+  console.log("prompt", prompt, "came here");
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyBzWaUpsbCzQdarvv14X7M7tKiXDcyDP_4",
+  });
+
+  const response = await ai.models.generateContent({
+    model: "gemini-2.0-flash-exp-image-generation",
+    contents: prompt,
+    config: {
+      responseModalities: ["Text", "Image"],
+    },
+  });
+  console.log("response", response.candidates.length);
+
+  let imageDescription = null;
+  let buffer = null;
+  for (const part of response.candidates[0].content.parts) {
+    // Based on the part type, either show the text or save the image
+    if (part.text) {
+      console.log(part.text);
+      imageDescription = part.text;
+    } else if (part.inlineData) {
+      const imageData = part.inlineData.data;
+      buffer = Buffer.from(imageData, "base64");
+    }
+  }
+  console.log("came here");
+
+  let imageUrl = await uploadToTmpFiles(buffer, "generated_image.png");
+  return {
+    url: imageUrl,
+    description: imageDescription,
+  };
+}
 
 async function publishInstagramPost(imageUrl, caption, instagram_access_token) {
   const accessToken = instagram_access_token; // Replace with your actual access token
@@ -311,24 +402,18 @@ export default async function handler(req, res) {
         ${categoryToRun.imageGenPrompt}, "{article summary : ${feedSummaryByChatgpt}}"`,
       );
 
-      const { url, description } = await getGeneratedImage(`${imageGenPrompt}`);
+      const { url, description } = await generateImageFromPrompt(
+        `${imageGenPrompt}
+        Generate only 1 image.
+        And describe the image in 3 lines`,
+      );
+      console.log("url : ", url);
+      console.log("description : ", description);
 
       const tagGenPrompt = await generateAIContent(
         openai,
         `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
       );
-
-      // https://visualstream.vercel.app/api/add-image
-      // POST
-      // {
-      //   caption,
-      //   title,
-      //   ai_describe,
-      //   article_link,
-      //   category,
-      //   ai_tags,
-      //   ai_article_describe,
-      // }
 
       if (!url) {
         return res
@@ -359,12 +444,6 @@ export default async function handler(req, res) {
 
       const id = addImageData?.result?.image_data?.id || null;
       const imageUrl = url;
-
-      // https://visualstream.vercel.app/api/process-image-url
-      // POST
-      // {
-      // image_url, id
-      // }
 
       const processImageResponse = await fetch(
         "https://visualstream.vercel.app/api/process-image-url",
@@ -482,12 +561,6 @@ export default async function handler(req, res) {
 
       const id = addImageData?.result?.image_data?.id || null;
       const imageUrl = url;
-
-      // https://visualstream.vercel.app/api/process-image-url
-      // POST
-      // {
-      // image_url, id
-      // }
 
       const processImageResponse = await fetch(
         "https://visualstream.vercel.app/api/process-image-url",

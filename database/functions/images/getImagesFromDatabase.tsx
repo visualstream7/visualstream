@@ -24,7 +24,10 @@ export type Image = {
 
 // Function to fetch an image from a URL, convert it to base64, and upload to Supabase
 async function getImagesFromDatabase(supabase: SupabaseClient<Database>) {
-  const { data, error } = await supabase.from("Images").select("*");
+  const { data, error } = await supabase
+    .from("Images")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to get images: ${error.message}`);
