@@ -165,13 +165,13 @@ class ColorAnalyzer {
     let bestMatchColorSimilarity: number | null = null;
 
     // For each user-selected color
-    userColors.forEach((userColor) => {
+    userColors?.forEach((userColor) => {
       const userLab = this.hexToLab(userColor.hex);
       let bestMatchDistance = Infinity;
       let bestMatchPercentageDiff = 100;
 
       // Find the best match from the image colors
-      colorPercentage.forEach((imageColor) => {
+      colorPercentage?.forEach((imageColor) => {
         const imageLab = this.hexToLab(imageColor.color);
         const distance = this.ciede2000(userLab, imageLab);
         if (distance < bestMatchDistance) {
@@ -205,6 +205,13 @@ class ColorAnalyzer {
     userColors: { hex: string; percentage: number }[],
   ): ImageWithSimilarity[] {
     let imagesWithSimilarity = images.map((image) => {
+      if (!image.image_url) {
+        return {
+          ...image,
+          similarity: 0,
+          bestMatchColor: null,
+        };
+      }
       let { similarity, bestMatchColor } = this.calculateSimilarityScore(
         // @ts-ignore
         image.color_composition as QuantizedColor[],

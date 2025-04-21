@@ -15,88 +15,70 @@ const sleep = (seconds) =>
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-async function uploadToTmpFiles(buffer, filename) {
-  const form = new FormData();
-  form.append("file", buffer, {
-    filename: filename,
-    contentType: "image/png",
-  });
-
-  const options = {
+const generateImage = async (prompt) => {
+  console.log("Image Generation Prompt from AI: ", prompt);
+  const response = await fetch("https://modelslab.com/api/v6/images/text2img", {
     method: "POST",
-    headers: form.getHeaders(),
-  };
-  let url = null;
-
-  const req = https.request(
-    "https://tmpfiles.org/api/v1/upload",
-    options,
-    (res) => {
-      let data = "";
-      res.on("data", (chunk) => (data += chunk));
-      res.on("end", () => {
-        try {
-          const json = JSON.parse(data);
-          url = json.data.url;
-          // if tmpfiles.org is in url but,url doesn't include /dl
-          // replace tmpfiles.org with tmpfiles.org/dl
-          if (url.includes("tmpfiles.org") && !url.includes("/dl")) {
-            console.log(
-              "URL doesn't include /dl, replacing tmpfiles.org with tmpfiles.org/dl",
-            );
-            url = url.replace("tmpfiles.org", "tmpfiles.org/dl");
-          }
-
-          console.log("TmpFiles URL:", url);
-        } catch (err) {
-          console.error("Failed to parse response:", data);
-        }
-      });
+    headers: {
+      "Content-Type": "application/json",
     },
-  );
-
-  req.on("error", (err) => {
-    console.error("Upload error:", err.message);
+    body: JSON.stringify({
+      key: "pJNpP027ksFNqL1IdbkRNouBNJaeI5gMqxVaSfOSv1wWyilSIcpXgBisDFGw",
+      model_id: "flux",
+      prompt: prompt,
+      width: "1024",
+      height: "1024",
+      samples: "1",
+      num_inference_steps: "30",
+      safety_checker: "no",
+      enhance_prompt: "yes",
+      seed: null,
+      guidance_scale: 7.5,
+      self_attention: "no",
+      vae: null,
+      webhook: null,
+      track_id: null,
+    }),
   });
 
-  form.pipe(req);
-  return new Promise((resolve) => {
-    req.on("close", () => {
-      resolve(url);
-    });
-  });
-}
+  if (!response.ok) {
+    throw new Error(`HTTP error! Status: ${response.status}`);
+  }
 
-async function generateImageFromPrompt(prompt) {
+  const data = await response.json();
+  return data?.output?.[0]; // returns the first image URL
+};
+
+async function generateImageFromPrompt(openai, prompt) {
   console.log("prompt", prompt, "came here");
+  const imageUrl = await generateImage(prompt);
+  console.log("imageUrl", imageUrl);
+
+  //
+  const response = await fetch(imageUrl);
+  const imageArrayBuffer = await response.arrayBuffer();
+  const base64ImageData = Buffer.from(imageArrayBuffer).toString("base64");
+
   const ai = new GoogleGenAI({
     apiKey: "AIzaSyBzWaUpsbCzQdarvv14X7M7tKiXDcyDP_4",
   });
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.0-flash-exp-image-generation",
-    contents: prompt,
-    config: {
-      responseModalities: ["Text", "Image"],
-    },
+  //
+  const result = await ai.models.generateContent({
+    model: "gemini-2.0-flash",
+    contents: [
+      {
+        inlineData: {
+          mimeType: "image/jpeg",
+          data: base64ImageData,
+        },
+      },
+      { text: "Describe this image in 3 lines." },
+    ],
   });
-  console.log("response", response.candidates.length);
+  let imageDescription = result.text;
+  console.log("imageDescription", imageDescription);
 
-  let imageDescription = null;
-  let buffer = null;
-  for (const part of response.candidates[0].content.parts) {
-    // Based on the part type, either show the text or save the image
-    if (part.text) {
-      console.log(part.text);
-      imageDescription = part.text;
-    } else if (part.inlineData) {
-      const imageData = part.inlineData.data;
-      buffer = Buffer.from(imageData, "base64");
-    }
-  }
-  console.log("came here");
-
-  let imageUrl = await uploadToTmpFiles(buffer, "generated_image.png");
   return {
     url: imageUrl,
     description: imageDescription,
@@ -110,7 +92,6 @@ async function publishInstagramPost(imageUrl, caption, instagram_access_token) {
   const instagramAccountId = "17841463996337780"; // Replace with your Instagram account ID
 
   try {
-    // Step 1: Upload the image to Instagram
     const uploadResponse = await fetch(
       `https://graph.facebook.com/v22.0/${instagramAccountId}/media`,
       {
@@ -207,104 +188,10 @@ async function generateAIContent(openai, prompt) {
     // store: true,
     messages: [{ role: "user", content: prompt }],
   });
-  console.log("completion : ", completion.choices[0].message.content);
+  console.log("prompt", prompt);
+  console.log("Result : ", completion.choices[0].message.content);
+  console.log("-------------------------------------------------------------");
   return completion.choices[0].message.content;
-}
-
-async function getGeneratedImage(prompt) {
-  try {
-    const response = await fetch(
-      "https://api.userapi.ai/midjourney/v2/imagine",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-        },
-        body: JSON.stringify({ prompt: prompt }),
-      },
-    );
-    const data = await response.json();
-    let imagineHash = data?.hash || null;
-    console.log("imagineHash", imagineHash);
-    await sleep(40);
-
-    // upscale
-    const responseUpscale = await fetch(
-      "https://api.userapi.ai/midjourney/v2/upscale",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-        },
-        body: JSON.stringify({ hash: imagineHash, choice: 1 }),
-      },
-    );
-    const dataUpscale = await responseUpscale.json();
-    console.log("dataUpscale", dataUpscale);
-    let upscaleHash = dataUpscale?.hash || null;
-    console.log("upscaleHash", upscaleHash);
-    await sleep(40);
-
-    const responseStatus = await fetch(
-      `https://api.userapi.ai/midjourney/v2/status?hash=${upscaleHash}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-        },
-      },
-    );
-    console.log("responseStatus", responseStatus);
-    const dataStatus = await responseStatus.json();
-    console.log("dataStatus", dataStatus);
-    let result =
-      dataStatus?.result?.url || dataStatus?.result?.proxy_url || null;
-
-    const description = await fetch(
-      "https://api.userapi.ai/midjourney/v2/describe",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-        },
-        body: JSON.stringify({ url: result }),
-      },
-    );
-    const descriptionData = await description.json();
-    let descriptionHash = descriptionData?.hash || null;
-    console.log("descriptionHash", descriptionHash);
-    await sleep(40);
-
-    const responseDescription = await fetch(
-      `https://api.userapi.ai/midjourney/v2/status?hash=${descriptionHash}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": "4a31c14d-2f9e-4661-9b72-fabe3186417c",
-        },
-      },
-    );
-
-    const dataDescription = await responseDescription.json();
-    console.log("dataDescription", dataDescription);
-    let descriptionResult = dataDescription?.result
-      ? dataDescription?.result[0]
-      : "No description found";
-    console.log("descriptionResult", descriptionResult);
-  } catch (error) {
-    console.error("Error generating image:", error);
-    return { url: null, description: null };
-  }
-
-  return {
-    url: result,
-    description: descriptionResult,
-  };
 }
 
 function extractLastLinkBeforePubDate(xmlString) {
@@ -372,11 +259,11 @@ export default async function handler(req, res) {
   if (categoryToRun.type === "normal") {
     try {
       const feedData = await fetchRSSFeed(categoryToRun.rssFeedUrl);
+      let articleLink = extractLastLinkBeforePubDate(feedData) || null;
       const jsonResult = await parseStringPromise(feedData);
       let feedTextContent = JSON.stringify(jsonResult, null, 2);
-
-      let a;
       feedTextContent = feedTextContent.split("pubDate")[0] || feedTextContent;
+      console.log("articleLink", articleLink);
 
       const openai = new OpenAI({
         apiKey: OPENAI_API_KEY,
@@ -403,16 +290,13 @@ export default async function handler(req, res) {
       );
 
       const { url, description } = await generateImageFromPrompt(
-        `${imageGenPrompt}
-        Generate only 1 image.
-        And describe the image in 3 lines`,
+        openai,
+        `${imageGenPrompt}`,
       );
-      console.log("url : ", url);
-      console.log("description : ", description);
 
       const tagGenPrompt = await generateAIContent(
         openai,
-        `${categoryToRun.tagPrompt} : "{image description : ${description}}"`,
+        `${categoryToRun.tagPrompt} : "{image description : ${description}}" and  "{article summary : ${feedSummaryByChatgpt}}"`,
       );
 
       if (!url) {
@@ -432,7 +316,7 @@ export default async function handler(req, res) {
             caption: captionByChatgpt,
             title: imageTitle,
             ai_describe: description,
-            article_link: categoryToRun.rssFeedUrl,
+            article_link: articleLink,
             category: categoryToRun.name,
             ai_tags: tagGenPrompt,
             ai_article_describe: feedSummaryByChatgpt,
@@ -460,7 +344,7 @@ export default async function handler(req, res) {
       );
 
       let processImageData = await processImageResponse.json();
-      console.log("processImageData", processImageData);
+      console.log("processImageData after image upload : ", processImageData);
 
       await publishInstagramPost(
         processImageData.result.image_data.image_url,
@@ -518,7 +402,10 @@ export default async function handler(req, res) {
         "-------------------------------------------------------------",
       );
 
-      const { url, description } = await getGeneratedImage(`${imageGenPrompt}`);
+      const { url, description } = await generateImageFromPrompt(
+        openai,
+        `${imageGenPrompt}`,
+      );
       console.log(
         "-------------------------------------------------------------",
       );
@@ -577,7 +464,8 @@ export default async function handler(req, res) {
       );
 
       let processImageData = await processImageResponse.json();
-      console.log("processImageData", processImageData);
+      console.log("processImageData after image upload : ", processImageData);
+
       await publishInstagramPost(
         processImageData.result.image_data.image_url,
         captionByChatgpt,
