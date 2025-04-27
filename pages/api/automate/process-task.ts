@@ -50,7 +50,7 @@ const generateImage = async (prompt) => {
 };
 
 async function generateImageFromPrompt(openai, prompt) {
-  console.log("prompt", prompt, "came here");
+  console.log("Image Generation prompt : ", prompt);
   const imageUrl = await generateImage(prompt);
   console.log("imageUrl", imageUrl);
 
@@ -285,8 +285,14 @@ export default async function handler(req, res) {
       const imageGenPrompt = await generateAIContent(
         openai,
         `
-          You must resopnd with only 2 lines (the image generation prompt). Don't explain anything or use any conversational language. Just respond with the prompt.
-        ${categoryToRun.imageGenPrompt}, "{article summary : ${feedSummaryByChatgpt}}"`,
+          - You must resopnd with only 1 large sentence -> (the image generation prompt).
+          - Don't explain anything or use any conversational language. Just respond with the image generation prompt.
+          - The prompts theme should be based on the '# article summary'.
+          - The prompts detail should be based on the '# prompt details'.
+
+          # article summary : "${feedSummaryByChatgpt}"
+          # prompt details : "${categoryToRun.imageGenPrompt}"
+          `,
       );
 
       const { url, description } = await generateImageFromPrompt(
@@ -375,28 +381,45 @@ export default async function handler(req, res) {
 
       const feedSummaryByChatgpt = await generateAIContent(
         openai,
-        `${categoryToRun.summaryPrompt}`,
+        `
+        - You must respond with only the year or the letter.
+        - Don't explain anything or use any conversational language. Just respond with the year or the letter.
+
+        ${categoryToRun.summaryPrompt}`,
       );
       console.log(
         "-------------------------------------------------------------",
       );
       const captionByChatgpt = await generateAIContent(
         openai,
-        `${categoryToRun.captionPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
+        `
+        - You must resopnd with only the social media catpion.
+        - Don't explain anything or use any conversational language. Just respond with the caption.
+
+        ${categoryToRun.captionPrompt} : "{ extracted data : ${feedSummaryByChatgpt}}"`,
       );
       console.log(
         "-------------------------------------------------------------",
       );
       const imageTitle = await generateAIContent(
         openai,
-        `${categoryToRun.imageTitlePrompt} : "${feedSummaryByChatgpt}"`,
+        `
+        - You must resopnd with only the image title in 1 line.
+        - Don't explain anything or use any conversational language. Just respond with an image title.
+
+        ${categoryToRun.imageTitlePrompt} : "{ extracted data : ${feedSummaryByChatgpt}}"`,
       );
       console.log(
         "-------------------------------------------------------------",
       );
       const imageGenPrompt = await generateAIContent(
         openai,
-        `${categoryToRun.imageGenPrompt} : "{summary : ${feedSummaryByChatgpt}}"`,
+        `
+        - You must resopnd with only 1 large sentence -> (the image generation prompt).
+        - Don't explain anything or use any conversational language. Just respond with the image generation prompt.
+        - The prompt theme should be based on the '# prompt details'.
+
+        # prompt details : "${categoryToRun.imageGenPrompt}, where Summary is : ${feedSummaryByChatgpt}"`,
       );
       console.log(
         "-------------------------------------------------------------",
@@ -438,7 +461,7 @@ export default async function handler(req, res) {
             article_link: "n/a",
             category: categoryToRun.name,
             ai_tags: tagGenPrompt,
-            ai_article_describe: feedSummaryByChatgpt,
+            ai_article_describe: description || feedSummaryByChatgpt,
           }),
         },
       );
