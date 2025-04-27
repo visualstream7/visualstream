@@ -8,7 +8,8 @@ import { Printful } from "@/libs/printful-client/printful-sdk";
 
 const mailersend = new MailerSend({
   apiKey:
-    "mlsn.8030be6531b6af03ab34eb0b36ef20c2799ed39e445dedba5c8f001ef55b7d1d",
+    "mlsn.f66a77a55d229b34ae3afd0bb45e0152d33e7729969ed0cee155e36e713c9e22",
+  // "mlsn.8030be6531b6af03ab34eb0b36ef20c2799ed39e445dedba5c8f001ef55b7d1d",
 });
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
