@@ -123,10 +123,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       console.log("Order created with Printful:", createOrderResult);
 
-      const sentFrom = new Sender(
-        "MS_axmL5i@trial-pq3enl6oprml2vwr.mlsender.net",
-        "VisualStream",
-      );
+      const sentFrom = new Sender("MS_d4vwjL@visualstream.ai", "visualstream");
       const recipients = [
         new Recipient(customerDetails.email || "", "Recipient"),
       ];
