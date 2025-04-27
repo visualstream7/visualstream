@@ -48,13 +48,13 @@ export interface Variant {
   discontinued: boolean;
 }
 
-export interface Order { }
+export interface Order {}
 
 // types/category.ts (or wherever you keep your types)
 export interface Category {
   id: number;
   name: string;
-  displayName?: string;  // Optional display name
+  displayName?: string; // Optional display name
   rssFeedUrl?: string;
   summaryPrompt?: string;
   captionPrompt?: string;
@@ -1100,6 +1100,17 @@ class SupabaseWrapper {
     };
   };
 
+  async clearCart(userId: number) {
+    const { error } = await this.client
+      .from("Users")
+      .update({ cart: { items: [] } })
+      .eq("id", userId);
+
+    return {
+      error: error,
+    };
+  }
+
   async updateProductMargin(productId: number, margin: number) {
     const { error } = await this.client
       .from("Products")
@@ -1343,7 +1354,7 @@ class SupabaseWrapper {
   getAutomateCategories = async (): Promise<{
     result: any;
     error: string | null;
-  }> => { 
+  }> => {
     try {
       const { data, error } = await this.client
         //@ts-ignore
@@ -1367,7 +1378,7 @@ class SupabaseWrapper {
         error: message,
       };
     }
-  }
+  };
 
   updateCategoryPriorities(
     categories: { id: number; priority: number }[],

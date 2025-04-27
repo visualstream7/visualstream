@@ -10,7 +10,7 @@ export default function Success() {
   const { user, isLoaded } = useUser();
 
   useEffect(() => {
-    if (isLoaded && !user) {
+    if (isLoaded) {
       localStorage.setItem("cart", JSON.stringify([]));
     }
   }, [isLoaded, user]);
