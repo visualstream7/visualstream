@@ -511,7 +511,10 @@ export default function Admin() {
           ...image,
           favCount: getFavCount(image.id, fav),
         }));
-        allImages = allImages.sort((a, b) => b.favCount - a.favCount);
+        allImages = allImages.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
         // @ts-ignore
         setImages(allImages);
       }
