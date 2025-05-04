@@ -6,6 +6,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { list_of_admin_emails } from "@/data/admins";
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import { FullPageSpinner } from "@/components/spinners/fullPageSpiner";
+import { Copy } from "lucide-react";
 
 const database = new SupabaseWrapper("CLIENT");
 
@@ -190,6 +191,45 @@ export default function CategoriesDashboard() {
   const { user, isLoaded } = useUser();
   const [deletingId, setDeletingId] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  const handleDuplicate = async (category: any) => {
+    function getRandomString(length: number) {
+      const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += characters.charAt(
+          Math.floor(Math.random() * characters.length),
+        );
+      }
+      return result;
+    }
+
+    const baseDisplayName = category.displayName.replace(
+      /\s*\(Copy - [a-z0-9]+\)$/i,
+      "",
+    );
+    const baseName = category.name.replace(/\s*\(Copy - [a-z0-9]+\)$/i, "");
+    const randomString = getRandomString(7);
+
+    const newCategory = {
+      ...category,
+      displayName: `${baseDisplayName} (Copy - ${randomString})`,
+      name: `${baseName} (Copy - ${randomString})`,
+    };
+
+    delete newCategory.id;
+
+    const { result, error } = await database.addCategory(newCategory);
+
+    if (error) {
+      console.error("Error duplicating category:", error);
+      alert("Failed to duplicate category");
+    } else {
+      // setCategories((prev) => [...prev, result]);
+      // refresh the page
+      router.reload();
+    }
+  };
 
   const handleDeleteCategory = async (categoryId: any) => {
     if (!window.confirm("Are you sure you want to delete this category?")) {
@@ -501,6 +541,14 @@ export default function CategoriesDashboard() {
                             <div className="flex items-center space-x-4 ml-4">
                               {editingId !== cat.id && (
                                 <>
+                                  <Copy
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDuplicate(cat);
+                                    }}
+                                    size={16}
+                                    className="text-[#1b1b1b80]"
+                                  />
                                   <span
                                     className={`px-3 py-1.5 rounded-full text-sm font-medium ${
                                       cat.paused
