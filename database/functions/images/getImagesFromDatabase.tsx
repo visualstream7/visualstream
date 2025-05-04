@@ -27,6 +27,7 @@ async function getImagesFromDatabase(supabase: SupabaseClient<Database>) {
   const { data, error } = await supabase
     .from("Images")
     .select("*")
+    .neq("image_url", null)
     .order("created_at", { ascending: false });
 
   if (error) {
