@@ -31,7 +31,7 @@ function Modal({
       try {
         const { error } = await database.updateProductMargin(
           productId,
-          marginValue,
+          marginValue
         );
         if (error) {
           console.error("Error updating margin:", error);
@@ -97,7 +97,7 @@ function ProductCard({
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [selectedVariantId, setSelectedVariantId] = useState<number | null>(
-    null,
+    null
   );
 
   const getProductSizes = (product_id: number) => {
@@ -167,7 +167,7 @@ function ProductCard({
 
   const updateVariantDiscontinuedStatus = async (
     variantId: number,
-    status: boolean,
+    status: boolean
   ) => {
     // optimistic update in the variantGroups state
 
@@ -186,7 +186,7 @@ function ProductCard({
 
     const { result, error } = await database.updateVariantStatus(
       variantId,
-      status,
+      status
     );
 
     if (error) {
@@ -219,10 +219,14 @@ function ProductCard({
               className={`relative h-10 w-10 flex items-center justify-center rounded-md border cursor-pointer shadow-sm
           ${
             variant.variant_id === selectedVariantId
-              ? `border-blue-500 border-2 ${isVariantDiscontinued(variant.variant_id) ? "bg-red-50" : "bg-green-50"}`
+              ? `border-blue-500 border-2 ${
+                  isVariantDiscontinued(variant.variant_id)
+                    ? "bg-red-50"
+                    : "bg-green-50"
+                }`
               : isVariantDiscontinued(variant.variant_id)
-                ? "border-red-500 bg-red-50"
-                : "border-green-500 bg-green-50"
+              ? "border-red-500 bg-red-50"
+              : "border-green-500 bg-green-50"
           } hover:shadow-md transition`}
               onClick={() => setSelectedVariantId(variant.variant_id)}
             >
@@ -254,7 +258,7 @@ function ProductCard({
               Color:{" "}
               {
                 getVariantsOfGroup(product.id, selectedSize).find(
-                  (v) => v.variant_id === selectedVariantId,
+                  (v) => v.variant_id === selectedVariantId
                 )?.color
               }
             </p>
@@ -279,7 +283,7 @@ function ProductCard({
               onClick={() =>
                 updateVariantDiscontinuedStatus(
                   selectedVariantId,
-                  !isVariantDiscontinued(selectedVariantId),
+                  !isVariantDiscontinued(selectedVariantId)
                 )
               }
             >
@@ -431,7 +435,7 @@ export default function Admin() {
   const [products, setProducts] = useState<Product[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [variantGroups, setVariantGroups] = useState<DistinctVariantGroup[]>(
-    [],
+    []
   );
   const [activeTab, setActiveTab] = useState<string>("Products");
   const [isSidebarVisible, setIsSidebarVisible] = useState<boolean>(false); // New state for sidebar visibility
@@ -489,7 +493,7 @@ export default function Admin() {
           alert("Error deleting the image: " + error);
         } else {
           setImages((prevImages) =>
-            prevImages.filter((image) => image.id !== imageId),
+            prevImages.filter((image) => image.id !== imageId)
           );
         }
       } catch (error: any) {
@@ -513,7 +517,7 @@ export default function Admin() {
         }));
         allImages = allImages.sort(
           (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
         // @ts-ignore
         setImages(allImages);
@@ -529,19 +533,19 @@ export default function Admin() {
         const favoriteCountByCategory = result.reduce(
           (
             acc: { [key: string]: number },
-            { category, count }: { category: string; count: number },
+            { category, count }: { category: string; count: number }
           ) => {
             acc[category] = (acc[category] || 0) + count;
             return acc;
           },
-          {},
+          {}
         );
 
         const favoriteImagesData = Object.keys(favoriteCountByCategory).map(
           (category) => ({
             category,
             count: favoriteCountByCategory[category],
-          }),
+          })
         );
 
         setFavoriteImages(favoriteImagesData);
@@ -560,7 +564,7 @@ export default function Admin() {
     const checkAdmin = () => {
       const userEmail = user?.emailAddresses[0].emailAddress;
       setIsAdmin(
-        userEmail && list_of_admin_emails.includes(userEmail) ? true : false,
+        userEmail && list_of_admin_emails.includes(userEmail) ? true : false
       );
     };
     checkAdmin();
@@ -579,7 +583,7 @@ export default function Admin() {
     const groupedVariants = variants.reduce<DistinctVariantGroup[]>(
       (acc, variant) => {
         const group = acc.find(
-          (g) => g.size === variant.size && g.product_id === variant.product_id,
+          (g) => g.size === variant.size && g.product_id === variant.product_id
         );
         if (group) {
           group.variants.push(variant);
@@ -592,7 +596,7 @@ export default function Admin() {
         }
         return acc;
       },
-      [],
+      []
     );
 
     // Deduplicate and update variantGroups
@@ -602,14 +606,14 @@ export default function Admin() {
       const uniqueGroups = combinedGroups.reduce<DistinctVariantGroup[]>(
         (acc, group) => {
           const exists = acc.some(
-            (g) => g.product_id === group.product_id && g.size === group.size,
+            (g) => g.product_id === group.product_id && g.size === group.size
           );
           if (!exists) {
             acc.push(group);
           }
           return acc;
         },
-        [],
+        []
       );
 
       return uniqueGroups;
@@ -851,7 +855,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://supabase.com/dashboard/project/xkwhbcurrwiqrioskcgh",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -871,7 +875,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://analytics.google.com/analytics/web/#/p476945942/reports/intelligenthome",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -891,7 +895,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://dashboard.stripe.com/dashboard",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -912,7 +916,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://dashboard.stripe.com/test/payments",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -947,7 +951,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://dashboard.stripe.com/test/customers",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -991,7 +995,7 @@ export default function Admin() {
                 onClick={() =>
                   window.open(
                     "https://uploadthing.com/dashboard/visualstream7-personal-team/hhc2cny3ts",
-                    "_blank",
+                    "_blank"
                   )
                 }
                 className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
@@ -1046,6 +1050,30 @@ export default function Admin() {
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
                   Manually upload any image
+                </p>
+              </div>
+
+              <div
+                onClick={() =>
+                  window.open(
+                    "https://developers.facebook.com/tools/accesstoken/",
+                    "_blank"
+                  )
+                }
+                className="relative p-4 border rounded-lg shadow-md border-gray-400 bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+              >
+                <div className="flex justify-center mb-4">
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/2048px-Instagram_icon.png"
+                    alt="Insta Icon"
+                    className="w-20 h-20 rounded-full border border-gray-600"
+                  />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  Access Token
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Generate Access Token for Instagram
                 </p>
               </div>
             </div>
